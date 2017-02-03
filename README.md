@@ -10,6 +10,8 @@ Systems Architect: Rebecca Mahany
 
 Tester: Ruijia Yang
 
+![MatchaScript](https://c1.staticflickr.com/5/4085/5026245674_1d7b562b24_b.jpg)
+
 __________________________________________________
 
 Upcoming due dates:
