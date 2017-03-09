@@ -1,0 +1,21 @@
+opam-version: "1.2"
+name: "MatchaScript"
+version: "0.1"
+maintainer: "RebeccaMahany <rlm2175@columbia.edu>"
+authors: "RebeccaMahany <rlm2175@columbia.edu>"
+homepage: "https://github.com/RebeccaMahany/MatchaScript"
+bug-reports: "https://github.com/RebeccaMahany/MatchaScript/issues"
+dev-repo: "https://github.com/RebeccaMahany/MatchaScript.git"
+authors: [
+  "Kimberly Hou"
+  "Rebecca Mahany"
+  "Jordi Orbay"
+  "Ruijia Yang"
+]
+
+depends: [
+  "ocamlbuild" {build}
+  "ocamlfind"  {build}
+]
+
+build: [make]
