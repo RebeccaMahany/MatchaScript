@@ -16,9 +16,9 @@ __________________________________________________
 
 Upcoming due dates:
 
-8 Feb: Project proposal due
+8 Feb: Project proposal due - DONE
 
-20 Feb: Language reference manual due
+20 Feb: Language reference manual due - DONE
 
 27 March: Hello World due
 
