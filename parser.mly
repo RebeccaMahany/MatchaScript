@@ -48,6 +48,13 @@ fdecl:
 	 locals = List.rev $8;
 	 body = List.rev $9 } }
 
+constr:
+  CONSTRUCTOR LPAREN formals_opt RPAREN LBRACE (* something *) RBRACE
+  { { args = $3;
+
+
+    } }
+
 formals_opt:
     /* nothing */ { [] }
   | formal_list   { List.rev $1 }
