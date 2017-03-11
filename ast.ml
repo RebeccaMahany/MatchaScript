@@ -39,6 +39,8 @@ type constr = {
   decl: stmt list;
 }
 
+type include_stmt = Include of string
+
 type fdecl = {
     typ : typ;
     fname : string;
