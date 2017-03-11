@@ -1,20 +1,26 @@
 (* Abstract Syntax Tree and functions for printing it *)
 
 type op = Add | Sub | Mult | Div | Equal | Neq | Less | Leq | Greater | Geq |
-          And | Or
+          And | Or | Mod  
 
-type uop = Neg | Not
+type uop = Neg | Not 
 
-type typ = Int | Bool | Void
+type postop = Incr | Decr
+
+type typ = Int | Float| String | Char | Bool | Void | Fun 
 
 type bind = typ * string
 
 type expr =
-    Literal of int
+    IntLit of int
+  | FloatLit of float
+  | StringLit of string
+  | CharLit of char
   | BoolLit of bool
   | Id of string
   | Binop of expr * op * expr
   | Unop of uop * expr
+  | Postop of expr * postop
   | Assign of string * expr
   | Call of string * expr list
   | Noexpr
@@ -25,9 +31,15 @@ type stmt =
   | Return of expr
   | If of expr * stmt * stmt
   | For of expr * expr * expr * stmt
-  | While of expr * stmt
+  | While of expr * stmt  
 
-type func_decl = {
+type constr = {
+  args: bind list;
+  super: string list;
+  decl: stmt list;
+}
+
+type fdecl = {
     typ : typ;
     fname : string;
     formals : bind list;
@@ -35,7 +47,16 @@ type func_decl = {
     body : stmt list;
   }
 
-type program = bind list * func_decl list
+type cdecl = {
+    cname: string;
+    extends: string;
+    constructor: constr; 
+    cbody: fdecl list;  
+}
+
+type program = 
+       include_stmt list * cdecl list * fdecl list * stmt list
+
 
 (* Pretty-printing functions *)
 
@@ -52,19 +73,28 @@ let string_of_op = function
   | Geq -> ">="
   | And -> "&&"
   | Or -> "||"
+  | Mod -> "%"
 
 let string_of_uop = function
     Neg -> "-"
   | Not -> "!"
 
+let string_of_postop = function 
+    Incr -> "++" 
+  | Decr -> "--" 
+
 let rec string_of_expr = function
-    Literal(l) -> string_of_int l
+    IntLit(l) -> string_of_int l
+  | FloatLit(f) -> string_of_float f
+  | StringLit(s) -> s
+  | CharLit(c) -> Char.escaped c 
   | BoolLit(true) -> "true"
   | BoolLit(false) -> "false"
   | Id(s) -> s
   | Binop(e1, o, e2) ->
       string_of_expr e1 ^ " " ^ string_of_op o ^ " " ^ string_of_expr e2
   | Unop(o, e) -> string_of_uop o ^ string_of_expr e
+  | Postop(e, o) -> string_of_expr e ^ string_of_postop o
   | Assign(v, e) -> v ^ " = " ^ string_of_expr e
   | Call(f, el) ->
       f ^ "(" ^ String.concat ", " (List.map string_of_expr el) ^ ")"
@@ -82,11 +112,16 @@ let rec string_of_stmt = function
       "for (" ^ string_of_expr e1  ^ " ; " ^ string_of_expr e2 ^ " ; " ^
       string_of_expr e3  ^ ") " ^ string_of_stmt s
   | While(e, s) -> "while (" ^ string_of_expr e ^ ") " ^ string_of_stmt s
+  | 
 
 let string_of_typ = function
     Int -> "int"
+  | Float -> "float"
+  | String -> "String"
+  | Char -> "char"
   | Bool -> "bool"
   | Void -> "void"
+  | Fun -> "fun"
 
 let string_of_vdecl (t, id) = string_of_typ t ^ " " ^ id ^ ";\n"
 
@@ -96,6 +131,24 @@ let string_of_fdecl fdecl =
   ")\n{\n" ^
   String.concat "" (List.map string_of_vdecl fdecl.locals) ^
   String.concat "" (List.map string_of_stmt fdecl.body) ^
+  "}\n"
+
+let string_of_constr constr = 
+  "constructor(" ^ String.concat ", " (List.map snd constr.args) ^
+  ")\n{\n" ^ 
+  String.concat "" (List.map constr.super) ^ 
+  String.concat "" (List.map string_of_stmt constr.decl) ^ 
+  "}\n"
+
+let string_of_cdecl cdecl = 
+  if String.is_empty cdecl.extends then "class " ^ cdecl.cname ^ 
+  "{\n" ^ string_of_constr cdecl.constructor ^ 
+  String.concat "" (List.map string_of_fdecl constr.cbody) ^
+  "}\n"
+  else
+  "class " ^ cdecl.cname ^ " extends " ^ cdecl.extends ^
+  " {\n" ^ string_of_constr cdecl.constructor ^ 
+  String.concat "" (List.map string_of_fdecl constr.cbody) ^
   "}\n"
 
 let string_of_program (vars, funcs) =
