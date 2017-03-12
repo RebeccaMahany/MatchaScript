@@ -7,8 +7,8 @@ open Ast
 %token SEMI LPAREN RPAREN LBRACE RBRACE COMMA
 %token PLUS MINUS TIMES DIVIDE ASSIGN NOT MOD
 %token EQ NEQ LT LEQ GT GEQ TRUE FALSE AND OR INCR DECR
-%token RETURN IF ELSE FOR WHILE FUNCTION EOF
-%token INT BOOL VOID FLOAT CHAR STRING FUN NULL 
+%token RETURN IF ELSE FOR WHILE FUNCTION CONSTRUCTOR EXTENDS SUPER 
+%token CLASS INT BOOL VOID FLOAT CHAR STRING FUN NULL EOF
 %token <int> INT_LIT
 %token <float> FLOAT_LIT
 %token <string> STRING_LIT
@@ -49,11 +49,31 @@ fdecl:
 	 body = List.rev $9 } }
 
 constr:
-  CONSTRUCTOR LPAREN formals_opt RPAREN LBRACE (* something *) RBRACE
+  CONSTRUCTOR LPAREN formals_opt RPAREN LBRACE super_body stmt_list RBRACE
   { { args = $3;
-
-
+      super = $6;
+      decl = $7
     } }
+
+cdecl:
+  CLASS ID extend_body LBRACE constr decls RBRACE 
+  { { cname = $2;
+      extends = $3;
+      constructor = $5; (* not sure if this works consistently with ast.ml *)
+      cbody = $6
+   } }
+
+extend_body:
+    /* nothing */ { "" }
+  | EXTENDS ID { $2 }
+
+super_body:
+    /* nothing */ { [] }
+  | SUPER LPAREN super_list RPAREN SEMI { List.rev $3 }
+
+super_list:
+    ID      { [$1] }
+  | super_list COMMA ID { $3 :: $1 }
 
 formals_opt:
     /* nothing */ { [] }

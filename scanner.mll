@@ -64,6 +64,7 @@ rule token = parse
 | "class"   { CLASS } (* for class declaration *)
 | "constructor" { CONSTRUCTOR } (* for class declaration *)
 | "super"	{ SUPER } (* for constructor declaration *)
+| "extends" { EXTENDS } (* for inheritance *)
 | "function" { FUNCTION } (* for function declaration *)
 | int_lit as lxm { INT_LIT(int_of_string lxm) }
 | float_lit as lxm { FLOAT_LIT(float_of_string lxm) }
