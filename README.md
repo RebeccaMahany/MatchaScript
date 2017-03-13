@@ -14,6 +14,20 @@ Tester: Ruijia Yang
 
 __________________________________________________
 
+Current schedule:
+
+13 March: Scanner - DONE
+
+13 March: AST - DONE
+
+13 March: Parser - DONE
+
+17 March: Compiler
+
+20 March: Hello, World
+
+__________________________________________________
+
 Upcoming due dates:
 
 8 Feb: Project proposal due - DONE
