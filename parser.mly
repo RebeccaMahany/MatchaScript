@@ -14,18 +14,20 @@ open Ast
 %token <string> STRING_LIT
 %token <char> CHAR_LIT
 %token <string> ID
+%token EOF
 
-%nonassoc NOELSE
-%nonassoc ELSE
 %right ASSIGN
 %left OR
 %left AND
 %left EQ NEQ
 %left LT GT LEQ GEQ
 %left PLUS MINUS
-%left TIMES DIVIDE MOD
+%left MOD
+%left TIMES DIVIDE
 %right NOT NEG
 %left INCR DECR
+%nonassoc NOELSE
+%nonassoc ELSE
 
 %start program
 %type <Ast.program> program
@@ -121,7 +123,7 @@ expr_opt:
 expr:
     INT_LIT          { IntLit($1) }
   | FLOAT_LIT        { FloatLit($1) }
-  | STRING_LIT       { StringLit($1) } (* Is this necessary? *)
+  | STRING_LIT       { StringLit($1) }
   | CHAR_LIT         { CharLit($1) } 
   | TRUE             { BoolLit(true) }
   | FALSE            { BoolLit(false) }
@@ -143,7 +145,7 @@ expr:
   | expr INCR { Postop($1, Incr) }
   | expr DECR { Postop($1, Decr) }
   | ID ASSIGN expr   { Assign($1, $3) }
-  | ID LPAREN actuals_opt RPAREN { Call($1, $3) }
+  | ID LPAREN actuals_opt RPAREN { Call($1, $3) } (* function call *)
   | LPAREN expr RPAREN { $2 }
 
 actuals_opt:
