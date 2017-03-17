@@ -1,9 +1,0 @@
-1,5c1
-< Branch condition is not 'i1' type!
-<   br i32 42, label %then5, label %else6
-< i32 42
-< Broken module found, compilation aborted!
-< Aborted (core dumped)
----
-> Fatal error: exception Failure("expected Boolean expression in 42")
-\ No newline at end of file
