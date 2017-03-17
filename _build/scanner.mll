@@ -1,4 +1,4 @@
-(* Ocamllex scanner for MatchaScript *)
+(* Ocamllex scanner for MicroC *)
 
 { open Parser }
 

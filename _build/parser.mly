@@ -1,4 +1,4 @@
-/* Ocamlyacc parser for MatchaScript */
+/* Ocamlyacc parser for MicroC */
 
 %{
 open Ast
