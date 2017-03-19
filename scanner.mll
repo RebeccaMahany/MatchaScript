@@ -11,6 +11,8 @@ rule token = parse
 | '}'      { RBRACE }
 | ';'      { SEMI }
 | ','      { COMMA }
+
+(* Operators *)
 | '+'      { PLUS }
 | '-'      { MINUS }
 | '*'      { TIMES }
@@ -25,16 +27,23 @@ rule token = parse
 | "&&"     { AND }
 | "||"     { OR }
 | "!"      { NOT }
+
+(* Branch control *)
 | "if"     { IF }
 | "else"   { ELSE }
 | "for"    { FOR }
 | "while"  { WHILE }
 | "return" { RETURN }
+
+(* Data types *)
 | "int"    { INT }
 | "bool"   { BOOL }
 | "void"   { VOID }
 | "true"   { TRUE }
 | "false"  { FALSE }
+
+(* Classes *)
+
 | ['0'-'9']+ as lxm { INTLIT(int_of_string lxm) }
 | ['a'-'z' 'A'-'Z']['a'-'z' 'A'-'Z' '0'-'9' '_']* as lxm { ID(lxm) }
 | eof { EOF }

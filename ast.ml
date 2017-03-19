@@ -35,6 +35,8 @@ type func_decl = {
     body : stmt list;
   }
 
+type include_stmt = Include of string
+
 type program = bind list * func_decl list
 
 (* Pretty-printing functions *)

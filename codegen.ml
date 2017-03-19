@@ -82,7 +82,7 @@ let translate (globals, functions) =
 
     (* Construct code for an expression; return its value *)
     let rec expr builder = function
-  A.IntLit i -> L.const_int i32_t i
+      A.IntLit i -> L.const_int i32_t i
       | A.BoolLit b -> L.const_int i1_t (if b then 1 else 0)
       | A.Noexpr -> L.const_int i32_t 0
       | A.Id s -> L.build_load (lookup s) s builder
@@ -93,7 +93,7 @@ let translate (globals, functions) =
       A.Add     -> L.build_add
     | A.Sub     -> L.build_sub
     | A.Mult    -> L.build_mul
-          | A.Div     -> L.build_sdiv
+    | A.Div     -> L.build_sdiv
     | A.And     -> L.build_and
     | A.Or      -> L.build_or
     | A.Equal   -> L.build_icmp L.Icmp.Eq
@@ -107,7 +107,7 @@ let translate (globals, functions) =
     let e' = expr builder e in
     (match op with
       A.Neg     -> L.build_neg
-          | A.Not     -> L.build_not) e' "tmp" builder
+      | A.Not     -> L.build_not) e' "tmp" builder
       | A.Assign (s, e) -> let e' = expr builder e in
                      ignore (L.build_store e' (lookup s) builder); e'
       | A.Call ("print", [e]) | A.Call ("printb", [e]) ->

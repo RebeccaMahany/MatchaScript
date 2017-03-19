@@ -1,4 +1,4 @@
-/* Ocamlyacc parser for MicroC */
+/* Ocamlyacc parser for MatchaScript */
 
 %{
 open Ast
@@ -29,7 +29,7 @@ open Ast
 %%
 
 program:
-  decls EOF { $1 }
+	decls fdecl EOF { $1 }
 
 decls:
    /* nothing */ { [], [] }
