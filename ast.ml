@@ -7,7 +7,7 @@ type uop = Neg | Not
 
 type typ = Int | Bool | Void
 
-type bind = typ * string
+type vdecl = typ * string
 
 type expr =
     IntLit of int
@@ -27,21 +27,22 @@ type stmt =
   | For of expr * expr * expr * stmt
   | While of expr * stmt
 
-type func_decl = {
+type fdecl = {
     typ : typ;
     fname : string;
-    formals : bind list;
-    locals : bind list;
+    formals : vdecl list;
+    locals : vdecl list;
     body : stmt list;
   }
 
 type include_stmt = Include of string
 
-type program = bind list * func_decl list
+type program = vdecl list * fdecl list
+(* type program = include_stmt list * vdecl list * stmt list * cdecl list * fdecl list *)
 
 (* Pretty-printing functions *)
 
-let string_of_op = function
+(* let string_of_op = function
     Add -> "+"
   | Sub -> "-"
   | Mult -> "*"
@@ -103,3 +104,4 @@ let string_of_fdecl fdecl =
 let string_of_program (vars, funcs) =
   String.concat "" (List.map string_of_vdecl vars) ^ "\n" ^
   String.concat "\n" (List.map string_of_fdecl funcs)
+*)
