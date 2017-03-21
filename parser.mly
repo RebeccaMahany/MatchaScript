@@ -41,7 +41,7 @@ decls:
    /* nothing */ { [], [] }
  | decls vdecl { ($2 :: fst $1), snd $1 }
  | decls fdecl { fst $1, ($2 :: snd $1) }
-
+ 
 fdecl:
    FUNCTION typ ID LPAREN formals_opt RPAREN LBRACE vdecl_list stmt_list RBRACE
      { { typ = $2;
@@ -145,7 +145,7 @@ expr:
   | expr INCR { Postop($1, Incr) }
   | expr DECR { Postop($1, Decr) }
   | ID ASSIGN expr   { Assign($1, $3) }
-  | ID LPAREN actuals_opt RPAREN { Call($1, $3) } (* function call *)
+  | ID LPAREN actuals_opt RPAREN { Call($1, $3) }
   | LPAREN expr RPAREN { $2 }
 
 actuals_opt:
