@@ -13,20 +13,20 @@ rule token = parse
 | ','      { COMMA }
 
 (* Operators *)
-| '+'      { PLUS }
-| '-'      { MINUS }
-| '*'      { TIMES }
-| '/'      { DIVIDE }
-| '='      { ASSIGN }
-| "=="     { EQ }
-| "!="     { NEQ }
-| '<'      { LT }
-| "<="     { LEQ }
-| ">"      { GT }
-| ">="     { GEQ }
-| "&&"     { AND }
-| "||"     { OR }
-| "!"      { NOT }
+| '+'      	{ PLUS }
+| '-'      	{ MINUS }
+| '*'      	{ TIMES }
+| '/'      	{ DIVIDE }
+| '='      	{ ASSIGN }
+| "=="     	{ EQ }
+| "!="     	{ NEQ }
+| '<'		{ LT }
+| "<="  	{ LEQ }
+| ">"	    { GT }
+| ">="     	{ GEQ }
+| "&&"		{ AND }
+| "||"		{ OR }
+| "!"		{ NOT }
 
 (* Branch control *)
 | "if"     { IF }

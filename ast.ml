@@ -28,16 +28,16 @@ type stmt =
   | While of expr * stmt
 
 type fdecl = {
-    typ : typ;
-    fname : string;
-    formals : vdecl list;
-    locals : vdecl list;
-    body : stmt list;
-  }
+  typ : typ;
+  fname : string;
+  formals : vdecl list;
+  locals : vdecl list;
+  body : stmt list;
+}
 
 type include_stmt = Include of string
 
-type program = vdecl list * fdecl list
+type program = vdecl list * stmt list * fdecl list * cdecl list
 (* type program = include_stmt list * vdecl list * stmt list * cdecl list * fdecl list *)
 
 (* Pretty-printing functions *)

@@ -28,13 +28,26 @@ open Ast
 
 %%
 
-program:
-	decls fdecl EOF { $1 }
+/* type program = vdecl list * fdecl list * stmt list */
+/* type program = include_stmt list * vdecl list * stmt list * cdecl list * fdecl list */
 
-decls:
-   /* nothing */ { [], [] }
- | decls vdecl { ($2 :: fst $1), snd $1 }
- | decls fdecl { fst $1, ($2 :: snd $1) }
+program:
+	vdecls stmts fdecls EOF { $1 $2 $3 }
+
+/* includes: */
+
+vdecls:
+  | vdecl_list  { List.rev $1 }
+
+stmts:
+  | stmt_list   { List.rev $1 }
+
+fdecls:
+  | fdecl_list  { List.rev $1 }
+  
+fdecl_list:
+    fdecl     { [$1] }
+  | fdecl_list fdecl { $2::$1 }
 
 fdecl:
    typ ID LPAREN formals_opt RPAREN LBRACE vdecl_list stmt_list RBRACE
@@ -58,14 +71,14 @@ typ:
   | VOID { Void }
 
 vdecl_list:
-    /* nothing */    { [] }
+  vdecl    { [$1] }
   | vdecl_list vdecl { $2 :: $1 }
 
 vdecl:
    typ ID SEMI { ($1, $2) }
 
 stmt_list:
-    /* nothing */  { [] }
+  stmt  { [$1] }
   | stmt_list stmt { $2 :: $1 }
 
 stmt:
@@ -84,7 +97,7 @@ expr_opt:
   | expr          { $1 }
 
 expr:
-    INTLIT          { IntLit($1) }
+    INTLIT           { IntLit($1) }
   | TRUE             { BoolLit(true) }
   | FALSE            { BoolLit(false) }
   | ID               { Id($1) }
