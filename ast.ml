@@ -38,7 +38,7 @@ type fdecl = {
 
 type include_stmt = Include of string
 
-type program = { 
+type constructs = { 
   includes: include_stmt list;
   vdecls: vdecl list;
   stmts: stmt list;
