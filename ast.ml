@@ -45,7 +45,7 @@ type program = {
   fdecls: fdecl list;
 }
 
-type program = Program of include_stmt list * vdecl list * stmt list * fdecl list;
+type program = Program of include_stmt list * vdecl list * stmt list * fdecl list
 
 (* Pretty-printing functions *)
 
