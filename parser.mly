@@ -4,11 +4,13 @@
 open Ast
 %}
 
-%token SEMI LPAREN RPAREN LBRACE RBRACE COMMA
+%token INCLUDE
+%token SEMI LPAREN RPAREN LBRACE RBRACE COMMA LBRACKET RBRACKET DOT
 %token PLUS MINUS TIMES DIVIDE ASSIGN NOT
 %token EQ NEQ LT LEQ GT GEQ TRUE FALSE AND OR
 %token RETURN IF ELSE FOR WHILE INT BOOL VOID
 %token <int> INTLIT
+%token <string> STRINGLIT
 %token <string> ID
 %token EOF
 
@@ -28,27 +30,71 @@ open Ast
 
 %%
 
-/* type program = vdecl list * fdecl list * stmt list */
-/* type program = include_stmt list * vdecl list * stmt list * cdecl list * fdecl list */
+/*
+type program = { 
+  includes: include_stmt list;
+  vdecls: vdecl list;
+  stmts: stmt list;
+  fdecls: fdecl list;
+} 
+*/
 
 program:
-	vdecls stmts fdecls EOF { $1 $2 $3 }
+  constructs EOF { Program(List.rev $1.includes, List.rev $1.vdecls, 
+                                List.rev $1.stmts, List.rev $1.fdecls) }
 
-/* includes: */
+/* type constructs = include_stmt list * vdecl list * stmt list * fdecl list */
+constructs:
+    { { 
+        includes = [];
+        vdecls = [];
+        stmts = [];
+        fdecls = [];
+    } }
+  | constructs include_stmt { {
+        includes = $2 :: $1.includes;
+        vdecls = $1.vdecls; 
+        stmts = $1.stmts; 
+        fdecls = $1.fdecls; 
+    } }
+  | constructs vdecl { {
+        includes = $1.includes;
+        vdecls = $2 :: $1.vdecls; 
+        stmts = $1.stmts; 
+        fdecls = $1.fdecls; 
+    } }
+  | constructs stmt { {
+        includes = $1.includes;
+        vdecls = $1.vdecls; 
+        stmts = $2 :: $1.stmts; 
+        fdecls = $1.fdecls; 
+    } }
+  | constructs fdecl { {
+        includes = $1.includes;
+        vdecls = $1.vdecls; 
+        stmts = $1.stmts; 
+        fdecls = $2 :: $1.fdecls; 
+    } }
 
-vdecls:
-  | vdecl_list  { List.rev $1 }
+/*********
+Includes
+*********/
+include_stmt:
+    INCLUDE LPAREN STRINGLIT RPAREN SEMI { Include($3) }
 
-stmts:
-  | stmt_list   { List.rev $1 }
+/*********
+Variables
+**********/
+vdecl_list:
+    vdecl            { [$1] }
+  | vdecl_list vdecl { $2::$1 }
 
-fdecls:
-  | fdecl_list  { List.rev $1 }
-  
-fdecl_list:
-    fdecl     { [$1] }
-  | fdecl_list fdecl { $2::$1 }
+vdecl:
+   typ ID SEMI { ($1, $2) }
 
+/*********
+Functions
+**********/
 fdecl:
    typ ID LPAREN formals_opt RPAREN LBRACE vdecl_list stmt_list RBRACE
      { { typ = $1;
@@ -70,15 +116,12 @@ typ:
   | BOOL { Bool }
   | VOID { Void }
 
-vdecl_list:
-  vdecl    { [$1] }
-  | vdecl_list vdecl { $2 :: $1 }
 
-vdecl:
-   typ ID SEMI { ($1, $2) }
-
+/*********
+Statements
+**********/
 stmt_list:
-  stmt  { [$1] }
+    stmt  { [$1] }
   | stmt_list stmt { $2 :: $1 }
 
 stmt:
@@ -98,6 +141,7 @@ expr_opt:
 
 expr:
     INTLIT           { IntLit($1) }
+  | STRINGLIT        { StringLit($1) }
   | TRUE             { BoolLit(true) }
   | FALSE            { BoolLit(false) }
   | ID               { Id($1) }

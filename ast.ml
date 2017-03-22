@@ -12,6 +12,7 @@ type vdecl = typ * string
 type expr =
     IntLit of int
   | BoolLit of bool
+  | StringLit of string
   | Id of string
   | Binop of expr * op * expr
   | Unop of uop * expr
@@ -37,8 +38,14 @@ type fdecl = {
 
 type include_stmt = Include of string
 
-type program = vdecl list * stmt list * fdecl list * cdecl list
-(* type program = include_stmt list * vdecl list * stmt list * cdecl list * fdecl list *)
+type program = { 
+  includes: include_stmt list;
+  vdecls: vdecl list;
+  stmts: stmt list;
+  fdecls: fdecl list;
+}
+
+type program = Program of include_stmt list * vdecl list * stmt list * fdecl list;
 
 (* Pretty-printing functions *)
 

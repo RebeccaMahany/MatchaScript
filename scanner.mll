@@ -2,9 +2,22 @@
 
 { open Parser }
 
+let alpha = ['a'-'z' 'A'-'Z']
+let escape = '\\' ['\\' ''' '"' 'n' 'r' 't']
+let escape_char = ''' (escape) '''
+let ascii = ([' '-'!' '#'-'[' ']'-'~'])
+let digit = ['0'-'9']
+let id = alpha (alpha | digit | '_')*
+let string = '"' ( (ascii | escape)* as s) '"'
+let char = ''' ( ascii | digit ) '''
+let float = (digit+) ['.'] digit+
+let int = digit+
+let whitespace = [' ' '\t' '\r']
+let return = '\n'
+
 rule token = parse
-  [' ' '\t' '\r' '\n'] { token lexbuf } (* Whitespace *)
-| "/*"     { comment lexbuf }           (* Comments *)
+  whitespace { token lexbuf }
+| "/*"     { comment lexbuf }
 | '('      { LPAREN }
 | ')'      { RPAREN }
 | '{'      { LBRACE }
@@ -27,6 +40,9 @@ rule token = parse
 | "&&"		{ AND }
 | "||"		{ OR }
 | "!"		{ NOT }
+| '.'      { DOT }
+| '['      { LBRACKET }
+| ']'      { RBRACKET }
 
 (* Branch control *)
 | "if"     { IF }
@@ -43,10 +59,13 @@ rule token = parse
 | "false"  { FALSE }
 
 (* Classes *)
+| "include"	{ INCLUDE }
 
-| ['0'-'9']+ as lxm { INTLIT(int_of_string lxm) }
-| ['a'-'z' 'A'-'Z']['a'-'z' 'A'-'Z' '0'-'9' '_']* as lxm { ID(lxm) }
-| eof { EOF }
+(* Literals *)
+| int as lxm 	{ INTLIT(int_of_string lxm) }
+| id as lxm 	{ ID(lxm) }
+| string 		{ STRINGLIT(s) }
+| eof 			{ EOF }
 | _ as char { raise (Failure("illegal character " ^ Char.escaped char)) }
 
 and comment = parse
