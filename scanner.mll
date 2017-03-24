@@ -12,8 +12,7 @@ let string = '"' ( (ascii | escape)* as s) '"'
 let char = ''' ( ascii | digit ) '''
 let float = (digit+) ['.'] digit+
 let int = digit+
-let whitespace = [' ' '\t' '\r']
-let return = '\n'
+let whitespace = [' ' '\t' '\r' '\n']
 
 rule token = parse
   whitespace { token lexbuf }
@@ -58,13 +57,10 @@ rule token = parse
 | "true"   { TRUE }
 | "false"  { FALSE }
 
-(* Classes *)
-| "include"	{ INCLUDE }
-
 (* Literals *)
 | int as lxm 	{ INTLIT(int_of_string lxm) }
 | id as lxm 	{ ID(lxm) }
-| string 		{ STRINGLIT(s) }
+| string 		{ STRLIT(s) }
 | eof 			{ EOF }
 | _ as char { raise (Failure("illegal character " ^ Char.escaped char)) }
 
