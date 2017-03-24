@@ -58,13 +58,10 @@ rule token = parse
 | "true"   { TRUE }
 | "false"  { FALSE }
 
-(* Classes *)
-| "include"	{ INCLUDE }
-
 (* Literals *)
 | int as lxm 	{ INTLIT(int_of_string lxm) }
 | id as lxm 	{ ID(lxm) }
-| string 		{ STRINGLIT(s) }
+| string 		{ STRLIT(s) }
 | eof 			{ EOF }
 | _ as char { raise (Failure("illegal character " ^ Char.escaped char)) }
 

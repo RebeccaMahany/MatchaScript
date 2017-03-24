@@ -60,7 +60,7 @@ parser.cmi : ast.cmo
 
 TESTS = hello
 
-FAILS = if1
+FAILS = 
 
 TESTFILES = $(TESTS:%=test-%.ms) $(TESTS:%=test-%.out) \
 	    $(FAILS:%=fail-%.ms) $(FAILS:%=fail-%.err)

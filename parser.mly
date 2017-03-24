@@ -10,7 +10,7 @@ open Ast
 %token EQ NEQ LT LEQ GT GEQ TRUE FALSE AND OR
 %token RETURN IF ELSE FOR WHILE INT BOOL VOID
 %token <int> INTLIT
-%token <string> STRINGLIT
+%token <string> STRLIT
 %token <string> ID
 %token EOF
 
@@ -31,8 +31,7 @@ open Ast
 %%
 
 /*
-type program = { 
-  includes: include_stmt list;
+type program = {
   vdecls: vdecl list;
   stmts: stmt list;
   fdecls: fdecl list;
@@ -40,47 +39,31 @@ type program = {
 */
 
 program:
-  constructs EOF { Program(List.rev $1.includes, List.rev $1.vdecls, 
-                                List.rev $1.stmts, List.rev $1.fdecls) }
+  constructs EOF { Program(List.rev $1.vdecls, List.rev $1.stmts, List.rev 
+    $1.fdecls) }
 
-/* type constructs = include_stmt list * vdecl list * stmt list * fdecl list */
+/* type constructs = vdecl list * stmt list * fdecl list */
 constructs:
-    { { 
-        includes = [];
+    { {
         vdecls = [];
         stmts = [];
         fdecls = [];
     } }
-  | constructs include_stmt { {
-        includes = $2 :: $1.includes;
-        vdecls = $1.vdecls; 
-        stmts = $1.stmts; 
-        fdecls = $1.fdecls; 
-    } }
   | constructs vdecl { {
-        includes = $1.includes;
         vdecls = $2 :: $1.vdecls; 
         stmts = $1.stmts; 
         fdecls = $1.fdecls; 
     } }
   | constructs stmt { {
-        includes = $1.includes;
         vdecls = $1.vdecls; 
         stmts = $2 :: $1.stmts; 
         fdecls = $1.fdecls; 
     } }
   | constructs fdecl { {
-        includes = $1.includes;
         vdecls = $1.vdecls; 
         stmts = $1.stmts; 
         fdecls = $2 :: $1.fdecls; 
     } }
-
-/*********
-Includes
-*********/
-include_stmt:
-    INCLUDE LPAREN STRINGLIT RPAREN SEMI { Include($3) }
 
 /*********
 Variables
@@ -141,7 +124,7 @@ expr_opt:
 
 expr:
     INTLIT           { IntLit($1) }
-  | STRINGLIT        { StringLit($1) }
+  | STRLIT        { StringLit($1) }
   | TRUE             { BoolLit(true) }
   | FALSE            { BoolLit(false) }
   | ID               { Id($1) }
