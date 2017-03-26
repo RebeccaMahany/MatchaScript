@@ -66,24 +66,14 @@ constructs:
     } }
 
 /*********
-Bind
+Variables
 **********/
-bind_list:
-    bind            { [$1] }
-  | bind_list vdecl { $2::$1 }
-
-bind:
-    typ ID SEMI { ($1, $2) }
-
-/*********
-Variable Declaration
-*********/
 vdecl_list:
     vdecl            { [$1] }
   | vdecl_list vdecl { $2::$1 }
 
 vdecl:
-    typ ID ASSIGN expr SEMI { ($1, $2, $4) }
+   typ ID SEMI { ($1, $2) }
 
 /*********
 Functions
