@@ -2,7 +2,7 @@ open Ast
 
 let top_ast prog =
 	let globals = prog.vdecls
-	and statements = prog.stmts
+	and statements = List.rev prog.stmts
 	and functions = prog.fdecls in
   let new_fdecls = List.append [{
 																	Ast.typ = Ast.Void;

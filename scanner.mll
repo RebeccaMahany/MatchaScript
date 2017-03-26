@@ -12,8 +12,7 @@ let string = '"' ( (ascii | escape)* as s) '"'
 let char = ''' ( ascii | digit ) '''
 let float = (digit+) ['.'] digit+
 let int = digit+
-let whitespace = [' ' '\t' '\r']
-let return = '\n'
+let whitespace = [' ' '\t' '\r' '\n']
 
 rule token = parse
   whitespace { token lexbuf }

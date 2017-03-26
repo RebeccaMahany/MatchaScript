@@ -31,6 +31,7 @@ let translate (globals, functions) =
     | A.Bool -> i1_t
     | A.Void -> void_t
     | A.Str -> str_t
+    
   and gen_type = function
       A.IntLit _ -> A.Int
     | A.BoolLit _ -> A.Bool

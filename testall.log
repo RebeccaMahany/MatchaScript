@@ -1,0 +1,23 @@
+/usr/bin/lli
+
+###### Testing test-hello
+./MatchaScript.native < tests/test-hello.ms > test-hello.ll
+./testall.sh: 1: eval: ./MatchaScript.native: not found
+###### SUCCESS
+
+###### Testing test-love
+./MatchaScript.native < tests/test-love.ms > test-love.ll
+./testall.sh: 1: eval: ./MatchaScript.native: not found
+###### SUCCESS
+
+###### Testing test-print1
+./MatchaScript.native < tests/test-print1.ms > test-print1.ll
+./testall.sh: 1: eval: ./MatchaScript.native: not found
+###### SUCCESS
+
+###### Testing fail-*
+./MatchaScript.native < tests/fail-*.ms 2> fail-*.err >> testall.log
+./testall.sh: 1: eval: cannot open tests/fail-*.ms: No such file
+diff -b fail-*.err tests/fail-*.err > fail-*.diff
+FAILED fail-*.err differs from tests/fail-*.err
+###### FAILED
