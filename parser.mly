@@ -39,8 +39,7 @@ type program = {
 */
 
 program:
-  constructs EOF { Program(List.rev $1.vdecls, List.rev $1.stmts, List.rev 
-    $1.fdecls) }
+  constructs EOF { $1 }
 
 /* type constructs = vdecl list * stmt list * fdecl list */
 constructs:
@@ -124,7 +123,7 @@ expr_opt:
 
 expr:
     INTLIT           { IntLit($1) }
-  | STRLIT        { StringLit($1) }
+  | STRLIT           { StrLit($1) }
   | TRUE             { BoolLit(true) }
   | FALSE            { BoolLit(false) }
   | ID               { Id($1) }

@@ -21,7 +21,7 @@ clean :
 
 # More detailed: build using ocamlc/ocamlopt + ocamlfind to locate LLVM
 
-OBJS = ast.cmx codegen.cmx parser.cmx scanner.cmx semant.cmx MatchaScript.cmx
+OBJS = ast.cmx codegen.cmx parser.cmx scanner.cmx semant.cmx MatchaScript.cmx top_ast.cmx
 
 MatchaScript : $(OBJS)
 	ocamlfind ocamlopt -linkpkg -package llvm -package llvm.analysis $(OBJS) -o MatchaScript
@@ -46,8 +46,10 @@ ast.cmo :
 ast.cmx :
 codegen.cmo : ast.cmo
 codegen.cmx : ast.cmx
-MatchaScript.cmo : semant.cmo scanner.cmo parser.cmi codegen.cmo ast.cmo
-MatchaScript.cmx : semant.cmx scanner.cmx parser.cmx codegen.cmx ast.cmx
+top_ast.cmo :
+top_ast.cmx :
+MatchaScript.cmo : semant.cmo scanner.cmo parser.cmi codegen.cmo ast.cmo top_ast.cmo
+MatchaScript.cmx : semant.cmx scanner.cmx parser.cmx codegen.cmx ast.cmx top_ast.cmx
 parser.cmo : ast.cmo parser.cmi
 parser.cmx : ast.cmx parser.cmi
 scanner.cmo : parser.cmi
@@ -65,7 +67,7 @@ FAILS =
 TESTFILES = $(TESTS:%=test-%.ms) $(TESTS:%=test-%.out) \
 	    $(FAILS:%=fail-%.ms) $(FAILS:%=fail-%.err)
 
-TARFILES = ast.ml codegen.ml Makefile MatchaScript.ml parser.mly README scanner.mll \
+TARFILES = ast.ml codegen.ml Makefile MatchaScript.ml parser.mly top_ast.ml README scanner.mll \
 	semant.ml testall.sh $(TESTFILES:%=tests/%)
 
 MatchaScript-llvm.tar.gz : $(TARFILES)

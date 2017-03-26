@@ -16,9 +16,7 @@ type uop = Neg | Not
 
 type typ = Int | Bool | Str | Void
 
-type bind = typ * string
-
-type vdecl = typ * string * expr
+type vdecl = typ * string
 
 type expr =
     IntLit of int
@@ -32,7 +30,6 @@ type expr =
   | Noexpr
 
 type stmt =
-    Vdecl of vdecl
   | Block of stmt list
   | Expr of expr
   | Return of expr
@@ -43,7 +40,7 @@ type stmt =
 type fdecl = {
   typ : typ;
   fname : string;
-  formals : bind list;
+  formals : vdecl list;
   locals : vdecl list;
   body : stmt list;
 }
@@ -54,4 +51,4 @@ type constructs = {
   fdecls: fdecl list;
 }
 
-type program = Program of vdecl list * stmt list * fdecl list
+type program = constructs

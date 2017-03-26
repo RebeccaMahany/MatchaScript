@@ -1,9 +1,14 @@
-module A = Ast
+open Ast
 
-let top_ast (vdecls, stmts, fdecls) =
-	(* Convert global variables to assignment statements *)
-  let globals = vdecls
-  and statements = stmts
-  and functions = fdecls in
-
-  
+let top_ast prog =
+	let globals = prog.vdecls
+	and statements = prog.stmts
+	and functions = prog.fdecls in
+  let new_fdecls = List.append [{
+																	Ast.typ = Ast.Void;
+																	Ast.fname = "main";
+																	Ast.formals = [];
+																	Ast.locals = [];
+																	Ast.body = statements
+																}] functions in
+  (globals, new_fdecls)
