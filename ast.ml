@@ -14,12 +14,13 @@ type op = Add | Sub | Mult | Div | Equal | Neq | Less | Leq | Greater | Geq |
 
 type uop = Neg | Not
 
-type typ = Int | Bool | Str | Void
+type typ = Int | Float | Bool | Str | Void
 
 type vdecl = typ * string
 
 type expr =
     IntLit of int
+  | FloatLit of float
   | BoolLit of bool
   | StrLit of string
   | Id of string

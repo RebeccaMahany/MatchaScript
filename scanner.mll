@@ -52,6 +52,7 @@ rule token = parse
 
 (* Data types *)
 | "int"    { INT }
+| "float"  { FLOAT }
 | "bool"   { BOOL }
 | "void"   { VOID }
 | "true"   { TRUE }
@@ -59,6 +60,7 @@ rule token = parse
 
 (* Literals *)
 | int as lxm 	{ INTLIT(int_of_string lxm) }
+| float as lxm  { FLOATLIT(float_of_string lxm) }
 | id as lxm 	{ ID(lxm) }
 | string 		{ STRLIT(s) }
 | eof 			{ EOF }
