@@ -154,4 +154,3 @@ let rec string_of_fdecl fdecl =
   let string_of_program (vars, fdecls) =
   String.concat "" (List.map string_of_vdecl vars) ^ "\n" ^
   String.concat "\n" (List.map string_of_fdecl fdecls)
->>>>>>> 55e61816e3ef6f4a066816c7454bef16bf0c3e4b
