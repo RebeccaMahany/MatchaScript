@@ -113,37 +113,6 @@ let rec string_of_stmt = function
       "for (" ^ string_of_expr e1  ^ " ; " ^ string_of_expr e2 ^ " ; " ^
       string_of_expr e3  ^ ") " ^ string_of_stmt s
   | While(e, s) -> "while (" ^ string_of_expr e ^ ") " ^ string_of_stmt s  
- (* | Function(t, e, v, s) -> "function " ^ string_of_typ t ^ " " ^ string_of_expr e
-      ^ "(" ^ String.concat ", " (List.map string_of_vdecl v) ^ ") {\n"
-      ^ string_of_stmt s ^ "}\n"
-*)
-
-
-(*)
-let string_of_fdecl_body (l1, l2, l3) = 
-  String.concat "" (List.map string_of_vdecl l1) ^ String.concat "" (List.map string_of_stmt l2) 
-  
-
-let rec string_of_fdecl fdecl =
-  
-  string_of_typ fdecl.typ ^ " " ^
-  fdecl.fname ^ "(" ^ String.concat ", " (List.map snd fdecl.formals) ^
-  ")\n{\n" ^
-   (string_of_fdecl_body fdecl.body) ^
-  "}\n"
-*)
-(*
-let rec string_of_fdecl fdecl =
-  let string_of_fdecl_body (l1, l2, l3) = 
-  String.concat "" (List.map string_of_vdecl l1) ^ String.concat "" (List.map string_of_stmt l2) 
-  ^ String.concat "" (List.map string_of_fdecl l3) in
-  string_of_typ fdecl.typ ^ " " ^
-  fdecl.fname ^ "(" ^ String.concat ", " (List.map snd fdecl.formals) ^
-  ")\n{\n" ^
-   (string_of_fdecl_body fdecl.body) ^
-  "}\n"
-*)
-
 
 let rec string_of_fdecl fdecl =
 	let string_of_constructs constructs = 

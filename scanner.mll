@@ -53,9 +53,9 @@ rule token = parse
 (* Data types *)
 | "int"    { INT }
 | "float"  { FLOAT }
-| "bool"   { BOOL }
 | "char"   { CHAR }
 | "String" { STRING }
+| "Boolean"   { BOOL }
 | "void"   { VOID }
 | "true"   { TRUE }
 | "false"  { FALSE }
