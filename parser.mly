@@ -69,20 +69,12 @@ constructs:
 /*********
 Variables
 **********/
-vdecl_list: 
-    vdecl            { [$1] }
-  | vdecl_list vdecl { $2::$1 }
-
 vdecl:
     typ ID ASSIGN expr SEMI { ($1, $2, $4) }
 
 /*********
 Binds
 **********/
-bind_list:
-    bind            { [$1] }
-  | bind_list bind { $2::$1 }
-
 bind:
    typ ID SEMI { ($1, $2) }
 
