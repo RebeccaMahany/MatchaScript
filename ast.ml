@@ -99,7 +99,7 @@ let string_of_typ = function
   | Str -> "String"
   | Void -> "void"
 
-let string_of_vdecl (t, id) = string_of_typ t ^ " " ^ id
+let string_of_vdecl (t, id, v) = string_of_typ t ^ " " ^ id ^ " " ^ string_of_expr v
 
 let rec string_of_stmt = function
     Block(stmts) ->
