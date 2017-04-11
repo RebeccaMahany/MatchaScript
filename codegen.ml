@@ -31,6 +31,7 @@ let translate (globals, functions) =
       A.Int -> i32_t
     | A.Float -> fl_t
     | A.Bool -> i1_t
+    | A.Char -> i8_t
     | A.Void -> void_t
     | A.Str -> str_t
     
@@ -38,6 +39,7 @@ let translate (globals, functions) =
       A.IntLit _ -> A.Int
     | A.FloatLit _ -> A.Float
     | A.BoolLit _ -> A.Bool
+    | A.CharLit _ -> A.Char
     | A.StrLit _ -> A.Str 
   in
 
@@ -53,13 +55,15 @@ let translate (globals, functions) =
   let printf_func = L.declare_function "printf" printf_t the_module in
 
   let int_format_str builder = L.build_global_stringptr "%d\n" "fmt" builder
-  and float_format_str builder = L.build_global_stringptr "%f\n" "fmt" builder 
+  and float_format_str builder = L.build_global_stringptr "%f\n" "fmt" builder
+  and char_format_str builder = L.build_global_stringptr "%c\n" "fmt" builder 
   and str_format_str builder = L.build_global_stringptr "%s\n" "fmt" builder in
   
   let format_str x_type builder =
     match x_type with
       A.Int -> int_format_str builder
     | A.Float -> float_format_str builder
+    | A.Char -> char_format_str builder
     | A.Str -> str_format_str builder
     | _ -> raise (Failure "Invalid printf type")
   in
@@ -106,6 +110,7 @@ let translate (globals, functions) =
         A.IntLit i -> L.const_int i32_t i
       | A.FloatLit f -> L.const_float fl_t f
       | A.BoolLit b -> L.const_int i1_t (if b then 1 else 0)
+      | A.CharLit c -> L.const_int i8_t c
       | A.StrLit s -> L.build_global_stringptr s "string" builder
       | A.Noexpr -> L.const_int i32_t 0
       | A.Id s -> L.build_load (lookup s) s builder

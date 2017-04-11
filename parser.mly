@@ -8,9 +8,10 @@ open Ast
 %token SEMI LPAREN RPAREN LBRACE RBRACE COMMA LBRACKET RBRACKET DOT
 %token PLUS MINUS TIMES DIVIDE ASSIGN NOT
 %token EQ NEQ LT LEQ GT GEQ TRUE FALSE AND OR
-%token RETURN IF ELSE FOR WHILE INT FLOAT BOOL VOID
+%token RETURN IF ELSE FOR WHILE INT FLOAT BOOL CHAR VOID
 %token <int> INTLIT
 %token <float> FLOATLIT
+%token <char> CHARLIT
 %token <string> STRLIT
 %token <string> ID
 %token EOF
@@ -124,12 +125,13 @@ expr_opt:
   | expr          { $1 }
 
 expr:
-    INTLIT           { IntLit($1) }
-  | FLOATLIT         { FloatLit($1) }
-  | STRLIT           { StrLit($1) }
-  | TRUE             { BoolLit(true) }
-  | FALSE            { BoolLit(false) }
-  | ID               { Id($1) }
+    INTLIT           { IntLit($1)           }
+  | FLOATLIT         { FloatLit($1)         }
+  | CHARLIT          { CharLit($1)          }
+  | STRLIT           { StrLit($1)           }
+  | TRUE             { BoolLit(true)        }
+  | FALSE            { BoolLit(false)       }
+  | ID               { Id($1)               }
   | expr PLUS   expr { Binop($1, Add,   $3) }
   | expr MINUS  expr { Binop($1, Sub,   $3) }
   | expr TIMES  expr { Binop($1, Mult,  $3) }
