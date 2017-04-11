@@ -75,8 +75,10 @@ let string_of_uop = function
 
 let rec string_of_expr = function
     IntLit(l) -> string_of_int l
+  | FloatLit(f) -> string_of_float f
   | BoolLit(true) -> "true"
   | BoolLit(false) -> "false"
+  | CharLit(c) -> String.make 1 c
   | StrLit(s) -> s
   | Id(s) -> s
   | Binop(e1, o, e2) ->
@@ -89,7 +91,9 @@ let rec string_of_expr = function
 
 let string_of_typ = function
     Int -> "int"
+  | Float -> "float"
   | Bool -> "bool"
+  | Char -> "char"
   | Str -> "String"
   | Void -> "void"
 

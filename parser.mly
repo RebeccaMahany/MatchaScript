@@ -8,7 +8,7 @@ open Ast
 %token SEMI LPAREN RPAREN LBRACE RBRACE COMMA LBRACKET RBRACKET DOT
 %token PLUS MINUS TIMES DIVIDE ASSIGN NOT
 %token EQ NEQ LT LEQ GT GEQ TRUE FALSE AND OR
-%token RETURN IF ELSE FOR WHILE INT FLOAT BOOL CHAR VOID
+%token RETURN IF ELSE FOR WHILE INT FLOAT BOOL CHAR STRING VOID
 %token <int> INTLIT
 %token <float> FLOATLIT
 %token <char> CHARLIT
@@ -95,10 +95,11 @@ formal_list:
   | formal_list COMMA typ ID { ($3,$4) :: $1 }
 
 typ:
-    INT   { Int }
-  | FLOAT { Float }
-  | BOOL  { Bool }
-  | VOID  { Void }
+    INT    { Int }
+  | FLOAT  { Float }
+  | BOOL   { Bool }
+  | STRING { Str }
+  | VOID   { Void }
 
 
 /*********
