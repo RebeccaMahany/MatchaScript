@@ -52,7 +52,7 @@ rule token = parse
 
 (* Data types *)
 | "int"    { INT }
-| "bool"   { BOOL }
+| "Boolean"   { BOOL }
 | "void"   { VOID }
 | "true"   { TRUE }
 | "false"  { FALSE }
