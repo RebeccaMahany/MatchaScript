@@ -30,18 +30,9 @@ open Ast
 
 %%
 
-/*
-type program = {
-  vdecls: vdecl list;
-  stmts: stmt list;
-  fdecls: fdecl list;
-} 
-*/
-
 program:
   constructs EOF { $1 }
 
-/* type constructs = vdecl list * stmt list * fdecl list */
 constructs:
     { {
         vdecls = [];
@@ -67,10 +58,10 @@ constructs:
 /*********
 Variables
 **********/
-vdecl_list:
+/*vdecl_list:
     vdecl            { [$1] }
   | vdecl_list vdecl { $2::$1 }
-
+*/
 vdecl:
    typ ID SEMI { ($1, $2) }
 
