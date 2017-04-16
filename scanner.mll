@@ -65,6 +65,7 @@ rule token = parse
 | float as lxm  { FLOATLIT(float_of_string lxm) }
 | id as lxm 	{ ID(lxm) }
 | string 		{ STRLIT(s) }
+| char as lxm   { CHARLIT( String.get lxm 1 ) }
 | eof 			{ EOF }
 | _ as char { raise (Failure("illegal character " ^ Char.escaped char)) }
 
