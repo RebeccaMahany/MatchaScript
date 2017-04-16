@@ -8,8 +8,10 @@ open Ast
 %token SEMI LPAREN RPAREN LBRACE RBRACE COMMA LBRACKET RBRACKET DOT
 %token PLUS MINUS TIMES DIVIDE ASSIGN NOT
 %token EQ NEQ LT LEQ GT GEQ TRUE FALSE AND OR
-%token RETURN IF ELSE FOR WHILE INT BOOL VOID
+%token RETURN IF ELSE FOR WHILE INT FLOAT BOOL CHAR STRING VOID
 %token <int> INTLIT
+%token <float> FLOATLIT
+%token <char> CHARLIT
 %token <string> STRLIT
 %token <string> ID
 %token EOF
@@ -63,8 +65,14 @@ Variables
   | vdecl_list vdecl { $2::$1 }
 */
 vdecl:
-   typ ID SEMI { ($1, $2) }
+    typ ID ASSIGN expr SEMI { ($1, $2, $4) }
 
+/*********
+Binds
+**********/
+/*bind:
+   typ ID SEMI { ($1, $2) }
+*/
 /*********
 Functions
 **********/
@@ -84,9 +92,12 @@ formal_list:
   | formal_list COMMA typ ID { ($3,$4) :: $1 }
 
 typ:
-    INT { Int }
-  | BOOL { Bool }
-  | VOID { Void }
+    INT    { Int }
+  | FLOAT  { Float }
+  | BOOL   { Bool }
+  | CHAR   { Char }
+  | STRING { Str }
+  | VOID   { Void }
 
 
 /*********
@@ -112,11 +123,13 @@ expr_opt:
   | expr          { $1 }
 
 expr:
-    INTLIT           { IntLit($1) }
-  | STRLIT           { StrLit($1) }
-  | TRUE             { BoolLit(true) }
-  | FALSE            { BoolLit(false) }
-  | ID               { Id($1) }
+    INTLIT           { IntLit($1)           }
+  | FLOATLIT         { FloatLit($1)         }
+  | CHARLIT          { CharLit($1)          }
+  | STRLIT           { StrLit($1)           }
+  | TRUE             { BoolLit(true)        }
+  | FALSE            { BoolLit(false)       }
+  | ID               { Id($1)               }
   | expr PLUS   expr { Binop($1, Add,   $3) }
   | expr MINUS  expr { Binop($1, Sub,   $3) }
   | expr TIMES  expr { Binop($1, Mult,  $3) }
