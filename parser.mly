@@ -70,9 +70,9 @@ vdecl:
 /*********
 Binds
 **********/
-bind:
+/*bind:
    typ ID SEMI { ($1, $2) }
-
+*/
 /*********
 Functions
 **********/
