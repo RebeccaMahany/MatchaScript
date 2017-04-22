@@ -196,6 +196,10 @@ let translate (globals, functions) =
     ignore (L.build_cond_br bool_val body_bb merge_bb pred_builder);
     L.builder_at_end context merge_bb
 
+      | A.DoWhile(body, predicate) -> stmt builder
+      ( A.Block [ A.Block [ body ] ; A.While(predicate, body)] )
+    in
+
       | A.For (e1, e2, e3, body) -> stmt builder
       ( A.Block [A.Expr e1 ; A.While (e2, A.Block [body ; A.Expr e3]) ] )
     in
