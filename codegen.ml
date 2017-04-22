@@ -99,7 +99,6 @@ let build_function_body f_build =
       let local_var = L.build_alloca (ltype_of_typ t) n llbuilder in 
       StringMap.add n local_var m
     in
-
     let f_formals = List.fold_left2 add_formal StringMap.empty f_build.sfdFormals
       (Array.to_list (L.params the_function)) in
 
@@ -111,7 +110,7 @@ let build_function_body f_build =
         in
         List.fold_left handle_vdecl [] fbody  (* fbody is a stmt list *)
       in extract_locals_from_fbody f_build.sfdBody 
-    in
+   in
     (* extract locals from the stmt list of the function *)
     List.fold_left add_local f_formals f_locals 
   in
