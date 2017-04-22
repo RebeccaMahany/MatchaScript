@@ -1,4 +1,3 @@
-function void main() {
 
     int i = 0;
 
@@ -20,4 +19,3 @@ function void main() {
         i = i + 1;
     }
 
-}
