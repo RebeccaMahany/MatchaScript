@@ -1,3 +1,0 @@
-printf("hello world");
-ID LPAREN STRLIT RPAREN SEMI EOF
-

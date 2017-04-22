@@ -12,7 +12,7 @@ open Ast
 %token <int> INTLIT
 %token <float> FLOATLIT
 %token <char> CHARLIT
-%token <string> STRLIT
+%token <string> STRINGLIT
 %token <string> ID
 %token EOF
 
@@ -96,7 +96,7 @@ typ:
   | FLOAT  { Float }
   | BOOL   { Bool }
   | CHAR   { Char }
-  | STRING { Str }
+  | STRING { String }
   | VOID   { Void }
 
 
@@ -126,7 +126,7 @@ expr:
     INTLIT           { IntLit($1)           }
   | FLOATLIT         { FloatLit($1)         }
   | CHARLIT          { CharLit($1)          }
-  | STRLIT           { StrLit($1)           }
+  | STRINGLIT           { StringLit($1)           }
   | TRUE             { BoolLit(true)        }
   | FALSE            { BoolLit(false)       }
   | ID               { Id($1)               }
@@ -145,7 +145,6 @@ expr:
   | MINUS expr %prec NEG { Unop(Neg, $2) }
   | NOT expr         { Unop(Not, $2) }
   | ID ASSIGN expr   { Assign($1, $3) }
-  /* | vdecl ASSIGN expr {} office hours */
   | ID LPAREN actuals_opt RPAREN { Call($1, $3) }
   | LPAREN expr RPAREN { $2 }
 
