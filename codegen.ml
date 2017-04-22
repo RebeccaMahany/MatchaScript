@@ -103,7 +103,7 @@ let build_function_body f_build =
         in
         List.fold_left handle_vdecl [] fbody  (* fbody is a stmt list*)
       in extract_locals_from_fbody f_build.sfdBody 
-    in
+   in
     (* extract locals from the stmt list of the function *)
     List.fold_left add_local f_formals f_locals 
   in

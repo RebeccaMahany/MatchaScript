@@ -45,6 +45,7 @@ and stmt =
   | If of expr * stmt * stmt
   | For of expr * expr * expr * stmt
   | While of expr * stmt
+  | DoWhile of stmt * expr
 
 and fexpr = {
   feReturnType : typ;
@@ -125,6 +126,7 @@ and string_of_stmt = function
       "for (" ^ string_of_expr e1  ^ " ; " ^ string_of_expr e2 ^ " ; " ^
       string_of_expr e3  ^ ") " ^ string_of_stmt s
   | While(e, s) -> "while (" ^ string_of_expr e ^ ") " ^ string_of_stmt s  
+  | DoWhile(s, e) -> "do: " ^ string_of_stmt s ^ " while (" ^ string_of_expr e ^ ")"
 
 and string_of_vdecl (typ, str, expr) = 
   if expr = Noexpr then string_of_typ typ ^ " " ^ str ^ ";\n"
