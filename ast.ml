@@ -115,10 +115,6 @@ let rec string_of_expr = function
         ^ string_of_expr e1 ^ " else " ^ string_of_expr e2
   | Noexpr -> ""
 
-and string_of_caseType = function
-    Default -> "default"
-  | CaseType(c) -> "case " ^ string_of_expr c
-
 and string_of_stmt = function
     Block(stmts) ->
       "{\n" ^ String.concat "" (List.map string_of_stmt stmts) ^ "}\n"
