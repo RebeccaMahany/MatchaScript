@@ -1,5 +1,5 @@
 int outer(int firstNum) {
-	/*String intro = "My name is";*/
+	/*string intro = "My name is";*/
 	int inner(int secondNum) {
 		void evenInner() {
 			void mostInner() {
