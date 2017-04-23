@@ -78,6 +78,7 @@ let codegen_func_fwd_decls (sast : sstmt list) =
   in List.iter get_fdecls_for_fwd_decl_generation sast
 ;;
 
+<<<<<<< 30da5b1497d40a5cf5ebfb3ec17b69be467a0b2b
 (*************************
 Function Definitions
 *************************)
@@ -92,7 +93,7 @@ let build_function_body f_build =
       let local = L.build_alloca (ltype_of_typ t) n llbuilder in
       ignore (L.build_store p local llbuilder);
       StringMap.add n local m 
-    in
+   in
 
     let add_local m (t, n) =
       let local_var = L.build_alloca (ltype_of_typ t) n llbuilder in 
