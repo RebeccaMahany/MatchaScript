@@ -43,6 +43,7 @@ type stmt =
   | While of expr * stmt
   | DoWhile of stmt * expr
   | Break
+  | Continue
 
 type fdecl = {
   typ : typ;
@@ -120,6 +121,7 @@ let rec string_of_stmt = function
   | While(e, s) -> "while (" ^ string_of_expr e ^ ") " ^ string_of_stmt s  
   | DoWhile(s, e) -> "do: " ^ string_of_stmt s ^ " while (" ^ string_of_expr e ^ ")"
   | Break -> "break"
+  | Continue -> "continue"
 
 let rec string_of_fdecl fdecl =
 	let string_of_constructs constructs = 
