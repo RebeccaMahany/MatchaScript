@@ -8,7 +8,7 @@ open Ast
 %token SEMI LPAREN RPAREN LBRACE RBRACE COMMA LBRACKET RBRACKET DOT
 %token PLUS MINUS TIMES DIVIDE ASSIGN NOT
 %token EQ NEQ LT LEQ GT GEQ TRUE FALSE AND OR
-%token RETURN IF ELSE FOR WHILE DO COLON QMARK INT FLOAT BOOL CHAR STRING VOID
+%token RETURN IF ELSE FOR WHILE DO COLON QMARK BREAK INT FLOAT BOOL CHAR STRING VOID
 %token <int> INTLIT
 %token <float> FLOATLIT
 %token <char> CHARLIT
@@ -118,6 +118,7 @@ stmt:
      { For($3, $5, $7, $9) }
   | WHILE LPAREN expr RPAREN stmt { While($3, $5) }
   | DO stmt WHILE LPAREN expr RPAREN SEMI { DoWhile ($2, $5) }
+  | BREAK SEMI { Break }
 
 expr_opt:
     /* nothing */ { Noexpr }

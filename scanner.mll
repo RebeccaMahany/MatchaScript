@@ -51,6 +51,7 @@ rule token = parse
 | "for"    { FOR }
 | "while"  { WHILE }
 | "do"     { DO }
+| "break"  { BREAK }
 | "return" { RETURN }
 
 (* Data types *)
