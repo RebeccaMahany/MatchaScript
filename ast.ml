@@ -52,6 +52,7 @@ and stmt =
   | While of expr * stmt
   | DoWhile of stmt * expr
   | Break
+  | Continue
 
 and fexpr = {
   feReturnType : typ;
@@ -163,6 +164,7 @@ and string_of_stmt = function
   | While(e, s) -> "while (" ^ string_of_expr e ^ ") " ^ string_of_stmt s  
   | DoWhile(s, e) -> "do: " ^ string_of_stmt s ^ " while (" ^ string_of_expr e ^ ")"
   | Break -> "break"
+  | Continue -> "continue"
 
 and string_of_vdecl (typ, str, expr) = 
   if expr = Noexpr then string_of_typ typ ^ " " ^ str ^ ";\n"
