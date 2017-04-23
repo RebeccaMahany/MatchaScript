@@ -41,12 +41,12 @@ constructs:
         fdecls = [];
     } }
   | constructs stmt { {
-        stmts = $2 :: $1.stmts; 
+        stmts = $1.stmts@[$2]; 
         fdecls = $1.fdecls; 
     } }
   | constructs fdecl { {
         stmts = $1.stmts; 
-        fdecls = $2 :: $1.fdecls; 
+        fdecls = $1.fdecls@[$2]; 
     } }
 
 /*********
