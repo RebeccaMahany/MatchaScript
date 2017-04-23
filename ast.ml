@@ -29,6 +29,7 @@ type expr =
   | Unop of uop * expr
   | Assign of string * expr
   | Call of string * expr list
+  | Ternary of expr * expr * expr (* Ternary operator ?: *)
   | Noexpr
 
 type vdecl = typ * string * expr

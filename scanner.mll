@@ -23,6 +23,8 @@ rule token = parse
 | '}'      { RBRACE }
 | ';'      { SEMI }
 | ','      { COMMA }
+| ':'      { COLON }
+| '?'      { QMARK }
 
 (* Operators *)
 | '+'      	{ PLUS }

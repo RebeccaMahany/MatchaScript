@@ -8,7 +8,7 @@ open Ast
 %token SEMI LPAREN RPAREN LBRACE RBRACE COMMA LBRACKET RBRACKET DOT
 %token PLUS MINUS TIMES DIVIDE ASSIGN NOT
 %token EQ NEQ LT LEQ GT GEQ TRUE FALSE AND OR
-%token RETURN IF ELSE FOR WHILE DO INT FLOAT BOOL CHAR STRING VOID
+%token RETURN IF ELSE FOR WHILE DO COLON QMARK INT FLOAT BOOL CHAR STRING VOID
 %token <int> INTLIT
 %token <float> FLOATLIT
 %token <char> CHARLIT
@@ -149,6 +149,7 @@ expr:
   /* | vdecl ASSIGN expr {} office hours */
   | ID LPAREN actuals_opt RPAREN { Call($1, $3) }
   | LPAREN expr RPAREN { $2 }
+  | LPAREN expr RPAREN QMARK expr COLON expr SEMI { Ternary($2, $5, $7) }
 
 actuals_opt:
     /* nothing */ { [] }
