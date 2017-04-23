@@ -51,13 +51,14 @@ rule token = parse
 | "function" { FUNCTION }
 
 (* Branch control *)
-| "if"     { IF }
-| "else"   { ELSE }
-| "for"    { FOR }
-| "while"  { WHILE }
-| "do"     { DO }
-| "break"  { BREAK }
-| "return" { RETURN }
+| "if"          { IF }
+| "else"        { ELSE }
+| "for"         { FOR }
+| "while"       { WHILE }
+| "do"          { DO }
+| "break"       { BREAK }
+| "continue"    { CONTINUE }
+| "return"      { RETURN }
 
 (* Data types *)
 | "int"    { INT }
