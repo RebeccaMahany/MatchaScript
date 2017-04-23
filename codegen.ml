@@ -138,6 +138,8 @@ let translate (globals, functions) =
           | A.Not     -> L.build_not) e' "tmp" builder
       | A.Assign (s, e) -> let e' = expr builder e in
                      ignore (L.build_store e' (lookup s) builder); e'
+      | A.Ternary (p, e1, e2) -> let p' = expr builder p in 
+                    (if p then expr builder e1 else expr builder e2)
       | A.Call ("print", [e]) | A.Call ("printb", [e]) ->
           let e' = expr builder e
           and e_type = gen_type e in
