@@ -32,6 +32,7 @@ and expr =
   | Unop of uop * expr
   | Assign of expr * expr
   | CallExpr of expr * expr list 
+  | Ternary of expr * expr * expr (* Ternary operator ?: *)
   | Noexpr
 
 and stmt =
