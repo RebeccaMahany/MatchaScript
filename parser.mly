@@ -145,7 +145,6 @@ expr:
   | call_expr { $1 }
   | expr QMARK expr COLON expr { Ternary($1, $3, $5) }
   | LPAREN expr RPAREN { $2 }
-  | LPAREN expr RPAREN QMARK expr COLON expr SEMI { Ternary($2, $5, $7) }
 
 actuals_opt:
     /* nothing */ { [] }
