@@ -36,6 +36,8 @@ and expr =
   | ObjAccessExpr of expr * expr (* PP *)
   (* ArrayAccess *)
   | CallExpr of expr * expr list
+  | Call of string * expr list
+  | Ternary of expr * expr * expr (* Ternary operator ?: *)
   | Noexpr
 
 and stmt =

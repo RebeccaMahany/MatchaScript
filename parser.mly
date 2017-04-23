@@ -6,7 +6,7 @@ open Ast
 %token SEMI LPAREN RPAREN LBRACE RBRACE COMMA LBRACKET RBRACKET DOT
 %token PLUS MINUS TIMES DIVIDE MOD ASSIGN NOT
 %token EQ NEQ LT LEQ GT GEQ TRUE FALSE AND OR
-%token RETURN IF ELSE FOR WHILE DO INT FLOAT BOOL CHAR STRING VOID
+%token RETURN IF ELSE FOR WHILE DO COLON QMARK INT FLOAT BOOL CHAR STRING VOID
 %token <int> INTLIT
 %token <float> FLOATLIT
 %token <char> CHARLIT
@@ -196,6 +196,7 @@ expr:
   | call_expression LPAREN actuals_opt RPAREN { CallExpr($1, $3) }
   | NEW ID LPAREN actuals_opt RPAREN { CallConstructor($2, $4) }
   | LPAREN expr RPAREN { $2 }
+  | LPAREN expr RPAREN QMARK expr COLON expr SEMI { Ternary($2, $5, $7) }
 
 actuals_opt:
     /* nothing */ { [] }
