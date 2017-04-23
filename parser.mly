@@ -37,48 +37,24 @@ program:
 
 constructs:
     { {
-        vdecls = [];
         stmts = [];
         fdecls = [];
     } }
-  | constructs vdecl { {
-        vdecls = $2 :: $1.vdecls; 
-        stmts = $1.stmts; 
-        fdecls = $1.fdecls; 
-    } }
   | constructs stmt { {
-        vdecls = $1.vdecls; 
         stmts = $2 :: $1.stmts; 
         fdecls = $1.fdecls; 
     } }
   | constructs fdecl { {
-        vdecls = $1.vdecls; 
         stmts = $1.stmts; 
         fdecls = $2 :: $1.fdecls; 
     } }
 
 /*********
-Variables
-**********/
-/*vdecl_list:
-    vdecl            { [$1] }
-  | vdecl_list vdecl { $2::$1 }
-*/
-vdecl:
-    typ ID ASSIGN expr SEMI { ($1, $2, $4) }
-
-/*********
-Binds
-**********/
-/*bind:
-   typ ID SEMI { ($1, $2) }
-*/
-/*********
 Functions
 **********/
 fdecl:
    typ ID LPAREN formals_opt RPAREN LBRACE constructs RBRACE
-     { { typ = $1;
+     { { returnType = $1;
    fname = $2;
    formals = $4;
    body = $7 } }
@@ -109,8 +85,10 @@ stmt_list:
 
 stmt:
     expr SEMI { Expr $1 }
-  | RETURN SEMI { Return Noexpr }
+  | typ ID SEMI { DeclStmt($1, $2, Noexpr)}
+  | typ ID ASSIGN expr SEMI { DeclStmt($1, $2, $4) }
   | RETURN expr SEMI { Return $2 }
+  | RETURN SEMI { Return Noexpr }
   | LBRACE stmt_list RBRACE { Block(List.rev $2) }
   | IF LPAREN expr RPAREN stmt %prec NOELSE { If($3, $5, Block([])) }
   | IF LPAREN expr RPAREN stmt ELSE stmt    { If($3, $5, $7) }
@@ -144,7 +122,7 @@ expr:
   | expr OR     expr { Binop($1, Or,    $3) }
   | MINUS expr %prec NEG { Unop(Neg, $2) }
   | NOT expr         { Unop(Not, $2) }
-  | ID ASSIGN expr   { Assign($1, $3) }
+  | expr ASSIGN expr   { Assign($1, $3) } /* previously ID ASSIGN expr */
   | ID LPAREN actuals_opt RPAREN { Call($1, $3) }
   | LPAREN expr RPAREN { $2 }
 
