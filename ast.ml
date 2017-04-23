@@ -111,6 +111,8 @@ let rec string_of_expr = function
   | Assign(e1, e2) -> string_of_expr e1 ^ " = " ^ string_of_expr e2
   | CallExpr(call_expr, args) ->
       string_of_expr call_expr ^ "(" ^ String.concat ", " (List.map string_of_expr args) ^ ")"
+  | Ternary(p, e1, e2) -> "if " ^ string_of_expr p ^ " then " 
+        ^ string_of_expr e1 ^ " else " ^ string_of_expr e2
   | Noexpr -> ""
 
 and string_of_caseType = function
