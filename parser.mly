@@ -102,6 +102,7 @@ stmt:
      { For($3, $5, $7, $9) }
   | WHILE LPAREN expr RPAREN stmt { While($3, $5) }
   | DO stmt WHILE LPAREN expr RPAREN SEMI { DoWhile ($2, $5) }
+  | BREAK SEMI { Break }
 
 /*********
 Expressions
