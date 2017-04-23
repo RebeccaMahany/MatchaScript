@@ -84,7 +84,6 @@ Function Definitions
 let build_function_body f_build =
   let (the_function, _) = Hashtbl.find fwd_decls_hashtbl f_build.sfdFname in
   let llbuilder = L.builder_at_end context (L.entry_block the_function) in
-
   (* Construct the function's "locals": formal arguments and locally declared variables. 
     Allocate each on the stack, initialize their value, if appropriate, and remember their
     values in the "locals" map *)
