@@ -148,8 +148,8 @@ expr:
   | ID ASSIGN expr   { Assign($1, $3) }
   /* | vdecl ASSIGN expr {} office hours */
   | ID LPAREN actuals_opt RPAREN { Call($1, $3) }
+  | expr QMARK expr COLON expr { Ternary($1, $3, $5) }
   | LPAREN expr RPAREN { $2 }
-  | LPAREN expr RPAREN QMARK expr COLON expr SEMI { Ternary($2, $5, $7) }
 
 actuals_opt:
     /* nothing */ { [] }
