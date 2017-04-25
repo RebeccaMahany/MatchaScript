@@ -47,10 +47,16 @@ type fdecl = {
   body : constructs;
 }
 
+and type cdecl = {
+  cdecl: string;
+  contructor: fdecl;
+  fdecls: fdecl list;
+}
+
 and constructs = {
+  cdecls: cdecl list;
   stmts: stmt list;
   fdecls: fdecl list;
-  (* cdecls: cdecl list *)
 }
 
 (* type program = include_stmt list * constructs *)

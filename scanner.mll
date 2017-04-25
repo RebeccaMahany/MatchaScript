@@ -61,6 +61,12 @@ rule token = parse
 | "true"   { TRUE }
 | "false"  { FALSE }
 
+(* Classes *)
+| "new"             { NEW }
+| "this"            { THIS }
+| "constructor"     { CONSTRUCTOR }
+| "class"           { CLASS }
+
 (* Literals *)
 | int as lxm 	{ INTLIT(int_of_string lxm) }
 | float as lxm  { FLOATLIT(float_of_string lxm) }
