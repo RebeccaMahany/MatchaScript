@@ -1,14 +1,11 @@
-/* Ocamlyacc parser for MatchaScript */
-
 %{
 open Ast
 %}
 
-%token INCLUDE
+%token INCLUDE FUNCTION
 %token SEMI LPAREN RPAREN LBRACE RBRACE COMMA LBRACKET RBRACKET DOT
 %token PLUS MINUS TIMES DIVIDE MOD ASSIGN NOT
 %token EQ NEQ LT LEQ GT GEQ TRUE FALSE AND OR
-%token NEW THIS CONSTRUCTOR CLASS
 %token RETURN IF ELSE FOR WHILE INT FLOAT BOOL CHAR STRING VOID
 %token <int> INTLIT
 %token <float> FLOATLIT
@@ -36,38 +33,19 @@ open Ast
 program:
   constructs EOF { $1 }
 
-(* FIX THIS *)
 constructs:
-    { {
-        cdecls = [];
-        stmts = [];
-        fdecls = [];
-    } }
-  | constructs cdecl { {
-        cdecls = 
-        stmts =
-        fdecls = 
-    } }
-  | constructs stmt { {
-        cdecls =
-        stmts = $1.stmts@[$2]; 
-        fdecls = $1.fdecls; 
-    } }
-  | constructs fdecl { {
-        cdecls = 
-        stmts = $1.stmts; 
-        fdecls = $1.fdecls@[$2]; 
-    } }
+    /* nothing */ { { stmts = []; } }
+  | constructs stmt { { stmts = $1.stmts@[$2]; } }
 
 /*********
 Functions
 **********/
 fdecl:
-   typ ID LPAREN formals_opt RPAREN LBRACE constructs RBRACE
-     { { returnType = $1;
-   fname = $2;
-   formals = $4;
-   body = $7 } }
+   FUNCTION typ ID LPAREN formals_opt RPAREN LBRACE constructs RBRACE
+     { { returnType = $2;
+   fname = $3;
+   formals = $5;
+   body = $8 } }
 
 formals_opt:
     /* nothing */ { [] }
@@ -85,26 +63,6 @@ typ:
   | STRING { String }
   | VOID   { Void }
 
-fdecl_list:
-    { [] }
-  | fdecl { [$1] }
-  | fdecl_list fdecl { $2 :: $1 }
-
-/*********
-Classes
-**********/
-cdecl_list:
-    cdecl { [$1] }
-  | cdecl_list cdecl { $2 :: $1 }
-
-cdecl:
-    CLASS ID LBRACE constructor fdecl_list RBRACE { {
-        cname = $2;
-        constructor = $4;
-        fdecl_list = $5;
-    } }
-
-(* TODO: CLASS ID EXTENDS ID LBRACE fdecl_list RBRACE *)
 
 /*********
 Statements
@@ -117,6 +75,7 @@ stmt:
     expr SEMI { Expr $1 }
   | typ ID SEMI { DeclStmt($1, $2, Noexpr)}
   | typ ID ASSIGN expr SEMI { DeclStmt($1, $2, $4) }
+  | fdecl { FDeclStmt($1) }
   | RETURN expr SEMI { Return $2 }
   | RETURN SEMI { Return Noexpr }
   | LBRACE stmt_list RBRACE { Block(List.rev $2) }

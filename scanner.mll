@@ -44,6 +44,9 @@ rule token = parse
 | '['      { LBRACKET }
 | ']'      { RBRACKET }
 
+(* Function *)
+| "function" { FUNCTION }
+
 (* Branch control *)
 | "if"     { IF }
 | "else"   { ELSE }
@@ -60,12 +63,6 @@ rule token = parse
 | "void"   { VOID }
 | "true"   { TRUE }
 | "false"  { FALSE }
-
-(* Classes *)
-| "new"             { NEW }
-| "this"            { THIS }
-| "constructor"     { CONSTRUCTOR }
-| "class"           { CLASS }
 
 (* Literals *)
 | int as lxm 	{ INTLIT(int_of_string lxm) }
