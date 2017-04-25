@@ -1,0 +1,38 @@
+ACCEPT
+[program:
+  [constructs:
+    [constructs:
+      [constructs:
+        [constructs:]
+        [stmt:
+          [expr:
+            ID
+            LPAREN
+            [actuals_opt: [actuals_list: [expr: STRINGLIT]]]
+            RPAREN
+          ]
+          SEMI
+        ]
+      ]
+      [stmt:
+        [expr:
+          ID
+          LPAREN
+          [actuals_opt: [actuals_list: [expr: STRINGLIT]]]
+          RPAREN
+        ]
+        SEMI
+      ]
+    ]
+    [stmt:
+      [expr:
+        ID
+        LPAREN
+        [actuals_opt: [actuals_list: [expr: STRINGLIT]]]
+        RPAREN
+      ]
+      SEMI
+    ]
+  ]
+  EOF
+]

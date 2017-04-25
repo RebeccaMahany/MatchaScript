@@ -1,3 +1,5 @@
+(* Ocamllex scanner for MicroC *)
+
 { open Printf }
 
 let alpha = ['a'-'z' 'A'-'Z']
@@ -10,8 +12,7 @@ let string = '"' ( (ascii | escape)* as s) '"'
 let char = ''' ( ascii | digit ) '''
 let float = (digit+) ['.'] digit+
 let int = digit+
-let whitespace = [' ' '\t' '\r']
-let return = '\n'
+let whitespace = [' ' '\t' '\r' '\n']
 
 rule token = parse
   whitespace { token lexbuf }
@@ -51,18 +52,20 @@ rule token = parse
 
 (* Data types *)
 | "int"    { print_string "INT " }
+| "float"  { print_string "FLOAT " }
+| "char"   { print_string "CHAR " }
+| "string" { print_string "STRING "}
 | "bool"   { print_string "BOOL " }
 | "void"   { print_string "VOID " }
 | "true"   { print_string "TRUE " }
 | "false"  { print_string "FALSE " }
 
-(* Classes *)
-| "include"	{ print_string "INCLUDE " }
-
 (* Literals *)
-| int as lxm 	{ print_string "INTLIT(int_of_string lxm) " }
-| id as lxm 	{ print_string "ID(lxm) " }
-| string 		{ print_string "STRINGLIT(s) " }
+| int as lxm 	{ print_string "INTLIT " }
+| float as lxm { print_string "FLOATLIT " }
+| id as lxm 	{ print_string "ID " }
+| string 		  { print_string "STRINGLIT " }
+| char as lxm   { print_string "CHARLIT " }
 (*| eof 			{ EOF }*)
 | _ as char { raise (Failure("illegal character " ^ Char.escaped char)) }
 

@@ -31,6 +31,7 @@ rule token = parse
 | '-'      	{ MINUS }
 | '*'      	{ TIMES }
 | '/'      	{ DIVIDE }
+| '%'       { MOD }
 | '='      	{ ASSIGN }
 | "=="     	{ EQ }
 | "!="     	{ NEQ }
@@ -44,6 +45,9 @@ rule token = parse
 | '.'      { DOT }
 | '['      { LBRACKET }
 | ']'      { RBRACKET }
+
+(* Function *)
+| "function" { FUNCTION }
 
 (* Branch control *)
 | "if"          { IF }
@@ -59,8 +63,8 @@ rule token = parse
 | "int"    { INT }
 | "float"  { FLOAT }
 | "char"   { CHAR }
-| "String" { STRING }
-| "Boolean"   { BOOL }
+| "string" { STRING }
+| "bool"   { BOOL }
 | "void"   { VOID }
 | "true"   { TRUE }
 | "false"  { FALSE }
@@ -69,7 +73,7 @@ rule token = parse
 | int as lxm 	{ INTLIT(int_of_string lxm) }
 | float as lxm  { FLOATLIT(float_of_string lxm) }
 | id as lxm 	{ ID(lxm) }
-| string 		{ STRLIT(s) }
+| string 		{ STRINGLIT(s) }
 | char as lxm   { CHARLIT( String.get lxm 1 ) }
 | eof 			{ EOF }
 | _ as char { raise (Failure("illegal character " ^ Char.escaped char)) }

@@ -33,14 +33,14 @@ let translate (globals, functions) =
     | A.Bool -> i1_t
     | A.Char -> i8_t
     | A.Void -> void_t
-    | A.Str -> str_t
+    | A.String -> str_t
     
   and gen_type = function
       A.IntLit _ -> A.Int
     | A.FloatLit _ -> A.Float
     | A.BoolLit _ -> A.Bool
     | A.CharLit _ -> A.Char
-    | A.StrLit _ -> A.Str 
+    | A.StringLit _ -> A.String 
   in
 
   (* Declare each global variable; remember its value in a map *)
@@ -64,7 +64,7 @@ let translate (globals, functions) =
       A.Int -> int_format_str builder
     | A.Float -> float_format_str builder
     | A.Char -> char_format_str builder
-    | A.Str -> str_format_str builder
+    | A.String -> str_format_str builder
     | _ -> raise (Failure "Invalid printf type")
   in
 
@@ -111,7 +111,7 @@ let translate (globals, functions) =
       | A.FloatLit f -> L.const_float fl_t f
       | A.BoolLit b -> L.const_int i1_t (if b then 1 else 0)
       | A.CharLit c -> L.const_int i8_t c
-      | A.StrLit s -> L.build_global_stringptr s "string" builder
+      | A.StringLit s -> L.build_global_stringptr s "string" builder
       | A.Noexpr -> L.const_int i32_t 0
       | A.Id s -> L.build_load (lookup s) s builder
       | A.Binop (e1, op, e2) ->
@@ -122,6 +122,7 @@ let translate (globals, functions) =
           | A.Sub     -> L.build_sub
           | A.Mult    -> L.build_mul
           | A.Div     -> L.build_sdiv
+          | A.Mod     -> L.build_srem
           | A.And     -> L.build_and
           | A.Or      -> L.build_or
           | A.Equal   -> L.build_icmp L.Icmp.Eq

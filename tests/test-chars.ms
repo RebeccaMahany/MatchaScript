@@ -1,4 +1,4 @@
-void main() {
+function void main() {
     char a = 'a';
     char b = 'b';
     a = b;

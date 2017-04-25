@@ -1,19 +1,17 @@
-/* Ocamlyacc parser for MatchaScript */
-
 %{
 open Ast
 %}
 
-%token INCLUDE
+%token INCLUDE FUNCTION
 %token SEMI LPAREN RPAREN LBRACE RBRACE COMMA LBRACKET RBRACKET DOT
-%token PLUS MINUS TIMES DIVIDE ASSIGN NOT
+%token PLUS MINUS TIMES DIVIDE MOD ASSIGN NOT
 %token EQ NEQ LT LEQ GT GEQ TRUE FALSE AND OR
 %token RETURN IF ELSE FOR WHILE DO COLON QMARK BREAK CONTINUE 
 %token INT FLOAT BOOL CHAR STRING VOID
 %token <int> INTLIT
 %token <float> FLOATLIT
 %token <char> CHARLIT
-%token <string> STRLIT
+%token <string> STRINGLIT
 %token <string> ID
 %token EOF
 
@@ -25,7 +23,7 @@ open Ast
 %left EQ NEQ
 %left LT GT LEQ GEQ
 %left PLUS MINUS
-%left TIMES DIVIDE
+%left TIMES DIVIDE MOD
 %right NOT NEG
 
 %start program
@@ -37,52 +35,18 @@ program:
   constructs EOF { $1 }
 
 constructs:
-    { {
-        vdecls = [];
-        stmts = [];
-        fdecls = [];
-    } }
-  | constructs vdecl { {
-        vdecls = $2 :: $1.vdecls; 
-        stmts = $1.stmts; 
-        fdecls = $1.fdecls; 
-    } }
-  | constructs stmt { {
-        vdecls = $1.vdecls; 
-        stmts = $2 :: $1.stmts; 
-        fdecls = $1.fdecls; 
-    } }
-  | constructs fdecl { {
-        vdecls = $1.vdecls; 
-        stmts = $1.stmts; 
-        fdecls = $2 :: $1.fdecls; 
-    } }
+    /* nothing */ { { stmts = []; } }
+  | constructs stmt { { stmts = $1.stmts@[$2]; } }
 
-/*********
-Variables
-**********/
-/*vdecl_list:
-    vdecl            { [$1] }
-  | vdecl_list vdecl { $2::$1 }
-*/
-vdecl:
-    typ ID ASSIGN expr SEMI { ($1, $2, $4) }
-
-/*********
-Binds
-**********/
-/*bind:
-   typ ID SEMI { ($1, $2) }
-*/
 /*********
 Functions
 **********/
 fdecl:
-   typ ID LPAREN formals_opt RPAREN LBRACE constructs RBRACE
-     { { typ = $1;
-   fname = $2;
-   formals = $4;
-   body = $7 } }
+   FUNCTION typ ID LPAREN formals_opt RPAREN LBRACE constructs RBRACE
+     { { returnType = $2;
+   fname = $3;
+   formals = $5;
+   body = $8 } }
 
 formals_opt:
     /* nothing */ { [] }
@@ -97,7 +61,7 @@ typ:
   | FLOAT  { Float }
   | BOOL   { Bool }
   | CHAR   { Char }
-  | STRING { Str }
+  | STRING { String }
   | VOID   { Void }
 
 
@@ -110,8 +74,11 @@ stmt_list:
 
 stmt:
     expr SEMI { Expr $1 }
-  | RETURN SEMI { Return Noexpr }
+  | typ ID SEMI { DeclStmt($1, $2, Noexpr)}
+  | typ ID ASSIGN expr SEMI { DeclStmt($1, $2, $4) }
+  | fdecl { FDeclStmt($1) }
   | RETURN expr SEMI { Return $2 }
+  | RETURN SEMI { Return Noexpr }
   | LBRACE stmt_list RBRACE { Block(List.rev $2) }
   | IF LPAREN expr RPAREN stmt %prec NOELSE { If($3, $5, Block([])) }
   | IF LPAREN expr RPAREN stmt ELSE stmt    { If($3, $5, $7) }
@@ -130,7 +97,7 @@ expr:
     INTLIT           { IntLit($1)           }
   | FLOATLIT         { FloatLit($1)         }
   | CHARLIT          { CharLit($1)          }
-  | STRLIT           { StrLit($1)           }
+  | STRINGLIT           { StringLit($1)           }
   | TRUE             { BoolLit(true)        }
   | FALSE            { BoolLit(false)       }
   | ID               { Id($1)               }
@@ -138,6 +105,7 @@ expr:
   | expr MINUS  expr { Binop($1, Sub,   $3) }
   | expr TIMES  expr { Binop($1, Mult,  $3) }
   | expr DIVIDE expr { Binop($1, Div,   $3) }
+  | expr MOD    expr { Binop($1, Mod,   $3) }
   | expr EQ     expr { Binop($1, Equal, $3) }
   | expr NEQ    expr { Binop($1, Neq,   $3) }
   | expr LT     expr { Binop($1, Less,  $3) }
@@ -148,8 +116,7 @@ expr:
   | expr OR     expr { Binop($1, Or,    $3) }
   | MINUS expr %prec NEG { Unop(Neg, $2) }
   | NOT expr         { Unop(Not, $2) }
-  | ID ASSIGN expr   { Assign($1, $3) }
-  /* | vdecl ASSIGN expr {} office hours */
+  | expr ASSIGN expr   { Assign($1, $3) } /* previously ID ASSIGN expr */
   | ID LPAREN actuals_opt RPAREN { Call($1, $3) }
   | expr QMARK expr COLON expr { Ternary($1, $3, $5) }
   | LPAREN expr RPAREN { $2 }
