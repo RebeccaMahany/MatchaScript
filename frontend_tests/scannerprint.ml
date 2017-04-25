@@ -1383,7 +1383,7 @@ and __ocaml_lex_token_rec lexbuf __ocaml_lex_state =
 
   | 33 ->
 # 57 "frontend_tests/scannerprint.mll"
-           ( print_string "string ")
+           ( print_string "STRING ")
 # 1388 "frontend_tests/scannerprint.ml"
 
   | 34 ->

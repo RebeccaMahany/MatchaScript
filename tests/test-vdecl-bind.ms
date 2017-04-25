@@ -4,7 +4,6 @@ void aFunction(int q, float s) {
     print("hello there!");
 }
 
-
 void main() {
     int a = 1;
     char b = 'b';

@@ -54,7 +54,7 @@ rule token = parse
 | "int"    { print_string "INT " }
 | "float"  { print_string "FLOAT " }
 | "char"   { print_string "CHAR " }
-| "string" { print_string "string "}
+| "string" { print_string "STRING "}
 | "bool"   { print_string "BOOL " }
 | "void"   { print_string "VOID " }
 | "true"   { print_string "TRUE " }
