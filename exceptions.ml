@@ -18,15 +18,15 @@ exception DuplicateLocal of string
 exception DuplicateGlobal of string
 exception UnknownID of string
 exception AssignmentTypeMismatch of string * string
-exception CallingBreakOutsideLoop
-exception CallingContinueOutsideLoop
+(*exception CallingBreakOutsideLoop
+exception CallingContinueOutsideLoop*)
 
 (* Codegen exceptions *)
-exception InvalidTypePassedToPrintf
-exception InvalidBinaryOperator
-exception InvalidBinopEvalType
-exception InvalidUnopType
-exception InvalidUnopEvalType
+exception InvalidTypePassedToPrint
+exception InvalidBinaryOperator (* a @ b, where @ is not supported *)
+exception InvalidBinopEvalType (* "a" / "b" *)
+exception InvalidUnaryOperator (* ^a *)
+exception InvalidUnopEvalType (* !"not" *)
 exception UnknownVariable of string
 
 (* MatchaScript exceptions *)
