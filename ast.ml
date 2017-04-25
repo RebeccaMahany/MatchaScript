@@ -121,7 +121,7 @@ let rec string_of_fdecl fdecl =
 	  String.concat "" (List.map string_of_stmt constructs.stmts) 
   ^ String.concat "" (List.map string_of_fdecl constructs.fdecls) in
 
-  string_of_typ fdecl.returnType ^ " " ^
+  "function " ^ string_of_typ fdecl.returnType ^ " " ^
   fdecl.fname ^ "(" ^ String.concat ", " (List.map snd fdecl.formals) ^
   ")\n{\n" ^
    (string_of_constructs fdecl.body) ^

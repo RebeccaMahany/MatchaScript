@@ -4,7 +4,7 @@
 open Ast
 %}
 
-%token INCLUDE
+%token INCLUDE FUNCTION
 %token SEMI LPAREN RPAREN LBRACE RBRACE COMMA LBRACKET RBRACKET DOT
 %token PLUS MINUS TIMES DIVIDE MOD ASSIGN NOT
 %token EQ NEQ LT LEQ GT GEQ TRUE FALSE AND OR
@@ -53,11 +53,11 @@ constructs:
 Functions
 **********/
 fdecl:
-   typ ID LPAREN formals_opt RPAREN LBRACE constructs RBRACE
-     { { returnType = $1;
-   fname = $2;
-   formals = $4;
-   body = $7 } }
+   FUNCTION typ ID LPAREN formals_opt RPAREN LBRACE constructs RBRACE
+     { { returnType = $2;
+   fname = $3;
+   formals = $5;
+   body = $8 } }
 
 formals_opt:
     /* nothing */ { [] }
