@@ -1,5 +1,3 @@
-/* Ocamlyacc parser for MatchaScript */
-
 %{
 open Ast
 %}
