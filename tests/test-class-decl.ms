@@ -2,8 +2,8 @@ class Person
 {
   string name;  // all fields are public by default
 
-  Person(string nm) {
-    name = nm;
+  constructor(string nm) {
+    this.name = nm;
   }
 
   void changeName(string newName) {

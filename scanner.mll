@@ -44,6 +44,9 @@ rule token = parse
 | '['      { LBRACKET }
 | ']'      { RBRACKET }
 
+(* Function *)
+| "function" { FUNCTION }
+
 (* Branch control *)
 | "if"     { IF }
 | "else"   { ELSE }

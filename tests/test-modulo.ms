@@ -1,4 +1,4 @@
-void main() {
+function void main() {
     i = 10;
     j = i % 3;
     print(j);

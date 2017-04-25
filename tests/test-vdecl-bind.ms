@@ -1,10 +1,10 @@
-void aFunction(int q, float s) {
+function void aFunction(int q, float s) {
     print(q);
     print(s);
     print("hello there!");
 }
 
-void main() {
+function void main() {
     int a = 1;
     char b = 'b';
     string c = "c";
