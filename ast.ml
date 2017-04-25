@@ -31,16 +31,17 @@ type expr =
   | Call of string * expr list
   | Noexpr
 
-type stmt =
+and stmt =
   | Block of stmt list
   | Expr of expr
   | DeclStmt of typ * string * expr (* How to handle DeclStmt with empty expression? *) 
+  | FDeclStmt of fdecl
   | Return of expr
   | If of expr * stmt * stmt
   | For of expr * expr * expr * stmt
   | While of expr * stmt
 
-type fdecl = {
+and fdecl = {
   returnType : typ;
   fname : string;
   formals : bind list;
@@ -49,8 +50,6 @@ type fdecl = {
 
 and constructs = {
   stmts: stmt list;
-  fdecls: fdecl list;
-  (* cdecls: cdecl list *)
 }
 
 (* type program = include_stmt list * constructs *)
@@ -107,6 +106,7 @@ let rec string_of_stmt = function
       "{\n" ^ String.concat "" (List.map string_of_stmt stmts) ^ "}\n"
   | Expr(expr) -> string_of_expr expr ^ ";\n";
   | DeclStmt(typ, str, expr) -> string_of_typ typ ^ " " ^ str ^ " = " ^ string_of_expr expr ^ ";\n"
+  | FDeclStmt(fd) -> string_of_fdecl fd
   | Return(expr) -> "return " ^ string_of_expr expr ^ ";\n";
   | If(e, s, Block([])) -> "if (" ^ string_of_expr e ^ ")\n" ^ string_of_stmt s
   | If(e, s1, s2) ->  "if (" ^ string_of_expr e ^ ")\n" ^
@@ -116,10 +116,10 @@ let rec string_of_stmt = function
       string_of_expr e3  ^ ") " ^ string_of_stmt s
   | While(e, s) -> "while (" ^ string_of_expr e ^ ") " ^ string_of_stmt s  
 
-let rec string_of_fdecl fdecl =
+and string_of_fdecl fdecl =
 	let string_of_constructs constructs = 
 	  String.concat "" (List.map string_of_stmt constructs.stmts) 
-  ^ String.concat "" (List.map string_of_fdecl constructs.fdecls) in
+  (*^ String.concat "" (List.map string_of_fdecl constructs.fdecls)*) in
 
   "function " ^ string_of_typ fdecl.returnType ^ " " ^
   fdecl.fname ^ "(" ^ String.concat ", " (List.map snd fdecl.formals) ^
@@ -127,6 +127,6 @@ let rec string_of_fdecl fdecl =
    (string_of_constructs fdecl.body) ^
   "}\n"
  
-let string_of_program (stmts, fdecls) =
-  String.concat "" (List.map string_of_stmt stmts) ^ "\n" ^
-  String.concat "\n" (List.map string_of_fdecl fdecls)
+let string_of_program (*(stmts, fdecls)*) stmts =
+  String.concat "" (List.map string_of_stmt stmts) ^ "\n" (*^
+  String.concat "\n" (List.map string_of_fdecl fdecls)*)

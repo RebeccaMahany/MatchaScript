@@ -36,18 +36,8 @@ program:
   constructs EOF { $1 }
 
 constructs:
-    { {
-        stmts = [];
-        fdecls = [];
-    } }
-  | constructs stmt { {
-        stmts = $1.stmts@[$2]; 
-        fdecls = $1.fdecls; 
-    } }
-  | constructs fdecl { {
-        stmts = $1.stmts; 
-        fdecls = $1.fdecls@[$2]; 
-    } }
+    /* nothing */ { { stmts = []; } }
+  | constructs stmt { { stmts = $1.stmts@[$2]; } }
 
 /*********
 Functions
@@ -87,6 +77,7 @@ stmt:
     expr SEMI { Expr $1 }
   | typ ID SEMI { DeclStmt($1, $2, Noexpr)}
   | typ ID ASSIGN expr SEMI { DeclStmt($1, $2, $4) }
+  | fdecl { FDeclStmt($1) }
   | RETURN expr SEMI { Return $2 }
   | RETURN SEMI { Return Noexpr }
   | LBRACE stmt_list RBRACE { Block(List.rev $2) }
