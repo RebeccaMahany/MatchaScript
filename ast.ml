@@ -134,7 +134,7 @@ and string_of_fexpr fexpr =
 and string_of_fdecl fdecl =
   "function " ^ string_of_typ fdecl.fdReturnType ^ " " ^
   fdecl.fdFname ^ "(" ^ String.concat ", " (List.map string_of_bind fdecl.fdFormals) ^
-  ")\n{\n" ^ (string_of_constructs fdeclsl.fdBody) ^ "}"
+  ")\n{\n" ^ (string_of_constructs fdecl.fdBody) ^ "}"
 
 and string_of_constructs constructs = 
     String.concat "" (List.map string_of_stmt constructs.stmts)
