@@ -105,7 +105,8 @@ let rec string_of_stmt = function
     Block(stmts) ->
       "{\n" ^ String.concat "" (List.map string_of_stmt stmts) ^ "}\n"
   | Expr(expr) -> string_of_expr expr ^ ";\n";
-  | DeclStmt(typ, str, expr) -> string_of_typ typ ^ " " ^ str ^ " = " ^ string_of_expr expr ^ ";\n"
+  | DeclStmt(typ, str, expr) -> if expr = Noexpr then string_of_typ typ ^ " " ^ str ^ ";\n"
+                                else string_of_typ typ ^ " " ^ str ^ " = " ^ string_of_expr expr ^ ";\n"
   | FDeclStmt(fd) -> string_of_fdecl fd
   | Return(expr) -> "return " ^ string_of_expr expr ^ ";\n";
   | If(e, s, Block([])) -> "if (" ^ string_of_expr e ^ ")\n" ^ string_of_stmt s
@@ -122,7 +123,7 @@ and string_of_fdecl fdecl =
   (*^ String.concat "" (List.map string_of_fdecl constructs.fdecls)*) in
 
   "function " ^ string_of_typ fdecl.returnType ^ " " ^
-  fdecl.fname ^ "(" ^ String.concat ", " (List.map snd fdecl.formals) ^
+  fdecl.fname ^ "(" ^ String.concat ", " (List.map string_of_bind fdecl.formals) ^
   ")\n{\n" ^
    (string_of_constructs fdecl.body) ^
   "}\n"
