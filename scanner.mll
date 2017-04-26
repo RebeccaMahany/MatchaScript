@@ -63,6 +63,7 @@ rule token = parse
 | "void"   { VOID }
 | "true"   { TRUE }
 | "false"  { FALSE }
+| "fun"	   { FUN }
 
 (* Literals *)
 | int as lxm 	{ INTLIT(int_of_string lxm) }

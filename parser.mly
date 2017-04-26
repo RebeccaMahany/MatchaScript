@@ -6,7 +6,7 @@ open Ast
 %token SEMI LPAREN RPAREN LBRACE RBRACE COMMA LBRACKET RBRACKET DOT
 %token PLUS MINUS TIMES DIVIDE MOD ASSIGN NOT
 %token EQ NEQ LT LEQ GT GEQ TRUE FALSE AND OR
-%token RETURN IF ELSE FOR WHILE INT FLOAT BOOL CHAR STRING VOID
+%token RETURN IF ELSE FOR WHILE INT FLOAT BOOL CHAR STRING VOID FUN
 %token <int> INTLIT
 %token <float> FLOATLIT
 %token <char> CHARLIT
@@ -42,10 +42,16 @@ Functions
 **********/
 fdecl:
    FUNCTION typ ID LPAREN formals_opt RPAREN LBRACE constructs RBRACE
-     { { returnType = $2;
-   fname = $3;
-   formals = $5;
-   body = $8 } }
+     { { fdReturnType = $2;
+   fdFname = $3;
+   fdFormals = $5;
+   fdBody = $8 } }
+
+fexpr:
+  FUNCTION typ LPAREN formals_opt RPAREN LBRACE constructs RBRACE
+  { { feReturnType = $2;
+   feFormals = $4;
+   feBody = $7 } }
 
 formals_opt:
     /* nothing */ { [] }
@@ -62,6 +68,7 @@ typ:
   | CHAR   { Char }
   | STRING { String }
   | VOID   { Void }
+  | FUN    { Fun }
 
 
 /*********
@@ -85,9 +92,16 @@ stmt:
      { For($3, $5, $7, $9) }
   | WHILE LPAREN expr RPAREN stmt { While($3, $5) }
 
+/*********
+Expressions
+**********/
 expr_opt:
     /* nothing */ { Noexpr }
   | expr          { $1 }
+
+callee:
+    ID                                { Id($1) }
+  | callee LPAREN actuals_opt RPAREN  { CallExpr($1, $3) }
 
 expr:
     INTLIT           { IntLit($1)           }
@@ -97,6 +111,7 @@ expr:
   | TRUE             { BoolLit(true)        }
   | FALSE            { BoolLit(false)       }
   | ID               { Id($1)               }
+  | fexpr            { FunExpr($1) }
   | expr PLUS   expr { Binop($1, Add,   $3) }
   | expr MINUS  expr { Binop($1, Sub,   $3) }
   | expr TIMES  expr { Binop($1, Mult,  $3) }
@@ -112,8 +127,8 @@ expr:
   | expr OR     expr { Binop($1, Or,    $3) }
   | MINUS expr %prec NEG { Unop(Neg, $2) }
   | NOT expr         { Unop(Not, $2) }
-  | expr ASSIGN expr   { Assign($1, $3) } /* previously ID ASSIGN expr */
-  | ID LPAREN actuals_opt RPAREN { Call($1, $3) }
+  | expr ASSIGN expr   { Assign($1, $3) }
+  | callee LPAREN actuals_opt RPAREN  { CallExpr($1, $3) }
   | LPAREN expr RPAREN { $2 }
 
 actuals_opt:

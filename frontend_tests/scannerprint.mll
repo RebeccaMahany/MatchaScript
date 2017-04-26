@@ -30,6 +30,7 @@ rule token = parse
 | '*'      	{ print_string "TIMES " }
 | '/'      	{ print_string "DIVIDE " }
 | '='      	{ print_string "ASSIGN " }
+| '%'       { print_string "MOD " }
 | "=="     	{ print_string "EQ " }
 | "!="     	{ print_string "NEQ " }
 | '<'		    { print_string "LT " }
@@ -42,6 +43,9 @@ rule token = parse
 | '.'       { print_string "DOT " }
 | '['       { print_string "LBRACKET " }
 | ']'       { print_string "RBRACKET " }
+
+(* Function *)
+| "function" { print_string "FUNCTION " }
 
 (* Branch control *)
 | "if"     { print_string "IF " }
@@ -59,6 +63,7 @@ rule token = parse
 | "void"   { print_string "VOID " }
 | "true"   { print_string "TRUE " }
 | "false"  { print_string "FALSE " }
+| "fun"    { print_string "FUN " }
 
 (* Literals *)
 | int as lxm 	{ print_string "INTLIT " }
