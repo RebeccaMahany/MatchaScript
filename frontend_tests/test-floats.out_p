@@ -1,8 +1,0 @@
-ACCEPT
-[program:
-  [constructs:
-    [constructs:]
-    [vdecl: [typ: FLOAT] ID ASSIGN [expr: FLOATLIT] SEMI]
-  ]
-  EOF
-]
