@@ -62,11 +62,14 @@ Check() {
 
     generatedfiles=""
 
-    generatedfiles="$generatedfiles ${basename}.parsed" &&
+    # Make sure that the parsed tokens from the code are the same as the parsed tokens from the pretty printer
+    generatedfiles="$generatedfiles ${basename}.pretty ${basename}.prettytokens" &&
     Run "ocaml frontend_tests/scannerprint.ml" "<" $1 ">" "frontend_tests/${basename}.tokens" &&
     sed -i '$s/\w*$//' frontend_tests/${basename}.tokens &&
-    Run "menhir --interpret --interpret-show-cst --explain parser.mly" "< frontend_tests/${basename}.tokens >" "${basename}.parsed" &&
-    Compare ${basename}.parsed frontend_tests/${basename}.out_p ${basename}.diff
+    Run "./MatchaScript.native -a < tests/${basename}.ms > ${basename}.pretty" &&
+    Run "ocaml frontend_tests/scannerprint.ml < ${basename}.pretty > ${basename}.prettytokens" &&
+    sed -i '$s/\w*$//' ${basename}.prettytokens &&
+    Compare ${basename}.prettytokens frontend_tests/${basename}.tokens ${basename}.diff
 
     # Report the status and clean up the generated files
 
