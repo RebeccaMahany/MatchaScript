@@ -14,7 +14,7 @@ type op = Add | Sub | Mult | Div | Mod | Equal | Neq | Less | Leq | Greater | Ge
 
 type uop = Neg | Not
 
-type typ = Int | Float | Bool | Char | String | Void
+type typ = Int | Float | Bool | Char | String | Void | Fun
 
 type bind = typ * string
 
@@ -24,28 +24,35 @@ type expr =
   | BoolLit of bool
   | CharLit of char
   | StringLit of string
+  | FunExpr of fexpr
   | Id of string
   | Binop of expr * op * expr
   | Unop of uop * expr
-  | Assign of expr * expr (* check this *)
-  | Call of string * expr list
+  | Assign of expr * expr
+  | CallExpr of expr * expr list
   | Noexpr
 
 and stmt =
   | Block of stmt list
   | Expr of expr
-  | DeclStmt of typ * string * expr (* How to handle DeclStmt with empty expression? *) 
+  | DeclStmt of typ * string * expr
   | FDeclStmt of fdecl
   | Return of expr
   | If of expr * stmt * stmt
   | For of expr * expr * expr * stmt
   | While of expr * stmt
 
+and fexpr = {
+  feReturnType : typ;
+  feFormals : bind list;
+  feBody: constructs;
+}
+
 and fdecl = {
-  returnType : typ;
-  fname : string;
-  formals : bind list;
-  body : constructs;
+  fdReturnType : typ;
+  fdFname : string;
+  fdFormals : bind list;
+  fdBody : constructs;
 }
 
 and constructs = {
@@ -82,26 +89,28 @@ let rec string_of_expr = function
   | BoolLit(false) -> "false"
   | CharLit(c) -> "\'" ^ String.make 1 c ^ "\'"
   | StringLit(s) -> "\"" ^ s ^ "\""
+  | FunExpr(f) -> string_of_fexpr f
   | Id(s) -> s
   | Binop(e1, o, e2) ->
       string_of_expr e1 ^ " " ^ string_of_op o ^ " " ^ string_of_expr e2
   | Unop(o, e) -> string_of_uop o ^ string_of_expr e
   | Assign(e1, e2) -> string_of_expr e1 ^ " = " ^ string_of_expr e2
-  | Call(f, el) ->
-      f ^ "(" ^ String.concat ", " (List.map string_of_expr el) ^ ")"
+  | CallExpr(callee, el) ->
+      string_of_expr callee ^ "(" ^ String.concat ", " (List.map string_of_expr el) ^ ")"
   | Noexpr -> ""
 
-let string_of_typ = function
+and string_of_typ = function
     Int -> "int"
   | Float -> "float"
   | Bool -> "bool"
   | Char -> "char"
   | String -> "string"
   | Void -> "void"
+  | Fun -> "fun"
 
-let string_of_bind (t, id) = string_of_typ t ^ " " ^ id
+and string_of_bind (t, id) = string_of_typ t ^ " " ^ id
 
-let rec string_of_stmt = function
+and string_of_stmt = function
     Block(stmts) ->
       "{\n" ^ String.concat "" (List.map string_of_stmt stmts) ^ "}\n"
   | Expr(expr) -> string_of_expr expr ^ ";\n";
@@ -117,16 +126,18 @@ let rec string_of_stmt = function
       string_of_expr e3  ^ ") " ^ string_of_stmt s
   | While(e, s) -> "while (" ^ string_of_expr e ^ ") " ^ string_of_stmt s  
 
-and string_of_fdecl fdecl =
-	let string_of_constructs constructs = 
-	  String.concat "" (List.map string_of_stmt constructs.stmts) 
-  (*^ String.concat "" (List.map string_of_fdecl constructs.fdecls)*) in
+and string_of_fexpr fexpr =
+  "function " ^ string_of_typ fexpr.feReturnType ^ " " 
+  ^ "(" ^ String.concat ", " (List.map string_of_bind fexpr.feFormals) ^
+  ")\n{\n" ^ string_of_constructs fexpr.feBody ^ "}"
 
-  "function " ^ string_of_typ fdecl.returnType ^ " " ^
-  fdecl.fname ^ "(" ^ String.concat ", " (List.map string_of_bind fdecl.formals) ^
-  ")\n{\n" ^
-   (string_of_constructs fdecl.body) ^
-  "}\n"
+and string_of_fdecl fdecl =
+  "function " ^ string_of_typ fdecl.fdReturnType ^ " " ^
+  fdecl.fdFname ^ "(" ^ String.concat ", " (List.map string_of_bind fdecl.fdFormals) ^
+  ")\n{\n" ^ (string_of_constructs fdeclsl.fdBody) ^ "}"
+
+and string_of_constructs constructs = 
+    String.concat "" (List.map string_of_stmt constructs.stmts)
  
 let string_of_program (*(stmts, fdecls)*) stmts =
   String.concat "" (List.map string_of_stmt stmts) ^ "\n" (*^
