@@ -18,7 +18,7 @@ and sstmt =
 	  SBlock of sstmt list
 	| SExpr of sexpr * typ
 	| SDeclStmt of typ * string * sexpr * typ 
-	| SFDeclStmt of sfdecl * typ
+(*	| SFDeclStmt of sfdecl * typ *)
 	| SReturn of sexpr * typ
 	| SIf of sexpr * sstmt * sstmt
 	| SFor of sexpr * sexpr * sexpr * sstmt
