@@ -18,17 +18,27 @@ and sstmt =
 	  SBlock of sstmt list
 	| SExpr of sexpr * typ
 	| SDeclStmt of typ * string * sexpr * typ 
-(*	| SFDeclStmt of sfdecl * typ *)
+	| SFDeclStmt of sfdecl * typ 
 	| SReturn of sexpr * typ
 	| SIf of sexpr * sstmt * sstmt
 	| SFor of sexpr * sexpr * sexpr * sstmt
 	| SWhile of sexpr * sstmt
 
-(*TODO: Add support for sfdecl and sfexpr *)
+(*TODO: Add support for sfexpr *)
+
+and sfdecl = {
+	sfdReturnType : typ;
+	sfdFname : string;
+	sfdFormals : bind list;
+	sfdBody : sstmt list; (* changing from ast *)
+}
 
 and sconstructs = {
 	sstmts: sstmt list;
+	sfdecls: sfdecl list; (* separating out for codegen *)
 }
 
 (*TODO: Add support for classes if necessary *)
+
+type sprogram = sconstructs
 
