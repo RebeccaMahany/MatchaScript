@@ -14,11 +14,15 @@ type op = Add | Sub | Mult | Div | Mod | Equal | Neq | Less | Leq | Greater | Ge
 
 type uop = Neg | Not
 
-type typ = Int | Float | Bool | Char | String | Void | Fun
+type typ = Int | Float | Bool | Char | String | Void | Fun | ObjectType of string 
+
+type fname = Constructor | FName of string
 
 type bind = typ * string
 
-type expr =
+and vdecl = typ * string * expr (* PP *)
+
+and expr =
     IntLit of int
   | FloatLit of float
   | BoolLit of bool
@@ -26,17 +30,22 @@ type expr =
   | StringLit of string
   | FunExpr of fexpr
   | Id of string
+  | This
   | Binop of expr * op * expr
   | Unop of uop * expr
   | Assign of expr * expr
+  | ObjAccess of expr * expr (* PP *)
   | CallExpr of expr * expr list
+  | CallConstructor of string * expr list (* PP *)
   | Noexpr
 
 and stmt =
   | Block of stmt list
   | Expr of expr
-  | DeclStmt of typ * string * expr
+  | DeclStmt of vdecl
   | FDeclStmt of fdecl
+  | CDeclStmt of cdecl (* PP *)
+  | MthDefStmt of fdecl (* PP *)
   | Return of expr
   | If of expr * stmt * stmt
   | For of expr * expr * expr * stmt
@@ -53,6 +62,19 @@ and fdecl = {
   fdFname : string;
   fdFormals : bind list;
   fdBody : constructs;
+}
+
+and cdecl = {  (* PP *)
+  cname : string;
+  fields : vdecl list;
+  constructor : constr;
+  methods : fdecl list;
+}
+
+and constr = {  (* PP *)
+  (* returnType : ??; *)
+  formals : bind list;
+  body : constructs;
 }
 
 and constructs = {
