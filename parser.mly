@@ -31,16 +31,14 @@ open Ast
 %%
 
 program:
-  constructs EOF { $1 }
+  stmt_list EOF { $1 }
 
-constructs:
-    /* nothing */ { { stmts = []; } }
-  | constructs stmt { { stmts = $1.stmts@[$2]; } }
-
+/*********
+Variables
+**********/
 vdecl_list:
   | vdecl { [$1] }
   | vdecl_list vdecl { $2 :: $1  }
-
 
 vdecl:
     typ ID SEMI { ($1, $2, Noexpr)}
@@ -49,30 +47,47 @@ vdecl:
 /*********
 Classes
 **********/
-mthfdecl_list:
-  | mthfdecl { [$1] }
-  | mthfdecl_list mthfdecl { $1@[$2] }
 
 mthfdecl:
-  typ ID LPAREN formals_opt RPAREN LBRACE constructs RBRACE
+  typ ID LPAREN formals_opt RPAREN LBRACE stmt_list RBRACE
   { { fdReturnType = $1;
    fdFname = $2;
    fdFormals = $4;
    fdBody = $7 } }
 
-cdecl:
-    CLASS ID LBRACE vdecl_list constr mthfdecl_list RBRACE { {
-        cname = $2;
-        fields = $4;
-        constructor = $5;
-        methods = $6;
-    } }
-
 constr:
-    CONSTRUCTOR LPAREN formals_opt RPAREN LBRACE constructs RBRACE { {
-        (* returnType = ???? *)
+    CONSTRUCTOR LPAREN formals_opt RPAREN LBRACE stmt_list RBRACE { {
         formals = $3;
         body = $6;
+    } }
+
+cbody:
+  /* nothing */ { {
+    properties = [];
+    constructors = [];
+    methods = [];
+  } }
+  | cbody vdecl { {
+      properties = $2 :: $1.properties;
+      constructors = $1.constructors;
+      methods = $1.methods;
+    } }
+  | cbody constr { { 
+      properties = $1.properties;
+      constructors = $2 :: $1.constructors;
+      methods = $1.methods;
+    } }
+  | cbody mthfdecl { { 
+      properties = $1.properties;
+      constructors = $1.constructors;
+      methods = $2 :: $1.methods;
+    } }
+
+
+cdecl:
+    CLASS ID LBRACE cbody RBRACE { {
+        cname = $2;
+        cbody = $4;
     } }
 
 /*********
@@ -84,14 +99,14 @@ fdecl_list:
   | fdecl_list fdecl { $1@[$2] }
 
 fdecl:
-   FUNCTION typ ID LPAREN formals_opt RPAREN LBRACE constructs RBRACE
+   FUNCTION typ ID LPAREN formals_opt RPAREN LBRACE stmt_list RBRACE
      { { fdReturnType = $2;
    fdFname = $3;
    fdFormals = $5;
    fdBody = $8 } }
 
 fexpr:
-  FUNCTION typ LPAREN formals_opt RPAREN LBRACE constructs RBRACE
+  FUNCTION typ LPAREN formals_opt RPAREN LBRACE stmt_list RBRACE
   { { feReturnType = $2;
    feFormals = $4;
    feBody = $7 } }
@@ -125,10 +140,10 @@ stmt_list:
   | stmt_list stmt { $1@[$2] }
 
 stmt:
-    expr SEMI { Expr $1 }
-  | vdecl { DeclStmt($1) }
-  | fdecl { FDeclStmt($1) }
-  | cdecl { CDeclStmt($1) }
+    expr SEMI { ExprStmt $1 }
+  | vdecl { VarDecl($1) }
+  | fdecl { FunDecl($1) }
+  | cdecl { ClassDecl($1) }
   | RETURN expr SEMI { Return $2 }
   | RETURN SEMI { Return Noexpr }
   | LBRACE stmt_list RBRACE { Block(List.rev $2) }
@@ -145,15 +160,16 @@ expr_opt:
     /* nothing */ { Noexpr }
   | expr          { $1 }
 
-callee:
+call_expression:
     ID                                { Id($1) }
-  | callee LPAREN actuals_opt RPAREN  { CallExpr($1, $3) }
+/*  | call_expression LBRACKET expr RBREACKET <- Array */
+  | call_expression LPAREN actuals_opt RPAREN  { CallExpr($1, $3) }
 
 expr:
     INTLIT           { IntLit($1)           }
   | FLOATLIT         { FloatLit($1)         }
   | CHARLIT          { CharLit($1)          }
-  | STRINGLIT        { StringLit($1)           }
+  | STRINGLIT        { StringLit($1)        }
   | TRUE             { BoolLit(true)        }
   | FALSE            { BoolLit(false)       }
   | ID               { Id($1)               }
@@ -172,11 +188,11 @@ expr:
   | expr GEQ    expr { Binop($1, Geq,   $3) }
   | expr AND    expr { Binop($1, And,   $3) }
   | expr OR     expr { Binop($1, Or,    $3) }
-  | expr DOT expr    { ObjAccess($1, $3) }
+  | expr DOT expr    { ObjAccessExpr($1, $3) }
   | MINUS expr %prec NEG { Unop(Neg, $2) }
   | NOT expr         { Unop(Not, $2) }
   | expr ASSIGN expr   { Assign($1, $3) }
-  | callee LPAREN actuals_opt RPAREN  { CallExpr($1, $3) }
+  | call_expression LPAREN actuals_opt RPAREN { CallExpr($1, $3) }
   | NEW ID LPAREN actuals_opt RPAREN { CallConstructor($2, $4) }
   | LPAREN expr RPAREN { $2 }
 
