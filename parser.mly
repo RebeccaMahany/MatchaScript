@@ -34,6 +34,22 @@ program:
   stmt_list EOF { $1 }
 
 /*********
+Datatypes
+**********/
+typ:
+    INT    { Int }
+  | FLOAT  { Float }
+  | BOOL   { Bool }
+  | CHAR   { Char }
+  | STRING { String }
+  | VOID   { Void }
+  | FUN    { Fun }
+  | CLASS ID { ObjectType($2) }
+
+datatype:
+  | typ   { Typ($1) }
+
+/*********
 Variables
 **********/
 vdecl_list:
@@ -41,15 +57,15 @@ vdecl_list:
   | vdecl_list vdecl { $2 :: $1  }
 
 vdecl:
-    typ ID SEMI { ($1, $2, Noexpr)}
-  | typ ID ASSIGN expr SEMI { ($1, $2, $4) }
+    datatype ID SEMI { ($1, $2, Noexpr)}
+  | datatype ID ASSIGN expr SEMI { ($1, $2, $4) }
 
 /*********
 Classes
 **********/
 
 mthfdecl:
-  typ ID LPAREN formals_opt RPAREN LBRACE stmt_list RBRACE
+  datatype ID LPAREN formals_opt RPAREN LBRACE stmt_list RBRACE
   { { fdReturnType = $1;
    fdFname = $2;
    fdFormals = $4;
@@ -99,14 +115,14 @@ fdecl_list:
   | fdecl_list fdecl { $1@[$2] }
 
 fdecl:
-   FUNCTION typ ID LPAREN formals_opt RPAREN LBRACE stmt_list RBRACE
+   FUNCTION datatype ID LPAREN formals_opt RPAREN LBRACE stmt_list RBRACE
      { { fdReturnType = $2;
    fdFname = $3;
    fdFormals = $5;
    fdBody = $8 } }
 
 fexpr:
-  FUNCTION typ LPAREN formals_opt RPAREN LBRACE stmt_list RBRACE
+  FUNCTION datatype LPAREN formals_opt RPAREN LBRACE stmt_list RBRACE
   { { feReturnType = $2;
    feFormals = $4;
    feBody = $7 } }
@@ -116,21 +132,9 @@ formals_opt:
   | formal_list   { List.rev $1 }
 
 formal_list:
-    typ ID                   { [($1,$2)] }
-  | formal_list COMMA typ ID { ($3,$4) :: $1 }
+    datatype ID                   { [($1,$2)] }
+  | formal_list COMMA datatype ID { ($3,$4) :: $1 }
 
-typ:
-    INT    { Int }
-  | FLOAT  { Float }
-  | BOOL   { Bool }
-  | CHAR   { Char }
-  | STRING { String }
-  | VOID   { Void }
-  | FUN    { Fun }
-  | objtype { $1 }
-
-objtype:
-  | CLASS ID { ObjectType($2) }
 
 /*********
 Statements
