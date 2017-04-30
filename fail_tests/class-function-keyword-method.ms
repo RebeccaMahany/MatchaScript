@@ -4,8 +4,9 @@ class Person {
   constructor(string nm) {
     this.name = nm;
   }
-
-  void changeName(string newName) {
+	
+  /* there should not be a function keyword here*/
+  function void changeName(string newName) {
     this.name = newName;
   }
 }
