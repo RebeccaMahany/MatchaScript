@@ -14,11 +14,12 @@ type op = Add | Sub | Mult | Div | Mod | Equal | Neq | Less | Leq | Greater | Ge
 
 type uop = Neg | Not
 
-type typ = Int | Float | Bool | Char | String | Void | Fun | ObjectType of string 
+type typ = Int | Float | Bool | Char | Void | ObjectType of string | Fun | String
+type datatype = Typ of typ
 
-type bind = typ * string
+type bind = datatype * string
 
-and vdecl = typ * string * expr (* PP *)
+and vdecl = datatype * string * expr
 
 and expr =
     IntLit of int
@@ -50,13 +51,13 @@ and stmt =
   | While of expr * stmt
 
 and fexpr = {
-  feReturnType : typ;
+  feReturnType : datatype;
   feFormals : bind list;
   feBody: stmt list;
 }
 
 and fdecl = {
-  fdReturnType : typ;
+  fdReturnType : datatype;
   fdFname : string;
   fdFormals : bind list;
   fdBody : stmt list;
@@ -113,7 +114,10 @@ let string_of_typ = function
   | Fun -> "fun"
   | ObjectType(o) -> "class " ^ o 
 
-let string_of_bind (t, id) = string_of_typ t ^ " " ^ id
+let string_of_datatype = function
+  Typ(t) -> string_of_typ t
+
+let string_of_bind (t, id) = string_of_datatype t ^ " " ^ id
 
 let rec string_of_expr = function
     IntLit(l) -> string_of_int l
@@ -150,22 +154,22 @@ and string_of_stmt = function
       string_of_expr e3  ^ ") " ^ string_of_stmt s
   | While(e, s) -> "while (" ^ string_of_expr e ^ ") " ^ string_of_stmt s  
 
-and string_of_vdecl (typ, str, expr) = 
-  if expr = Noexpr then string_of_typ typ ^ " " ^ str ^ ";\n"
-  else string_of_typ typ ^ " " ^ str ^ " = " ^ string_of_expr expr ^ ";\n"
+and string_of_vdecl (datatype, str, expr) = 
+  if expr = Noexpr then string_of_datatype datatype ^ " " ^ str ^ ";\n"
+  else string_of_datatype datatype ^ " " ^ str ^ " = " ^ string_of_expr expr ^ ";\n"
 
 and string_of_fexpr fexpr =
-  "function " ^ string_of_typ fexpr.feReturnType ^ " " 
+  "function " ^ string_of_datatype fexpr.feReturnType ^ " " 
   ^ "(" ^ String.concat ", " (List.map string_of_bind fexpr.feFormals) ^
   ")\n{\n" ^ String.concat "" (List.map string_of_stmt fexpr.feBody) ^ "}"
 
 and string_of_fdecl fdecl =
-  "function " ^ string_of_typ fdecl.fdReturnType ^ " " ^
+  "function " ^ string_of_datatype fdecl.fdReturnType ^ " " ^
   fdecl.fdFname ^ "(" ^ String.concat ", " (List.map string_of_bind fdecl.fdFormals) ^
   ")\n{\n" ^ String.concat "" (List.map string_of_stmt fdecl.fdBody) ^ "}"
  
 and string_of_method mth = 
-  string_of_typ mth.fdReturnType ^ " " ^
+  string_of_datatype mth.fdReturnType ^ " " ^
   mth.fdFname ^ "(" ^ String.concat ", " (List.map string_of_bind mth.fdFormals) ^
   ")\n{\n" ^ String.concat "" (List.map string_of_stmt mth.fdBody) ^ "}"
 
