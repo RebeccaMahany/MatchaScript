@@ -60,6 +60,7 @@ rule token = parse
 | "else"   { ELSE }
 | "for"    { FOR }
 | "while"  { WHILE }
+| "do"     { DO }
 | "return" { RETURN }
 
 (* Data types *)
