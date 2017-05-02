@@ -214,7 +214,7 @@ expr:
   | call_expression LPAREN actuals_opt RPAREN { CallExpr($1, $3) }
   | NEW ID LPAREN actuals_opt RPAREN { CallConstructor($2, $4) }
   | ID LPAREN actuals_opt RPAREN { Call($1, $3) }
-  | expr QMARK expr COLON expr { Ternary($1, $3, $5) }
+/*  | expr QMARK expr COLON expr { Ternary($1, $3, $5) } */
   | LPAREN expr RPAREN { $2 }
 
 actuals_opt:
