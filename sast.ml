@@ -6,39 +6,37 @@ type sexpr =
 	| SBoolLit of bool
 	| SCharLit of char
 	| SStringLit of string
-(*	| SFunExpr of sfexpr *)
-	| SId of string * typ
-	| SBinop of sexpr * op * sexpr * typ
-	| SUnop of uop * sexpr * typ
-	| SAssign of sexpr * sexpr * typ
-	| SCallExpr of sexpr * sexpr list * typ 
+	| SFunExpr of sfexpr
+	| SId of string * datatype
+	| SBinop of sexpr * op * sexpr * datatype
+	| SUnop of uop * sexpr * datatype
+	| SAssign of sexpr * sexpr * datatype
+	| SCallExpr of sexpr * sexpr list * datatype 
 	| SNoexpr
 
 and sstmt = 
 	  SBlock of sstmt list
-	| SExpr of sexpr * typ
-	| SDeclStmt of typ * string * sexpr * typ 
-	| SFDeclStmt of sfdecl * typ 
-	| SReturn of sexpr * typ
-	| SIf of sexpr * sstmt * sstmt
+	| SExpr of sexpr * datatype
+	| SDeclStmt of datatype * string * sexpr * datatype 
+	| SFDeclStmt of sfdecl * datatype 
+	| SReturn of sexpr * datatype
+	| SIf of sexpr * sstmt * sstmt * datatype
 	| SFor of sexpr * sexpr * sexpr * sstmt
 	| SWhile of sexpr * sstmt
 
 (*TODO: Add support for sfexpr *)
 
 and sfdecl = {
-	sfdReturnType : typ;
+	sfdReturnType : datatype;
 	sfdFname : string;
 	sfdFormals : bind list;
 	sfdBody : sstmt list; (* changing from ast *)
 }
 
 and sconstructs = {
-	sstmts: sstmt list;
+	classes: scdecl list;
 	sfdecls: sfdecl list; (* separating out for codegen *)
+	main: sfdecl;
 }
 
-(*TODO: Add support for classes if necessary *)
-
 type sprogram = sconstructs
-
