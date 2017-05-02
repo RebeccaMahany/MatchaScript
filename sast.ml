@@ -1,4 +1,4 @@
-open Ast
+(* open Ast
 
 type sexpr = 
 	  SIntLit of int
@@ -39,4 +39,4 @@ and sconstructs = {
 	main: sfdecl;
 }
 
-type sprogram = sconstructs
+type sprogram = sconstructs *)
