@@ -66,6 +66,9 @@ rule token = parse
 | "break"       { BREAK }
 | "continue"    { CONTINUE }
 | "return"      { RETURN }
+| "switch"      { SWITCH }
+| "case"        { CASE }
+| "default"     { DEFAULT }
 
 (* Data types *)
 | "int"    { INT }
