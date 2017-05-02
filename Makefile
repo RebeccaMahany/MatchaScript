@@ -21,7 +21,7 @@ clean :
 
 # More detailed: build using ocamlc/ocamlopt + ocamlfind to locate LLVM
 
-OBJS = ast.cmx codegen.cmx parser.cmx scanner.cmx semant.cmx MatchaScript.cmx top_ast.cmx
+OBJS = ast.cmx codegen.cmx parser.cmx scanner.cmx analyzer.cmx MatchaScript.cmx top_ast.cmx
 
 MatchaScript : $(OBJS)
 	ocamlfind ocamlopt -linkpkg -package llvm -package llvm.analysis $(OBJS) -o MatchaScript
@@ -48,14 +48,14 @@ codegen.cmo : ast.cmo
 codegen.cmx : ast.cmx
 top_ast.cmo :
 top_ast.cmx :
-MatchaScript.cmo : semant.cmo scanner.cmo parser.cmi codegen.cmo ast.cmo top_ast.cmo
-MatchaScript.cmx : semant.cmx scanner.cmx parser.cmx codegen.cmx ast.cmx top_ast.cmx
+MatchaScript.cmo : analyzer.cmo scanner.cmo parser.cmi codegen.cmo ast.cmo top_ast.cmo
+MatchaScript.cmx : analyzer.cmx scanner.cmx parser.cmx codegen.cmx ast.cmx top_ast.cmx
 parser.cmo : ast.cmo parser.cmi
 parser.cmx : ast.cmx parser.cmi
 scanner.cmo : parser.cmi
 scanner.cmx : parser.cmx
-semant.cmo : ast.cmo
-semant.cmx : ast.cmx
+analyzer.cmo: ast.cmo
+analyzer.cmx: ast.cmx
 parser.cmi : ast.cmo
 
 # Building the tarball
@@ -68,7 +68,7 @@ TESTFILES = $(TESTS:%=test-%.ms) $(TESTS:%=test-%.out) \
 	    $(FAILS:%=fail-%.ms) $(FAILS:%=fail-%.err)
 
 TARFILES = ast.ml codegen.ml Makefile MatchaScript.ml parser.mly top_ast.ml README scanner.mll \
-	semant.ml testall.sh $(TESTFILES:%=tests/%)
+	analyzer.ml testall.sh $(TESTFILES:%=tests/%)
 
 MatchaScript-llvm.tar.gz : $(TARFILES)
 	cd .. && tar czf MatchaScript-llvm/MatchaScript-llvm.tar.gz \

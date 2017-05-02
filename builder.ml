@@ -53,6 +53,3 @@ and parse_stmt s m = function
 let s = Stack.create () 
 parse_function funOne s StringMap.empty; 
 print_int s.length	
-
-
-
