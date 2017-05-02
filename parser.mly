@@ -138,7 +138,7 @@ Statements
 **********/
 stmt_list:
     stmt  { [$1] }
-  | stmt_list stmt { $1@[$2] }
+  | stmt_list stmt { $2::$1 }
 
 stmt:
     expr SEMI { ExprStmt $1 }
@@ -213,7 +213,6 @@ expr:
   | expr ASSIGN expr   { Assign($1, $3) }
   | call_expression LPAREN actuals_opt RPAREN { CallExpr($1, $3) }
   | NEW ID LPAREN actuals_opt RPAREN { CallConstructor($2, $4) }
-  | ID LPAREN actuals_opt RPAREN { Call($1, $3) }
 /*  | expr QMARK expr COLON expr { Ternary($1, $3, $5) } */
   | LPAREN expr RPAREN { $2 }
 
