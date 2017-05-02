@@ -32,7 +32,7 @@ and expr =
   | Unop of uop * expr
   | Assign of expr * expr
   | CallExpr of expr * expr list 
-  | Ternary of expr * expr * expr (* Ternary operator ?: *)
+*  | Ternary of expr * expr * expr (* Ternary operator ?: *) *)
   | Noexpr
 
 and caseType = Default | CaseType of expr
@@ -114,18 +114,11 @@ let rec string_of_expr = function
   | Binop(e1, o, e2) ->
       string_of_expr e1 ^ " " ^ string_of_op o ^ " " ^ string_of_expr e2
   | Unop(o, e) -> string_of_uop o ^ string_of_expr e
-<<<<<<< bfad0991894fd401a8e9617942d5c860796a56aa
+(*  | Ternary(p, e1, e2) -> "if " ^ string_of_expr p ^ " then " 
+        ^ string_of_expr e1 ^ " else " ^ string_of_expr e2 *)
   | Assign(e1, e2) -> string_of_expr e1 ^ " = " ^ string_of_expr e2
-  | Ternary(p, e1, e2) -> string_of_expr p ^ " ? " ^ string_of_expr e1 ^ " : " ^ string_of_expr e2
   | CallExpr(call_expr, args) ->
       string_of_expr call_expr ^ "(" ^ String.concat ", " (List.map string_of_expr args) ^ ")"
-=======
-  | Assign(v, e) -> v ^ " = " ^ string_of_expr e
-  | Ternary(p, e1, e2) -> "if " ^ string_of_expr p ^ " then " 
-        ^ string_of_expr e1 ^ " else " ^ string_of_expr e2
-  | Call(f, el) ->
-      f ^ "(" ^ String.concat ", " (List.map string_of_expr el) ^ ")"
->>>>>>> Ternary operators now work! Pending codegen testing, of course. :)
   | Noexpr -> ""
 
 and string_of_stmt = function
@@ -143,8 +136,6 @@ and string_of_stmt = function
       string_of_expr e3  ^ ") " ^ string_of_stmt s
   | While(e, s) -> "while (" ^ string_of_expr e ^ ") " ^ string_of_stmt s  
   | DoWhile(s, e) -> "do: " ^ string_of_stmt s ^ " while (" ^ string_of_expr e ^ ")"
-  | Break -> "break"
-  | Continue -> "continue"
 
 and string_of_vdecl (typ, str, expr) = 
   if expr = Noexpr then string_of_typ typ ^ " " ^ str ^ ";\n"
