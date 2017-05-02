@@ -158,7 +158,7 @@ expr:
   | NOT expr         { Unop(Not, $2) }
   | expr ASSIGN expr   { Assign($1, $3) }
   | call_expr { $1 }
-  | expr QMARK expr COLON expr { Ternary($1, $3, $5) }
+ /* | expr QMARK expr COLON expr { Ternary($1, $3, $5) } */
   | LPAREN expr RPAREN { $2 }
 
 actuals_opt:
