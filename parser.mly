@@ -163,7 +163,7 @@ case_list:
   | case_list case { $1@[$2] }
 
 case:
-    CASE expr COLON stmt_list BREAK SEMI { {
+    CASE expr COLON stmt_list { {
         case = CaseType($2);
         setStmt = $4;
     } }
