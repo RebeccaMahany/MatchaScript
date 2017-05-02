@@ -53,7 +53,7 @@ and stmt =
 
 and case = {
   case : caseType;
-  set : stmt;
+  setStmt : stmt list;
 }
 
 and fexpr = {

@@ -1,4 +1,4 @@
-void main() {
+function void main() {
 
     int i = 0;
 
