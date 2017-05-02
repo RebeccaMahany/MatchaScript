@@ -267,7 +267,6 @@ let build_function_body f_build =
       A.Void -> L.build_ret_void
     | t -> L.build_ret (L.const_int (ltype_of_typ t) 0))
 ;;
-
 let codegen_func_defs (sast : sstmt list) =
   let gen_func_def sstmt = match sstmt with
       SFunDecl(f) -> build_function_body f
