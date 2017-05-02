@@ -195,4 +195,4 @@ let check_ast ast = match ast with
 
 (* Testing *)
 let test_ok sast = match sast with
-  _ -> print_string "okay\n"
+  _ -> "okay\n"
