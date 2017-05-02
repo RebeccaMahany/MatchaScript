@@ -31,7 +31,7 @@ open Ast
 %%
 
 program:
-  stmt_list EOF { $1 }
+  stmt_list EOF { Program($1) }
 
 /*********
 Datatypes
@@ -192,12 +192,12 @@ expr:
   | expr GEQ    expr { Binop($1, Geq,   $3) }
   | expr AND    expr { Binop($1, And,   $3) }
   | expr OR     expr { Binop($1, Or,    $3) }
-  | expr DOT expr    { ObjAccessExpr($1, $3) }
+  | expr DOT expr    { ObjAccess($1, $3) }
   | MINUS expr %prec NEG { Unop(Neg, $2) }
   | NOT expr         { Unop(Not, $2) }
   | expr ASSIGN expr   { Assign($1, $3) }
   | call_expression LPAREN actuals_opt RPAREN { CallExpr($1, $3) }
-  | NEW ID LPAREN actuals_opt RPAREN { CallConstructor($2, $4) }
+  | NEW ID LPAREN actuals_opt RPAREN { ObjCreate($2, $4) }
   | LPAREN expr RPAREN { $2 }
 
 actuals_opt:
