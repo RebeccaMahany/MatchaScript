@@ -1,10 +1,10 @@
 /* anonymous function expression */
-int a = function int() {
+int a = function int () {
 	return 3;
-}
+};
 
 /* naming a function expression */
-int a = function int bar() {
+int a = function int bar() { /* assigning to a function declaration? */
 	return 3;
 }
 
