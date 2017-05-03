@@ -35,7 +35,7 @@ and expr =
 (*  | Ternary of expr * expr * expr (* Ternary operator ?: *) *)
   | Noexpr
 
-and caseType = Default | CaseType of expr
+(*and caseType = Default | CaseType of expr*)
 
 and stmt =
   | Block of stmt list
