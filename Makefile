@@ -18,6 +18,7 @@ clean :
 	rm -rf testall.log MatchaScript scanner.ml parser.ml parser.mli
 	rm -rf *.cmx *.cmi *.cmo *.cmx *.o
 	rm -rf *.diff *.err *.ll *.pretty
+	rm ./frontend_tests/scannerprint.ml ./frontend_tests/*.tokens
 
 # More detailed: build using ocamlc/ocamlopt + ocamlfind to locate LLVM
 
