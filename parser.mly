@@ -147,7 +147,7 @@ stmt:
   | cdecl { ClassDecl($1) }
   | RETURN expr SEMI { Return $2 }
   | RETURN SEMI { Return Noexpr }
-  | LBRACE stmt_list RBRACE { Block(List.rev $2) }
+  | LBRACE stmt_list RBRACE { Block($2) }
   | IF LPAREN expr RPAREN stmt %prec NOELSE { If($3, $5, Block([])) }
   | IF LPAREN expr RPAREN stmt ELSE stmt    { If($3, $5, $7) }
   | FOR LPAREN expr_opt SEMI expr SEMI expr_opt RPAREN stmt
@@ -156,10 +156,7 @@ stmt:
   | DO stmt WHILE LPAREN expr RPAREN SEMI { DoWhile ($2, $5) }
   | BREAK SEMI { Break }
   | CONTINUE SEMI { Continue }
-  | SWITCH LPAREN expr RPAREN stmt { Switch ($3, $5) }
-  | CASE expr COLON stmt { Case ($2, $4) }
-  | DEFAULT COLON stmt { DefaultCase ($3) }
-/*  | SWITCH LPAREN expr RPAREN LBRACE case_list RBRACE { Switch ($3, $6) }
+  | SWITCH LPAREN expr RPAREN LBRACE case_list RBRACE { Switch ($3, $6) }
 
 case_list:
     case  { [$1] }
@@ -174,7 +171,6 @@ case:
         case = Default;
         setStmt = $3; 
     } }
-*/
 
 /*********
 Expressions

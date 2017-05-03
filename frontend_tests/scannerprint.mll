@@ -23,6 +23,7 @@ rule token = parse
 | '}'      { print_string "RBRACE " }
 | ';'      { print_string "SEMI " }
 | ','      { print_string "COMMA " }
+| ':'      { print_string "COLON " }
 
 (* Operators *)
 | '+'      	{ print_string "PLUS " }
@@ -60,7 +61,13 @@ rule token = parse
 | "else"   { print_string "ELSE " }
 | "for"    { print_string "FOR " }
 | "while"  { print_string "WHILE " }
+| "do"     { print_string "DO " }
+| "break"  { print_string "BREAK " }
+| "continue" { print_string "CONTINUE " }
 | "return" { print_string "RETURN " }
+| "switch" { print_string "SWITCH " }
+| "case"   { print_string "CASE " }
+| "default" { print_string "DEFAULT " }
 
 (* Data types *)
 | "int"    { print_string "INT " }
