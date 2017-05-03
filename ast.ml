@@ -15,11 +15,10 @@ type op = Add | Sub | Mult | Div | Mod | Equal | Neq | Less | Leq | Greater | Ge
 type uop = Neg | Not
 
 type typ = Int | Float | Bool | Char | Void | ObjectType of string | Fun | String
-type datatype = Typ of typ
 
-type bind = datatype * string
+type bind = typ * string
 
-and vdecl = datatype * string * expr
+and vdecl = typ * string * expr
 
 and expr =
     IntLit of int
@@ -27,7 +26,8 @@ and expr =
   | BoolLit of bool
   | CharLit of char
   | StringLit of string
-  | FunExpr of fexpr
+  | Array of expr list
+  | FunExpr of fexpr 
   | Id of string
   | This
   | Binop of expr * op * expr
@@ -35,8 +35,8 @@ and expr =
   | Assign of expr * expr
   | ObjCreate of string * expr list
   | ObjAccess of expr * expr
-  (* ArrayAccess *)
-  | CallExpr of expr * expr list
+  | CallExpr of expr * expr list (* callee * arguments *)
+  | MemberExpr of expr * [ `Id of string | `ExprStmt of expr ]
   | Noexpr
 
 and stmt =
@@ -44,20 +44,20 @@ and stmt =
   | ExprStmt of expr
   | VarDecl of vdecl
   | FunDecl of fdecl
-  | ClassDecl of cdecl (* PP *)
+  | ClassDecl of cdecl
   | Return of expr
   | If of expr * stmt * stmt
   | For of expr * expr * expr * stmt
   | While of expr * stmt
 
 and fexpr = {
-  feReturnType : datatype;
+  feReturnType : typ;
   feFormals : bind list;
   feBody: stmt list;
 }
 
 and fdecl = {
-  fdReturnType : datatype;
+  fdReturnType : typ;
   fdFname : string;
   fdFormals : bind list;
   fdBody : stmt list;
@@ -114,10 +114,7 @@ let string_of_typ = function
   | Fun -> "fun"
   | ObjectType(o) -> "class " ^ o 
 
-let string_of_datatype = function
-  Typ(t) -> string_of_typ t
-
-let string_of_bind (t, id) = string_of_datatype t ^ " " ^ id
+let string_of_bind (t, id) = string_of_typ t ^ " " ^ id
 
 let rec string_of_expr = function
     IntLit(l) -> string_of_int l
@@ -154,22 +151,22 @@ and string_of_stmt = function
       string_of_expr e3  ^ ") " ^ string_of_stmt s
   | While(e, s) -> "while (" ^ string_of_expr e ^ ") " ^ string_of_stmt s  
 
-and string_of_vdecl (datatype, str, expr) = 
-  if expr = Noexpr then string_of_datatype datatype ^ " " ^ str ^ ";\n"
-  else string_of_datatype datatype ^ " " ^ str ^ " = " ^ string_of_expr expr ^ ";\n"
+and string_of_vdecl (typ, str, expr) = 
+  if expr = Noexpr then string_of_typ typ ^ " " ^ str ^ ";\n"
+  else string_of_typ typ ^ " " ^ str ^ " = " ^ string_of_expr expr ^ ";\n"
 
 and string_of_fexpr fexpr =
-  "function " ^ string_of_datatype fexpr.feReturnType ^ " " 
+  "function " ^ string_of_typ fexpr.feReturnType ^ " " 
   ^ "(" ^ String.concat ", " (List.map string_of_bind fexpr.feFormals) ^
   ")\n{\n" ^ String.concat "" (List.map string_of_stmt fexpr.feBody) ^ "}"
 
 and string_of_fdecl fdecl =
-  "function " ^ string_of_datatype fdecl.fdReturnType ^ " " ^
+  "function " ^ string_of_typ fdecl.fdReturnType ^ " " ^
   fdecl.fdFname ^ "(" ^ String.concat ", " (List.map string_of_bind fdecl.fdFormals) ^
   ")\n{\n" ^ String.concat "" (List.map string_of_stmt fdecl.fdBody) ^ "}"
  
 and string_of_method mth = 
-  string_of_datatype mth.fdReturnType ^ " " ^
+  string_of_typ mth.fdReturnType ^ " " ^
   mth.fdFname ^ "(" ^ String.concat ", " (List.map string_of_bind mth.fdFormals) ^
   ")\n{\n" ^ String.concat "" (List.map string_of_stmt mth.fdBody) ^ "}"
 

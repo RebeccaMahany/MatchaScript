@@ -1,42 +1,51 @@
-(*open Ast
+open Ast
+
+type sbind = typ * string
+
+type svdecl = typ * string * expr
 
 type sexpr = 
-	  SIntLit of int
+    SIntLit of int
 	| SFloatLit of float
 	| SBoolLit of bool
 	| SCharLit of char
 	| SStringLit of string
 	| SFunExpr of sfexpr
-	| SId of string * datatype
-	| SBinop of sexpr * op * sexpr * datatype
-	| SUnop of uop * sexpr * datatype
-	| SAssign of sexpr * sexpr * datatype
-	| SCallExpr of sexpr * sexpr list * datatype 
+	| SId of string * typ
+	| SBinop of sexpr * op * sexpr * typ
+	| SUnop of uop * sexpr * typ
+	| SAssign of sexpr * sexpr * typ
+	| SObjCreate of string * sexpr list * typ
+	| SObjAccess of sexpr * sexpr * typ
+	(* Array access *)
+	| SCallExpr of sexpr * sexpr list * typ 
 	| SNoexpr
 
 and sstmt = 
-	  SBlock of sstmt list
-	| SExpr of sexpr * datatype
-	| SDeclStmt of datatype * string * sexpr * datatype 
-	| SFDeclStmt of sfdecl * datatype 
-	| SReturn of sexpr * datatype
-	| SIf of sexpr * sstmt * sstmt * datatype
-	| SFor of sexpr * sexpr * sexpr * sstmt
-	| SWhile of sexpr * sstmt
+    SBlock of sstmt list
+  | SExprStmt of sexpr
+  | SVarDecl of svdecl
+  | SFunDecl of sfdecl
+  | SClassDecl of scdecl
+  | SReturn of sexpr
+  | SIf of sexpr * sstmt * sstmt
+  | SFor of sexpr * sexpr * sexpr * sstmt
+  | SWhile of sexpr * sstmt
 
-(*TODO: Add support for sfexpr *)
+and sfexpr = {
+  sfeReturnType : typ;
+  sfeFormals : sbind list;
+  sfeBody: sstmt list;
+}
 
 and sfdecl = {
-	sfdReturnType : datatype;
-	sfdFname : string;
-	sfdFormals : bind list;
-	sfdBody : sstmt list; (* changing from ast *)
+  sfdReturnType : typ;
+  sfdFname : string;
+  sfdFormals : bind list;
+  sfdBody : stmt list;
 }
 
-and sconstructs = {
-	classes: scdecl list;
-	sfdecls: sfdecl list; (* separating out for codegen *)
-	main: sfdecl;
+and scdecl = {
+  scname : string;
+  scproperties : svdecl list;
 }
-
-type sprogram = sconstructs *)
