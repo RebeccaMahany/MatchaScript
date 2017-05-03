@@ -35,7 +35,7 @@ and expr =
 *  | Ternary of expr * expr * expr (* Ternary operator ?: *) *)
   | Noexpr
 
-(*and caseType = Default | CaseType of expr*)
+and caseType = Default | CaseType of expr
 
 and stmt =
   | Block of stmt list
@@ -47,16 +47,6 @@ and stmt =
   | For of expr * expr * expr * stmt
   | While of expr * stmt
   | DoWhile of stmt * expr
-  | Break
-  | Continue
-  | Switch of expr * stmt
-  | Case of expr * stmt
-  | DefaultCase of stmt
-
-(*and case = {
-  case : caseType;
-  setStmt : stmt list;
-}*)
 
 and fexpr = {
   feReturnType : typ;
@@ -123,6 +113,10 @@ let rec string_of_expr = function
       string_of_expr call_expr ^ "(" ^ String.concat ", " (List.map string_of_expr args) ^ ")"
   | Noexpr -> ""
 
+and string_of_caseType = function
+    Default -> "default"
+  | CaseType(c) -> "case " ^ string_of_expr c
+
 and string_of_stmt = function
     Block(stmts) ->
       "{\n" ^ String.concat "" (List.map string_of_stmt stmts) ^ "}\n"
@@ -137,7 +131,7 @@ and string_of_stmt = function
       "for (" ^ string_of_expr e1  ^ " ; " ^ string_of_expr e2 ^ " ; " ^
       string_of_expr e3  ^ ") " ^ string_of_stmt s
   | While(e, s) -> "while (" ^ string_of_expr e ^ ") " ^ string_of_stmt s  
-  | DoWhile(s, e) -> "do: " ^ string_of_stmt s ^ " while (" ^ string_of_expr e ^ ")"
+  | DoWhile(s, e) -> "do " ^ string_of_stmt s ^ " while (" ^ string_of_expr e ^ ");"
 
 and string_of_vdecl (typ, str, expr) = 
   if expr = Noexpr then string_of_typ typ ^ " " ^ str ^ ";\n"
