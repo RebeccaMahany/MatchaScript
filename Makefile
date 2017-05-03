@@ -17,7 +17,7 @@ clean :
 	ocamlbuild -clean
 	rm -rf testall.log MatchaScript scanner.ml parser.ml parser.mli
 	rm -rf *.cmx *.cmi *.cmo *.cmx *.o
-	rm -rf *.diff *.err *.ll *.pretty
+	rm -rf *.diff *.err *.ll *.pretty *.prettytokens
 
 # More detailed: build using ocamlc/ocamlopt + ocamlfind to locate LLVM
 

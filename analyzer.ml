@@ -17,7 +17,7 @@ type symbol_table = {
  ******************************************************)
 type translation_env = {
 	scope : symbol_table;		(* tracks in-scope vars, functions, and classes *)
-	return_type : A.datatype; 	(* function's return type *)
+	return_type : A.typ; 	(* function's return type *)
 	(* in_switch : bool; *)
 	(* case - see 4/3/2017 1:06:26 *)
 	(* break_label *)
@@ -30,10 +30,12 @@ type translation_env = {
 (***********************************
  * Builtin variables and functions
  ***********************************)
+ (* printf *)
 
 (******************
  * Error messages
  ******************)
+
 
 (***********
  * Scoping
@@ -42,12 +44,11 @@ type translation_env = {
 (*********
  * Utils
  *********)
- (*
 (* Look for the name within the current symbol table and its parents. *)
 let rec find_vdecl (scope : symbol_table) name (* option to check only current scope? *)=
 	try
-		(* a vdecl is (datatype, string, expr) *)
-		List.find (fun (_, s, _) -> s = name) scope.variables 
+		(* a vdecl is (typ, string, expr) *)
+		List.find (fun (_, s, _) -> s = name) scope.st_vdecls 
 	with Not_found ->
 		match scope.parent with
 			Some(parent) -> find_vdecl parent name
@@ -60,6 +61,7 @@ let rec find_vdecl (scope : symbol_table) name (* option to check only current s
 (*********************
  * Check Expressions
  *********************)
+ (*)
 let rec check_expr env expr = match expr with
 	  A.IntLit(i)						-> S.SIntLit(i)
 	| A.FloatLit f        	-> S.SFloatLit(f)
@@ -79,30 +81,35 @@ let rec check_expr env expr = match expr with
 	| A.Noexpr              -> S.SNoexpr
 
 and check_id env id =
-(*
 	(* Verify that identifier id is in scope and return its type *)
 	let vdecl = try
 		find_vdecl env.scope id (* locate a variable by name *)
 	with Not_found ->
 		raise E.UndefinedID(id)
  	in
-	let (datatype, _, _) = vdecl in (* get variable's type *)
-	S.SId(vdecl, datatype) (* !!! vdecl, datatype or string, datatype? *)
-*)
+	let (typ, _, _) = vdecl in (* get variable's type *)
+	S.SId(vdecl, typ) (* !!! vdecl, typ or string, typ? *)
 
 and check_this env =
+  1
 
 and check_binop env e1 op e2 =
+  1
 
 and check_unop env e =
+  1
 
 and check_assign env e1 e2 =
+  1
 
 and check_obj_create env s el =
+  1
 
 and check_obj_access env e1 e2 = 
+  1
 
 and check_call_expr env e el =
+  1
 
 (********************
  * Check Statements
@@ -142,8 +149,10 @@ and check_block env sl = (* 4/3 1:08:00 *)
 *)
 
 and check_expr_stmt env e = 
+  1
 
 and check_var_decl_stmt env v =
+  1
 (*	(* check if v has already been declared - using find_vdecl? *)
 
 	in
@@ -154,24 +163,34 @@ and check_var_decl_stmt env v =
 and check_fun_decl_stmt env f =
 
 and check_class_decl_stmt env c =
+  1
 
 and check_return env e =
+  1
 
 and check_if env e s_if s_el =
+  1
 
 and check_for env e1 e2 e3 s =
+  1
 
 and check_while env e s =
+  1
 
 and check_break env e =
+  1
 
 and check_continue env =
+  1
 *)
 (***********************
  * Convert AST to SAST
  ***********************)
 let rec convert_ast_to_sast env prog =
-  print_string "in convert_ast_to_sast\n"
+  1
+  (*print_string "in convert_ast_to_sast\n"*)
+
+  (* return SAST *)
 
 (***********************
  * Program entry point
@@ -185,7 +204,7 @@ let root_symbol_table : symbol_table = {
 
 let root_env : translation_env = {
   scope = root_symbol_table;
-  return_type = A.Typ(A.Int);   (* Int 0? *)
+  return_type = A.Int;   (* Int 0? *)
 }
 
 let check_ast ast = match ast with
