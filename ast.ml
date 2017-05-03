@@ -37,7 +37,7 @@ and expr =
   | Ternary of expr * expr * expr (* Ternary operator ?: *)
   | Noexpr
 
-and caseType = Default | CaseType of expr
+(*and caseType = Default | CaseType of expr*)
 
 and stmt =
   | Block of stmt list
@@ -51,12 +51,14 @@ and stmt =
   | DoWhile of stmt * expr
   | Break
   | Continue
-  | Switch of expr * case list
+  | Switch of expr * stmt
+  | Case of expr * stmt
+  | DefaultCase of stmt
 
-and case = {
+(*and case = {
   case : caseType;
   setStmt : stmt list;
-}
+}*)
 
 and fexpr = {
   feReturnType : typ;

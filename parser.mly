@@ -101,7 +101,10 @@ stmt:
   | DO stmt WHILE LPAREN expr RPAREN SEMI { DoWhile ($2, $5) }
   | BREAK SEMI { Break }
   | CONTINUE SEMI { Continue }
-  | SWITCH LPAREN expr RPAREN LBRACE case_list RBRACE { Switch ($3, $6) }
+  | SWITCH LPAREN expr RPAREN stmt { Switch ($3, $5) }
+  | CASE expr COLON stmt { Case ($2, $4) }
+  | DEFAULT COLON stmt { DefaultCase ($3) }
+/*  | SWITCH LPAREN expr RPAREN LBRACE case_list RBRACE { Switch ($3, $6) }
 
 case_list:
     case  { [$1] }
@@ -116,6 +119,7 @@ case:
         case = Default;
         setStmt = $3; 
     } }
+*/
 
 /*********
 Expressions
