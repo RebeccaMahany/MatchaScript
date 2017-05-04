@@ -183,6 +183,34 @@ and check_break env e =
 and check_continue env =
   1
 *)
+
+(**********************
+* Helper functions
+**********************)
+
+
+let expr_to_sexpr tenv = function
+	  IntLit i		-> SIntLit(i), tenv
+	| BoolLit b		-> SBoolLit(b), tenv
+	(*Here we include fexpr, where we'll convert to fdecl *)
+
+and get_sexpr_type = function 
+	  SIntLit(_)		-> typ(Int)
+	| SBoolLit(_)		-> typ(Bool)
+	| SFloatLit(_)		-> typ(Float)
+	| SCharLit(_)		-> typ(Char)
+	| SStringLit(_)		-> typ(String)
+	| SId(_, t)		-> t
+	| SBinop(_,_,_,t)	-> t
+	| SUnop(_,_,t)		-> t
+	| SAssign(_,_,t)	-> t
+	| SCallExpr(_,_,t)	-> t
+
+ 
+
+	
+
+
 (***********************
  * Convert AST to SAST
  ***********************)
