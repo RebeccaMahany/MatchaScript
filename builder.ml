@@ -52,7 +52,4 @@ and parse_stmt s m = function
 (* for unit testing parsing a function *)
 let s = Stack.create () 
 parse_function funOne s StringMap.empty; 
-print_int s.length	
-
-
-
+print_int s.length

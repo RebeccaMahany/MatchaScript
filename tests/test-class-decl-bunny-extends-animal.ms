@@ -1,12 +1,12 @@
-class​ Animal {
-	constructor(string name, int​ weight) {
-		this​.name = name;
-	this​.weight = weight;
+class Animal {
+	constructor(string name, int weight) {}
+		this.name = name;
+		this.weight = weight;
  	}
 }
 
-class​ BunnyRabbit extends Animal {
-	constructor(string name, int​ weight, string ears) {
+class BunnyRabbit extends Animal {
+	constructor(string name, int weight, string ears) {
 		super​(name, weight);
 		this​.ears = ears;
 	}

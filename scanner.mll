@@ -17,6 +17,7 @@ let whitespace = [' ' '\t' '\r' '\n']
 rule token = parse
   whitespace { token lexbuf }
 | "/*"     { comment lexbuf }
+| "//"     { line_comment lexbuf }
 | '('      { LPAREN }
 | ')'      { RPAREN }
 | '{'      { LBRACE }
@@ -46,6 +47,14 @@ rule token = parse
 
 (* Function *)
 | "function" { FUNCTION }
+
+(* Classes *)
+| "class"       { CLASS }
+| "constructor" { CONSTRUCTOR }
+| "this"        { THIS }
+| "new"         { NEW }
+(* | "extends"      { EXTENDS } *)
+(* | "super"        { SUPER } *)
 
 (* Branch control *)
 | "if"     { IF }
@@ -77,3 +86,7 @@ rule token = parse
 and comment = parse
   "*/" { token lexbuf }
 | _    { comment lexbuf }
+
+and line_comment = parse
+  "\n" { token lexbuf }
+| _    { line_comment lexbuf }
