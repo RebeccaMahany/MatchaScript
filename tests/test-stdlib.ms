@@ -60,10 +60,43 @@ function string boolToString(bool b) {
 /** Int to float **/
 
 
+/** Int to binary string **/
+
+
+/** Int to hexadecimal string (lowercase, prefixed by 0x) **/
+
+
 /** Float to string **/
 
 
 /** Float to int **/
+
+
+
+/***************
+Functions for returning information about variables
+***************/
+
+
+/** len **/
+
+
+/** typeOf **/
+
+
+/** instanceOf **/
+
+
+
+/***************
+Functions dealing with system and IO
+***************/
+
+
+/** open **/
+
+
+/** eval **/
 
 
 
