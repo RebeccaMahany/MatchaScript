@@ -31,15 +31,24 @@ open Ast
 %%
 
 program:
-  stmt_list EOF { $1 }
+  stmt_list EOF { Program($1) }
+
+/*********
+typs
+**********/
+typ:
+    INT    { Int }
+  | FLOAT  { Float }
+  | BOOL   { Bool }
+  | CHAR   { Char }
+  | STRING { String }
+  | VOID   { Void }
+  | FUN    { Fun }
+  | CLASS ID { ObjectType($2) }
 
 /*********
 Variables
 **********/
-vdecl_list:
-  | vdecl { [$1] }
-  | vdecl_list vdecl { $2 :: $1  }
-
 vdecl:
     typ ID SEMI { ($1, $2, Noexpr)}
   | typ ID ASSIGN expr SEMI { ($1, $2, $4) }
@@ -47,7 +56,6 @@ vdecl:
 /*********
 Classes
 **********/
-
 mthfdecl:
   typ ID LPAREN formals_opt RPAREN LBRACE stmt_list RBRACE
   { { fdReturnType = $1;
@@ -93,11 +101,6 @@ cdecl:
 /*********
 Functions
 **********/
-fdecl_list:
-  /* nothing */ { [] }
-  | fdecl { [$1] }
-  | fdecl_list fdecl { $1@[$2] }
-
 fdecl:
    FUNCTION typ ID LPAREN formals_opt RPAREN LBRACE stmt_list RBRACE
      { { fdReturnType = $2;
@@ -119,25 +122,13 @@ formal_list:
     typ ID                   { [($1,$2)] }
   | formal_list COMMA typ ID { ($3,$4) :: $1 }
 
-typ:
-    INT    { Int }
-  | FLOAT  { Float }
-  | BOOL   { Bool }
-  | CHAR   { Char }
-  | STRING { String }
-  | VOID   { Void }
-  | FUN    { Fun }
-  | objtype { $1 }
-
-objtype:
-  | CLASS ID { ObjectType($2) }
 
 /*********
 Statements
 **********/
 stmt_list:
     stmt  { [$1] }
-  | stmt_list stmt { $1@[$2] }
+  | stmt_list stmt { $1@[$2] } /* append statement to end of statement list */
 
 stmt:
     expr SEMI { ExprStmt $1 }
@@ -146,7 +137,7 @@ stmt:
   | cdecl { ClassDecl($1) }
   | RETURN expr SEMI { Return $2 }
   | RETURN SEMI { Return Noexpr }
-  | LBRACE stmt_list RBRACE { Block(List.rev $2) }
+  | LBRACE stmt_list RBRACE { Block($2) }
   | IF LPAREN expr RPAREN stmt %prec NOELSE { If($3, $5, Block([])) }
   | IF LPAREN expr RPAREN stmt ELSE stmt    { If($3, $5, $7) }
   | FOR LPAREN expr_opt SEMI expr SEMI expr_opt RPAREN stmt
@@ -160,10 +151,22 @@ expr_opt:
     /* nothing */ { Noexpr }
   | expr          { $1 }
 
-call_expression:
-    ID                                { Id($1) }
-/*  | call_expression LBRACKET expr RBREACKET <- Array */
-  | call_expression LPAREN actuals_opt RPAREN  { CallExpr($1, $3) }
+primary_expr:
+    THIS          { This }
+  | ID            { Id($1) }
+
+member_expr:
+    primary_expr  { $1 }              /* e.g. functionName(4) */
+  | LPAREN fexpr RPAREN                { FunExpr($2) }     /* e.g. (function int (int a, int b) { return a + b; })(3, 4) */
+  | member_expr LBRACKET expr RBRACKET { MemberExpr($1, `ExprStmt $3) } /* e.g. arr_id[i+1], arr_id[i+1][j+1] */
+  | member_expr DOT ID                 { MemberExpr($1, `Id $3) } /* e.g. rectangle.height, rectArray[0].height */
+  | NEW ID LPAREN actuals_opt RPAREN   { ObjCreate($2, $4) } /* int a = new Rectangle(3,4).height */
+
+call_expr:
+    member_expr LPAREN actuals_opt RPAREN { CallExpr($1, $3) }
+  | call_expr LPAREN actuals_opt RPAREN   { CallExpr($1, $3) } /* e.g. */
+  | call_expr LBRACKET expr RBRACKET      { MemberExpr($1, `ExprStmt $3) } /* e.g. returnArray()[3] */
+  | call_expr DOT ID                      { MemberExpr($1, `Id $3) } /* e.g. objName.property, getNewRect(3, 5).height, objName.propertyObject.property */
 
 expr:
     INTLIT           { IntLit($1)           }
@@ -173,8 +176,7 @@ expr:
   | TRUE             { BoolLit(true)        }
   | FALSE            { BoolLit(false)       }
   | ID               { Id($1)               }
-  | THIS             { This }
-  | fexpr            { FunExpr($1) }
+  | fexpr            { FunExpr($1)          }
   | expr PLUS   expr { Binop($1, Add,   $3) }
   | expr MINUS  expr { Binop($1, Sub,   $3) }
   | expr TIMES  expr { Binop($1, Mult,  $3) }
@@ -188,12 +190,10 @@ expr:
   | expr GEQ    expr { Binop($1, Geq,   $3) }
   | expr AND    expr { Binop($1, And,   $3) }
   | expr OR     expr { Binop($1, Or,    $3) }
-  | expr DOT expr    { ObjAccessExpr($1, $3) }
   | MINUS expr %prec NEG { Unop(Neg, $2) }
   | NOT expr         { Unop(Not, $2) }
   | expr ASSIGN expr   { Assign($1, $3) }
-  | call_expression LPAREN actuals_opt RPAREN { CallExpr($1, $3) }
-  | NEW ID LPAREN actuals_opt RPAREN { CallConstructor($2, $4) }
+  | call_expr { $1 }
   | LPAREN expr RPAREN { $2 }
 
 actuals_opt:

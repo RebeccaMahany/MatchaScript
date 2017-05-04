@@ -14,11 +14,11 @@ type op = Add | Sub | Mult | Div | Mod | Equal | Neq | Less | Leq | Greater | Ge
 
 type uop = Neg | Not
 
-type typ = Int | Float | Bool | Char | String | Void | Fun | ObjectType of string 
+type typ = Int | Float | Bool | Char | Void | ObjectType of string | Fun | String
 
 type bind = typ * string
 
-and vdecl = typ * string * expr (* PP *)
+and vdecl = typ * string * expr
 
 and expr =
     IntLit of int
@@ -26,16 +26,17 @@ and expr =
   | BoolLit of bool
   | CharLit of char
   | StringLit of string
-  | FunExpr of fexpr
+  | Array of expr list
+  | FunExpr of fexpr 
   | Id of string
   | This
   | Binop of expr * op * expr
   | Unop of uop * expr
   | Assign of expr * expr
-  | CallConstructor of string * expr list (* PP *)
-  | ObjAccessExpr of expr * expr (* PP *)
-  (* ArrayAccess *)
-  | CallExpr of expr * expr list
+  | ObjCreate of string * expr list
+  | ObjAccess of expr * expr
+  | CallExpr of expr * expr list (* callee * arguments *)
+  | MemberExpr of expr * [ `Id of string | `ExprStmt of expr ]
   | Noexpr
 
 and stmt =
@@ -43,7 +44,7 @@ and stmt =
   | ExprStmt of expr
   | VarDecl of vdecl
   | FunDecl of fdecl
-  | ClassDecl of cdecl (* PP *)
+  | ClassDecl of cdecl
   | Return of expr
   | If of expr * stmt * stmt
   | For of expr * expr * expr * stmt
@@ -69,19 +70,19 @@ and cbody = {
   methods : fdecl list;
 }
 
-and cdecl = {  (* PP *)
+and cdecl = { 
   cname : string;
   (* extends *)
   cbody: cbody;
 }
 
-and constr = {  (* PP *)
+and constr = { 
   formals : bind list;
   body : stmt list;
 }
 
 (* type program = include_stmt list * constructs *)
-type program = stmt list
+type program = Program of stmt list
 
 (* Pretty-printing functions *)
 let string_of_op = function
@@ -128,8 +129,8 @@ let rec string_of_expr = function
       string_of_expr e1 ^ " " ^ string_of_op o ^ " " ^ string_of_expr e2
   | Unop(o, e) -> string_of_uop o ^ string_of_expr e
   | Assign(e1, e2) -> string_of_expr e1 ^ " = " ^ string_of_expr e2
-  | CallConstructor(classname, args) -> "new " ^ classname ^ "(" ^ String.concat ", " (List.map string_of_expr args) ^ ")"
-  | ObjAccessExpr(e1, e2) -> string_of_expr e1 ^ "." ^ string_of_expr e2
+  | ObjCreate(classname, args) -> "new " ^ classname ^ "(" ^ String.concat ", " (List.map string_of_expr args) ^ ")"
+  | ObjAccess(e1, e2) -> string_of_expr e1 ^ "." ^ string_of_expr e2
   | CallExpr(call_expr, args) ->
       string_of_expr call_expr ^ "(" ^ String.concat ", " (List.map string_of_expr args) ^ ")"
   | Noexpr -> ""
@@ -181,5 +182,5 @@ and string_of_cbody cbody =
 and string_of_cdecl cdecl =
   "class " ^ cdecl.cname ^ "{\n" ^ string_of_cbody cdecl.cbody ^ "}\n"
 
-let string_of_program stmts =
-  String.concat "" (List.map string_of_stmt stmts) ^ "\n"
+let string_of_program prog = match prog with 
+  Program(stmts) -> String.concat "" (List.map string_of_stmt stmts) ^ "\n"
