@@ -187,12 +187,18 @@ and check_continue env =
 (**********************
 * Helper functions
 **********************)
-
+(* TODO: convert_fexpr function *)
 
 let expr_to_sexpr tenv = function
 	  IntLit i		-> SIntLit(i), tenv
 	| BoolLit b		-> SBoolLit(b), tenv
+	| FloatLit f		-> SFloatLit(f), tenv
+	| CharLit c 		-> SCharLit(c), tenv
+	| StringLit s		-> SStringLit(s), tenv
+	| FunExpr f		-> convert_fexpr tenv f, tenv
 	(*Here we include fexpr, where we'll convert to fdecl *)
+	| Id i			-> SId(i), tenv
+
 
 and get_sexpr_type = function 
 	  SIntLit(_)		-> typ(Int)
