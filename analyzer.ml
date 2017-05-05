@@ -187,30 +187,59 @@ and check_continue env =
 (**********************
 * Helper functions
 **********************)
-(* TODO: convert_fexpr function *)
+let get_Id_type tenv i =
+    (* TODO *)
+    A.Int
 
-let expr_to_sexpr tenv = function
-	  IntLit i		-> SIntLit(i), tenv
-	| BoolLit b		-> SBoolLit(b), tenv
-	| FloatLit f		-> SFloatLit(f), tenv
-	| CharLit c 		-> SCharLit(c), tenv
-	| StringLit s		-> SStringLit(s), tenv
-	| FunExpr f		-> convert_fexpr tenv f, tenv
+let convert_fexpr tenv f =
+    (* TODO*)
+ {
+    S.sfdReturnType = f.A.feReturnType;
+    S.sfdFname = (* look at the parent's name *) "anon";
+    S.sfdParent = (* look at the parent's name *) "parent";
+    S.sfdFormals = f.A.feFormals;
+    S.sfdLocals = (* parse fbody for locals *) [];
+    S.sfdBody = f.A.feBody;
+  };
+  S.SIntLit(0)  (* Ignore the result of this *)
+
+let check_binop tenv e1 op e2 = 
+  (* TODO *)
+  S.SIntLit(0)
+
+let check_unop tenv uop e =
+  (* TODO *)
+  S.SIntLit(0)
+
+
+(********************
+ * Check Statements
+ ********************)
+let check_expr tenv = function
+	  A.IntLit i		-> S.SIntLit(i), tenv
+	| A.BoolLit b		-> S.SBoolLit(b), tenv
+	| A.FloatLit f		-> S.SFloatLit(f), tenv
+	| A.CharLit c 		-> S.SCharLit(c), tenv
+	| A.StringLit s		-> S.SStringLit(s), tenv
+	| A.FunExpr f		-> convert_fexpr tenv f, tenv
 	(*Here we include fexpr, where we'll convert to fdecl *)
-	| Id i			-> SId(i), tenv
+	| A.Id i		-> S.SId(i, get_Id_type tenv i), tenv
+	| A.Binop(e1,op,e2)	-> check_binop tenv e1 op e2, tenv
+	| A.Unop(uop, e)	-> check_unop tenv uop e, tenv
+	
 
 
 and get_sexpr_type = function 
-	  SIntLit(_)		-> typ(Int)
-	| SBoolLit(_)		-> typ(Bool)
-	| SFloatLit(_)		-> typ(Float)
-	| SCharLit(_)		-> typ(Char)
-	| SStringLit(_)		-> typ(String)
-	| SId(_, t)		-> t
-	| SBinop(_,_,_,t)	-> t
-	| SUnop(_,_,t)		-> t
-	| SAssign(_,_,t)	-> t
-	| SCallExpr(_,_,t)	-> t
+	  S.SIntLit(_)		-> A.Int
+	| S.SBoolLit(_)		-> A.Bool
+	| S.SFloatLit(_)	-> A.Float
+	| S.SCharLit(_)		-> A.Char
+	| S.SStringLit(_)	-> A.String
+	| S.SId(_, t)		-> t
+	| S.SBinop(_,_,_,t)	-> t
+	| S.SUnop(_,_,t)	-> t
+	| S.SAssign(_,_,t)	-> t
+	| S.SCallExpr(_,_,t)	-> t
 
  
 
