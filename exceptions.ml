@@ -19,6 +19,7 @@ exception DuplicateGlobal of string
 exception UndeclaredIdentifier of string
 exception AssignmentTypeMismatch of string * string
 exception VariableDeclarationTypeMismatch of string
+exception InvalidIfStatementCondition
 (*exception CallingBreakOutsideLoop
 exception CallingContinueOutsideLoop*)
 

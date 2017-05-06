@@ -280,12 +280,31 @@ and check_return tenv e =
       if t = tenv.return_type then S.SReturn(sexpr), tenv
       else raise (E.ReturnTypeMismatch(A.string_of_typ t, A.string_of_typ tenv.return_type))
 
+and check_if tenv e s1 s2 =
+  let pred, _ = check_expr tenv e in
+    let t = get_sexpr_type pred in
+      let ifstmt, _ = check_stmt tenv s1 in
+        let elsestmt, _ = check_stmt tenv s2 in
+          if t = A.Bool then S.SIf(pred, ifstmt, elsestmt), tenv
+          else raise(E.InvalidIfStatementCondition)
+
+and check_for tenv e1 e2 e3 s =
+  (* TODO *)
+  S.SExprStmt(S.SIntLit(0)), tenv
+
+and check_while tenv e s =
+  (* TODO *)
+  S.SExprStmt(S.SIntLit(0)), tenv
+
 and check_stmt tenv = function
 	  A.Block sl		-> check_block tenv sl
 	| A.ExprStmt e		-> check_expr_stmt tenv e
 	| A.VarDecl v		-> check_vdecl tenv v  
 	| A.FunDecl f		-> check_fdecl tenv f
 	| A.Return e		-> check_return tenv e
+	| A.If(e, s1, s2)	-> check_if tenv e s1 s2
+	| A.For(e1, e2, e3, s)	-> check_for tenv e1 e2 e3 s
+	| A.While(e,s)		-> check_while tenv e s
 
 (* To be used as entrypoint for parsing ast, which is a stmt list *)
 and check_stmt_list tenv stmt_list =
