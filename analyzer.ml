@@ -174,9 +174,13 @@ and check_var_decl_stmt env v =
 (**********************
 * Helper functions
 **********************)
-let get_Id_type tenv i =
-    (* TODO *)
-    A.Int
+let get_id_type tenv i =
+  let get_vname (_,name,_) = name in
+    let vdecl = try List.find (fun x->(get_vname x)=i) tenv.scope.variables 
+    with | Not_found -> raise (E.UndeclaredIdentifier(i)) in
+      let get_vdecl_typ (typ,_,_) = typ in
+        get_vdecl_typ vdecl 
+        
 
 let convert_fexpr tenv f =
     (* TODO*)
@@ -213,7 +217,7 @@ let check_expr tenv = function
 	| A.StringLit s		-> S.SStringLit(s), tenv
 	| A.FunExpr f		-> convert_fexpr tenv f, tenv
 	(*Here we include fexpr, where we'll convert to fdecl *)
-	| A.Id i		-> S.SId(i, get_Id_type tenv i), tenv
+	| A.Id i		-> S.SId(i, get_id_type tenv i), tenv
 	| A.Binop(e1,op,e2)	-> check_binop tenv e1 op e2, tenv
 	| A.Unop(uop, e)	-> check_unop tenv uop e, tenv
 	| A.Assign(e1, e2)	-> check_assign tenv e1 e2, tenv
