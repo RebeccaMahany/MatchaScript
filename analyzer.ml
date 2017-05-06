@@ -211,9 +211,12 @@ let check_unop tenv uop e =
   (* TODO *)
   S.SIntLit(0)
 
+let check_assign tenv e1 e2 = 
+  (* TODO *)
+  S.SIntLit(0)
 
 (********************
- * Check Statements
+ * Check Expressions
  ********************)
 let check_expr tenv = function
 	  A.IntLit i		-> S.SIntLit(i), tenv
@@ -226,8 +229,8 @@ let check_expr tenv = function
 	| A.Id i		-> S.SId(i, get_Id_type tenv i), tenv
 	| A.Binop(e1,op,e2)	-> check_binop tenv e1 op e2, tenv
 	| A.Unop(uop, e)	-> check_unop tenv uop e, tenv
-	
-
+	| A.Assign(e1, e2)	-> check_assign tenv e1 e2, tenv
+	| A.Noexpr		-> S.SNoexpr, tenv	
 
 and get_sexpr_type = function 
 	  S.SIntLit(_)		-> A.Int
@@ -241,7 +244,48 @@ and get_sexpr_type = function
 	| S.SAssign(_,_,t)	-> t
 	| S.SCallExpr(_,_,t)	-> t
 
- 
+(***********************
+ * Check Statements
+ ***********************)
+let rec check_block tenv sl = match sl with
+	  [] -> S.SBlock([S.SExprStmt(S.SNoexpr)]), tenv (* empty block *)
+	| _ -> let sl, _ = check_stmt_list tenv sl in 
+	  S.SBlock(sl), tenv 
+
+(* Check exprstmt by just checking expr *)
+and check_expr_stmt tenv e =
+  let sexpr, tenv = check_expr tenv e in
+    S.SExprStmt(sexpr), tenv
+
+and check_vdecl tenv v =
+  let get_v_expr (_,_,e) = e in (* helper to get expr from vdecl tuple *)
+    let vexpr = get_v_expr v in
+      let vsexpr, tenv = check_expr tenv vexpr in
+        let vstyp = get_sexpr_type vsexpr in
+          let get_v_typ (t,_,_) = t in  (* helper to get typ of vdecl *)
+            let vtyp = get_v_typ v in
+              let get_v_name (_,n,_) = n in
+                let vname = get_v_name v in
+                  if vtyp = vstyp then S.SVarDecl(v), tenv
+                    else raise(E.VariableDeclarationTypeMismatch(vname)) 
+
+and check_stmt tenv = function
+	  A.Block sl		-> check_block tenv sl
+	| A.ExprStmt e		-> check_expr_stmt tenv e
+	| A.VarDecl v		-> check_vdecl tenv v  
+
+
+(* To be used as entrypoint for parsing ast, which is a stmt list *)
+and check_stmt_list tenv stmt_list =
+  let ref = ref(tenv) in
+    let rec iter = function
+      h::t ->
+        let sstmt, tenv = check_stmt !ref h in
+          ref := tenv; sstmt::(iter t)
+    | [] -> [] 
+    in
+      let sstmt_list = (iter stmt_list), !ref in
+      sstmt_list
 
 	
 
