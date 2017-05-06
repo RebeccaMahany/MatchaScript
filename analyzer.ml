@@ -257,10 +257,11 @@ and check_expr_stmt tenv e =
   let sexpr, tenv = check_expr tenv e in
     S.SExprStmt(sexpr), tenv
 
+(* TODO: add vdecl to symbol table *)
 and check_vdecl tenv v =
   let get_v_expr (_,_,e) = e in (* helper to get expr from vdecl tuple *)
     let vexpr = get_v_expr v in
-      let vsexpr, tenv = check_expr tenv vexpr in
+      let vsexpr, _ = check_expr tenv vexpr in
         let vstyp = get_sexpr_type vsexpr in
           let get_v_typ (t,_,_) = t in  (* helper to get typ of vdecl *)
             let vtyp = get_v_typ v in
@@ -269,11 +270,22 @@ and check_vdecl tenv v =
                   if vtyp = vstyp then S.SVarDecl(v), tenv
                     else raise(E.VariableDeclarationTypeMismatch(vname)) 
 
+and check_fdecl tenv f =
+  (* TODO *)
+  S.SExprStmt(S.SIntLit(0)), tenv
+
+and check_return tenv e =
+  let sexpr, _ = check_expr tenv e in
+    let t = get_sexpr_type sexpr in
+      if t = tenv.return_type then S.SReturn(sexpr), tenv
+      else raise (E.ReturnTypeMismatch(A.string_of_typ t, A.string_of_typ tenv.return_type))
+
 and check_stmt tenv = function
 	  A.Block sl		-> check_block tenv sl
 	| A.ExprStmt e		-> check_expr_stmt tenv e
 	| A.VarDecl v		-> check_vdecl tenv v  
-
+	| A.FunDecl f		-> check_fdecl tenv f
+	| A.Return e		-> check_return tenv e
 
 (* To be used as entrypoint for parsing ast, which is a stmt list *)
 and check_stmt_list tenv stmt_list =
