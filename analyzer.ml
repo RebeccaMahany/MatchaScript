@@ -17,12 +17,10 @@ type symbol_table = {
  ******************************************************)
 type translation_env = {
 	scope : symbol_table;		(* tracks in-scope vars, functions, and classes *)
-	return_type : A.typ; 	(* function's return type *)
-	(* in_switch : bool; *)
+	return_type 	: A.typ;	(* current function's return type *)
+	in_for		: bool;
+	in_while	: bool;
 	(* case - see 4/3/2017 1:06:26 *)
-	(* break_label *)
-	(* continue_label *)
-	(* exception scope? *)
 	(* labels on statements *) (* ref keyword makes field mutable *)
 	(* forward_gotos *)
 }
@@ -160,28 +158,6 @@ and check_var_decl_stmt env v =
 	env.scope.st_vdecls <- v :: env.scope.st_vdecls; (*!!! right way to add it? see 4/3 1:06:00*)
 *)
 
-and check_fun_decl_stmt env f =
-
-and check_class_decl_stmt env c =
-  1
-
-and check_return env e =
-  1
-
-and check_if env e s_if s_el =
-  1
-
-and check_for env e1 e2 e3 s =
-  1
-
-and check_while env e s =
-  1
-
-and check_break env e =
-  1
-
-and check_continue env =
-  1
 *)
 
 (**********************
@@ -343,6 +319,8 @@ let root_symbol_table : symbol_table = {
 let root_env : translation_env = {
   scope = root_symbol_table;
   return_type = A.Int;   (* Int 0? *)
+  in_for = false;
+  in_while = false;
 }
 
 let check_ast ast = match ast with
