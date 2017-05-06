@@ -7,9 +7,12 @@ module E = Exceptions
 (* Symbol table: *)
 type symbol_table = {
 	parent: symbol_table option; (* option means a parent scope is optional *)
-	mutable st_vdecls: A.vdecl list;
-	mutable st_fdecls: A.fdecl list;
-	mutable st_cdecls: A.cdecl list;
+		name		: string;
+	mutable variables	: A.vdecl list;
+		return_type	: A.typ;
+	mutable formals		: A.bind list; 
+	(*mutable st_fdecls: A.fdecl list;
+	mutable st_cdecls: A.cdecl list;*)
 }
 
 (******************************************************
@@ -17,12 +20,20 @@ type symbol_table = {
  ******************************************************)
 type translation_env = {
 	scope : symbol_table;		(* tracks in-scope vars, functions, and classes *)
+	(*name		: string;	(* current function's name *)
 	return_type 	: A.typ;	(* current function's return type *)
-	in_for		: bool;
-	in_while	: bool;
+	formals		: A.bind list;	(* current function's parameters *)
+*)	in_for		: bool;		(* whether in for loop context *)
+	in_while	: bool;		(* whether in while loop context *)
+
 	(* case - see 4/3/2017 1:06:26 *)
 	(* labels on statements *) (* ref keyword makes field mutable *)
-	(* forward_gotos *)
+}
+
+let update_env_context tenv in_for in_while = {
+	scope 		= tenv.scope;
+	in_for		= in_for;
+	in_while	= in_while;
 }
 
 (***********************************
@@ -46,7 +57,7 @@ type translation_env = {
 let rec find_vdecl (scope : symbol_table) name (* option to check only current scope? *)=
 	try
 		(* a vdecl is (typ, string, expr) *)
-		List.find (fun (_, s, _) -> s = name) scope.st_vdecls 
+		List.find (fun (_, s, _) -> s = name) scope.variables 
 	with Not_found ->
 		match scope.parent with
 			Some(parent) -> find_vdecl parent name
@@ -253,8 +264,8 @@ and check_fdecl tenv f =
 and check_return tenv e =
   let sexpr, _ = check_expr tenv e in
     let t = get_sexpr_type sexpr in
-      if t = tenv.return_type then S.SReturn(sexpr), tenv
-      else raise (E.ReturnTypeMismatch(A.string_of_typ t, A.string_of_typ tenv.return_type))
+      if t = tenv.scope.return_type then S.SReturn(sexpr), tenv
+      else raise (E.ReturnTypeMismatch(A.string_of_typ t, A.string_of_typ tenv.scope.return_type))
 
 and check_if tenv e s1 s2 =
   let pred, _ = check_expr tenv e in
@@ -284,15 +295,15 @@ and check_stmt tenv = function
 
 (* To be used as entrypoint for parsing ast, which is a stmt list *)
 and check_stmt_list tenv stmt_list =
-  let ref = ref(tenv) in
-    let rec iter = function
+  let ref = ref(tenv) in		(* create a pointer to env *)
+    let rec iter = function	(* dereference and modify env on each pass *) 
       h::t ->
         let sstmt, tenv = check_stmt !ref h in
           ref := tenv; sstmt::(iter t)
     | [] -> [] 
     in
       let sstmt_list = (iter stmt_list), !ref in
-      sstmt_list
+      sstmt_list		(* parse each statement in the stmt list *)
 
 	
 
@@ -310,15 +321,18 @@ let rec convert_ast_to_sast env prog =
  * Program entry point
  ***********************)
 let root_symbol_table : symbol_table = {
-  parent =  None;
-  st_vdecls = [];
-  st_fdecls = []; (* add builtins *)
-  st_cdecls = [];
+  parent	 = None;
+  name		 = "anon"; 
+  variables	 = [];
+  return_type	 = A.Void;
+  formals	 = [];
+ (* st_fdecls = []; (* add builtins *)
+  st_cdecls = []; *)
 }
 
 let root_env : translation_env = {
   scope = root_symbol_table;
-  return_type = A.Int;   (* Int 0? *)
+  (*return_type = A.Int;   (* Int 0? *) *)
   in_for = false;
   in_while = false;
 }
