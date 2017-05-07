@@ -3,21 +3,21 @@
 
 /********** all variable accesses are replaced by struct accesses *********/
 
-/********** Forward declarations of structs and function pointers **********/
-struct Rec_toplevel;
-struct Rec_toplevel_anon0;
-struct Rec_toplevel_anon0_anon0;
-struct Fp_toplevel_anon0_anon0;
+/********** Forward declarations of function closures 
+(containing the environment and function pointer) **********/
+struct Ctoplevel;
+struct Ctoplevel_anon0;
+struct Ctoplevel_anon0_anon0;
 
 /***************** Functions *****************/
 // Function forward declarations are made 
-struct Rec_toplevel_anon0_anon0 *toplevel_anon0(struct Rec_toplevel *parent, char *greeting);
-void toplevel_anon0_anon0(struct Rec_greetCurried *parent, char *name);
+struct Ctoplevel_anon0_anon0 *toplevel_anon0(struct Ctoplevel *parent, char *greeting);
+void toplevel_anon0_anon0(struct CgreetCurried *parent, char *name);
 
 /***************** Structs *****************/
-struct Rec_toplevel {
+struct Ctoplevel {
 	//functions
-	struct Fp_toplevel_anon0_anon0 (*(*greetCurried)(struct Rec_toplevel *parent, char *greeting));
+	struct Fp_toplevel_anon0_anon0 (*(*greetCurried)(struct Ctoplevel *parent, char *greeting));
 
 	// locals
 	// all function pointers are returned as a struct containing the function's static 
@@ -28,19 +28,19 @@ struct Rec_toplevel {
 // Declare access link structs for each function
 struct greetCurried_anon0 {
 	// pointer to parent struct
-	struct Rec_toplevel *parent;
+	struct Ctoplevel *parent;
 	// all formals and locally declared variables, functions, and classes
 	// formals
 	char *greeting;
 	// locals
 	// functions
-	void (*greetCurried_anon0_anon0)(struct Rec_greetCurried *, char *);
+	void (*greetCurried_anon0_anon0)(struct CgreetCurried *, char *);
 	// classes
 };
 
-struct Rec_greetCurried_anon0_anon0 {
+struct CgreetCurried_anon0_anon0 {
 	// pointer to parent struct
-	struct Rec_greetCurried *parent;
+	struct CgreetCurried *parent;
 	// all formals and locally declared variables, functions, and classes
 	// formals
 	char *name;
@@ -52,12 +52,12 @@ struct Rec_greetCurried_anon0_anon0 {
 // 1. a function pointer to the returned function
 // 2. the environment of the parent of the returned function (static scope)
 struct Fp_toplevel_anon0_anon0 {
-	void (*fp)(struct Rec_greetCurried *parent, char *name);
-	struct Rec_greetCurried *env;
+	void (*fp)(struct CgreetCurried *parent, char *name);
+	struct CgreetCurried *env;
 };
 
-struct Fp_toplevel_anon0_anon0 *toplevel_anon0(struct Rec_toplevel *parent, char *greeting) {
-	struct Rec_greetCurried *mine = malloc(sizeof(struct Rec_greetCurried));
+struct Fp_toplevel_anon0_anon0 *toplevel_anon0(struct Ctoplevel *parent, char *greeting) {
+	struct CgreetCurried *mine = malloc(sizeof(struct CgreetCurried));
 	mine->parent = parent;
 	mine->greeting = greeting; 	// formals, assigns, and vdecls
 
@@ -70,8 +70,8 @@ struct Fp_toplevel_anon0_anon0 *toplevel_anon0(struct Rec_toplevel *parent, char
 	return fp;	// 
 }
 
-void greetCurried_anon0_anon0(struct Rec_greetCurried *parent, char *name) {
-	struct Rec_greetCurried_anon0_anon0 *mine = malloc(sizeof(struct Rec_greetCurried_anon0_anon0));
+void greetCurried_anon0_anon0(struct CgreetCurried *parent, char *name) {
+	struct CgreetCurried_anon0_anon0 *mine = malloc(sizeof(struct CgreetCurried_anon0_anon0));
 	// fill in formals at the beginning of every scope
 	mine->parent = parent;
 	mine->name = name;
@@ -85,7 +85,7 @@ void greetCurried_anon0_anon0(struct Rec_greetCurried *parent, char *name) {
 }
 
 int main(int argc, char **argv) {
-	struct Rec_toplevel *mine = malloc(sizeof(struct Rec_toplevel));
+	struct Ctoplevel *mine = malloc(sizeof(struct Ctoplevel));
 	mine->greetCurried = &toplevel_anon0;
 	// when you call a function, locate where that function is relative to you
 	// is it in your symbol table? --> pass in "mine"

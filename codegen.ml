@@ -108,9 +108,8 @@ let wrap_sstmt_list (sl : sstmt list) =
   } in
   sfdecl_main
 
-(* Add built-ins to toplevel *)
-
 (* Forward-declare structs for the program functions and any returned function pointers *)
+
 
 (* Forward-declare the program functions *)
 
@@ -124,10 +123,9 @@ let translate (sstmt_list : sstmt list) =
   (* wrap the incoming sstmt_list in a main sfdecl *)
   let (prog_main : sfdecl) = wrap_sstmt_list sstmt_list in
 
-  (* Add built-ins to toplevel *)
-
   (* Forward-declare the structs for the program functions and any returned functions
     (using the symbol tables) *)
+
 
   (* Forward-declare the program functions (all sfdecls and sfexprs) *)
 
