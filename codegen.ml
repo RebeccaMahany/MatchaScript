@@ -108,9 +108,21 @@ let wrap_sstmt_list (sl : sstmt list) =
   } in
   sfdecl_main
 
+(* Add built-ins to toplevel *)
+
+(* Forward-declare structs for the program functions and any returned function pointers *)
+
+(* Forward-declare the program functions *)
+
+(* Generate LLVM IR to define the structs of the program functions and returned function pointers *)
+
+(* Generate LLVM IR for functions *)
+
+(* Generate LLVM IR for main function *)
+
 let translate (sstmt_list : sstmt list) =
   (* wrap the incoming sstmt_list in a main sfdecl *)
-  let prog_main = wrap_sstmt_list sstmt_list in
+  let (prog_main : sfdecl) = wrap_sstmt_list sstmt_list in
 
   (* Add built-ins to toplevel *)
 
@@ -119,10 +131,10 @@ let translate (sstmt_list : sstmt list) =
 
   (* Forward-declare the program functions (all sfdecls and sfexprs) *)
 
-  (* Generate LLVM IR to define the structs of the program functions *)
+  (* Generate LLVM IR to define the structs of the program functions and returned function pointers *)
   
   (* Generate LLVM IR for functions *)
 
-  (* Generate LLVM IR for main function (the incoming stmt list) *)
+  (* Generate LLVM IR for main function *)
   (*let _ = codegen_main sstmt_list builder in*)
   the_module
