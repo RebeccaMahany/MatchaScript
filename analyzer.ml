@@ -172,9 +172,7 @@ let convert_fexpr tenv f =
  {
     S.sfdReturnType = f.A.feReturnType;
     S.sfdFname = (* look at the parent's name *) "anon";
-    S.sfdParent = (* look at the parent's name *) "parent";
     S.sfdFormals = f.A.feFormals;
-    S.sfdLocals = (* parse fbody for locals *) [];
     S.sfdBody = f.A.feBody;
   };
   S.SIntLit(0)  (* Ignore the result of this *)
@@ -207,7 +205,8 @@ let check_expr tenv = function
 	| A.Unop(uop, e)	-> check_unop tenv uop e, tenv
 	| A.Assign(e1, e2)	-> check_assign tenv e1 e2, tenv
 	| A.Noexpr		-> S.SNoexpr, tenv	
-
+(* add in fexpr as type fun *)
+(* for check_expr, add in check_call *)
 and get_sexpr_type = function 
 	  S.SIntLit(_)		-> A.Int
 	| S.SBoolLit(_)		-> A.Bool
@@ -256,9 +255,27 @@ and check_vdecl_st tenv v =
                
 
 and check_fdecl tenv f =
-  (* TODO *)
-  S.SExprStmt(S.SIntLit(0)), tenv
-
+  let scope' = (* create a new scope *)
+    	{ 
+	parent = Some(tenv.scope); (* parent may or may not exist *)
+	variables = []; 
+	name = f.A.fdFname;
+	return_type = f.A.fdReturnType;
+	formals = f.A.fdFormals;
+	} in
+  let tenv' = 
+	{ tenv with scope = scope'; in_for = tenv.in_for; in_while = tenv.in_while } in
+  let sl = List.map (fun s->check_stmt tenv' s) f.A.fdBody in (* check fbody with new scope *)
+  scope'.variables <- List.rev scope'.variables;
+    let sfdecl = {
+      S.sfdReturnType = f.A.fdReturnType;
+      S.sfdFname = f.A.fdFname;
+      S.sfdFormals = f.A.fdFormals;
+      S.sfdBody = f.A.fdBody;
+    } in sl;
+      S.SFunDecl(sfdecl), tenv (* return the original tenv after checking the fdecl *)
+  
+ 
 and check_return tenv e =
   let sexpr, _ = check_expr tenv e in
     let t = get_sexpr_type sexpr in
@@ -302,7 +319,7 @@ and check_while tenv e s =
 and check_stmt tenv = function
 	  A.Block sl		-> check_block tenv sl
 	| A.ExprStmt e		-> check_expr_stmt tenv e
-	| A.VarDecl v		-> ignore(check_vdecl_st tenv v); check_vdecl tenv v  
+	| A.VarDecl v		-> check_vdecl_st tenv v; check_vdecl tenv v  
 	| A.FunDecl f		-> check_fdecl tenv f
 	| A.Return e		-> check_return tenv e
 	| A.If(e, s1, s2)	-> check_if tenv e s1 s2

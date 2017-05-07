@@ -41,9 +41,7 @@ and sfexpr = {
 and sfdecl = {
   sfdReturnType : typ;
   sfdFname : string;
-  sfdParent : string;
   sfdFormals : bind list;
-  sfdLocals : expr list;
   sfdBody : stmt list;
 }
 (*

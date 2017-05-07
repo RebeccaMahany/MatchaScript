@@ -15,7 +15,7 @@ exception DuplicateConstructor
 exception DuplicateField
 exception DuplicateFunction of string
 exception DuplicateLocal of string
-exception DuplicateGlobal of string
+exception DuplicateFormal of string
 exception UndeclaredIdentifier of string
 exception AssignmentTypeMismatch of string * string
 exception VariableDeclarationTypeMismatch of string
@@ -31,7 +31,6 @@ exception InvalidBinaryOperator (* a @ b, where @ is not supported *)
 exception InvalidBinopEvalType (* "a" / "b" *)
 exception InvalidUnaryOperator (* ^a *)
 exception InvalidUnopEvalType (* !"not" *)
-exception UndefinedID of string
 
 (* MatchaScript exceptions *)
 exception IncorrectNumberOfCompilerArguments of int
