@@ -2,10 +2,11 @@ open Ast
 open Sast
 
 (* hello world *)
-let stmt_list : sprogram = []
+let hello_world : sprogram = [SExprStmt(SCallExpr(SId("print", Fun), [SStringLit("hello world")],
+	Void))]
 
-
-(* SCallExpr((SId(("print", string)), [SStringLit("hello world")], Void)) *)
+(* empty program *)
+let empty_prog : sprogram = []
 
 let create_fake_sast = 
-	stmt_list
+	empty_prog
