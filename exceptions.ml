@@ -20,6 +20,8 @@ exception UndeclaredIdentifier of string
 exception AssignmentTypeMismatch of string * string
 exception VariableDeclarationTypeMismatch of string
 exception InvalidIfStatementCondition
+exception InvalidForStatementCondition
+exception InvalidWhileStatementCondition
 (*exception CallingBreakOutsideLoop
 exception CallingContinueOutsideLoop*)
 

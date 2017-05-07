@@ -111,11 +111,7 @@ and check_unop env e =
 and check_assign env e1 e2 =
   1
 
-and check_obj_create env s el =
-  1
 
-and check_obj_access env e1 e2 = 
-  1
 
 and check_call_expr env e el =
   1
@@ -157,17 +153,6 @@ and check_block env sl = (* 4/3 1:08:00 *)
 	S.Block(new_scope, sl) (* return block with symbols *)
 *)
 
-and check_expr_stmt env e = 
-  1
-
-and check_var_decl_stmt env v =
-  1
-(*	(* check if v has already been declared - using find_vdecl? *)
-
-	in
-	(* side-effect: add variable to the env symbol table *)
-	env.scope.st_vdecls <- v :: env.scope.st_vdecls; (*!!! right way to add it? see 4/3 1:06:00*)
-*)
 
 *)
 
@@ -288,14 +273,32 @@ and check_if tenv e s1 s2 =
           if t = A.Bool then S.SIf(pred, ifstmt, elsestmt), tenv
           else raise(E.InvalidIfStatementCondition)
 
-and check_for tenv e1 e2 e3 s =
-  (* TODO *)
-  S.SExprStmt(S.SIntLit(0)), tenv
+and check_for tenv e1 e2 e3 s = 
+  let restore = tenv.in_for in
+    let tenv = update_env_context tenv true tenv.in_while in (* in for loop *)
+    let se1, _ = check_expr tenv e1 in
+    let se2, _ = check_expr tenv e2 in
+    let se3, _ = check_expr tenv e3 in
+    let forblock, _ = check_stmt tenv s in
+    let typ = get_sexpr_type se2 in
+    let result =  (* condition can be boolean or nothing, e.g. for(;;) *)
+      if (typ = A.Bool || typ = A.Void) then S.SFor(se1, se2, se3, forblock)
+      else raise(E.InvalidForStatementCondition) in
+    let tenv = update_env_context tenv restore tenv.in_while (* out of for loop*)
+    in result, tenv 
 
 and check_while tenv e s =
-  (* TODO *)
-  S.SExprStmt(S.SIntLit(0)), tenv
-
+  let restore = tenv.in_while in
+    let tenv = update_env_context tenv tenv.in_for true in
+    let se, _ = check_expr tenv e in
+    let typ = get_sexpr_type se in
+    let whileblock, _ = check_stmt tenv s in
+    let result = 
+      if (typ = A.Bool || typ = A.Void) then S.SWhile(se, whileblock)
+      else raise(E.InvalidWhileStatementCondition) in
+    let tenv = update_env_context tenv tenv.in_for restore
+    in result, tenv
+ 
 and check_stmt tenv = function
 	  A.Block sl		-> check_block tenv sl
 	| A.ExprStmt e		-> check_expr_stmt tenv e
