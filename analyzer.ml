@@ -112,7 +112,6 @@ and check_assign env e1 e2 =
   1
 
 
-
 and check_call_expr env e el =
   1
 
@@ -131,27 +130,6 @@ and check_stmt env stmt = match stmt with
   | A.While(e, s)					-> S.check_while env e s
   | A.Break								-> S.check_break env e
   | A.Continue						-> S.check_continue env
-
-and check_block env sl = (* 4/3 1:08:00 *)
-(*
-	(* Create new scope: parent is the existing scope, new scope starts empty *)
-	let new_scope = { 
-		parent: Some(env.scope); 
-		st_vdecls: [];
-		st_fdecls: [];
-		st_cdecls: [];
-	}
-	(* no exceptions yet *)
-
-	(* New environment: same, but with new symbol tables *)
-	let new_env = { env with scope = new_scope; }
-
-	(* Check all the statements in the block *)
-	let sl = List.map (fun s -> stmt new_env s) sl in
-	new_scope.st_vdecls <- List.rev new_scope.st_vdecls;
-
-	S.Block(new_scope, sl) (* return block with symbols *)
-*)
 
 
 *)
@@ -172,62 +150,6 @@ let get_id_type tenv i =
       let get_vdecl_typ (typ,_,_) = typ in
         get_vdecl_typ vdecl 
 
-let convert_fexpr tenv f =
-    (* TODO*)
- {
-    S.sfdReturnType = f.A.feReturnType;
-    S.sfdFname = (* look at the parent's name *) "anon";
-    S.sfdFormals = f.A.feFormals;
-    S.sfdBody = f.A.feBody;
-  };
-  S.SIntLit(0)  (* Ignore the result of this *)
-
-let check_binop tenv e1 op e2 = 
-  (* TODO *)
-  S.SIntLit(0)
-
-let check_unop tenv uop e =
-  (* TODO *)
-  S.SIntLit(0)
-
-let check_assign tenv e1 e2 = 
-  (* TODO *)
-  S.SIntLit(0)
-
-(********************
- * Check Expressions
- ********************)
-let check_expr tenv = function
-	  A.IntLit i		-> S.SIntLit(i), tenv
-	| A.BoolLit b		-> S.SBoolLit(b), tenv
-	| A.FloatLit f		-> S.SFloatLit(f), tenv
-	| A.CharLit c 		-> S.SCharLit(c), tenv
-	| A.StringLit s		-> S.SStringLit(s), tenv
-	| A.FunExpr f		-> convert_fexpr tenv f, tenv
-	(*Here we include fexpr, where we'll convert to fdecl *)
-	| A.Id i		-> S.SId(i, get_id_type tenv i), tenv
-	| A.Binop(e1,op,e2)	-> check_binop tenv e1 op e2, tenv
-	| A.Unop(uop, e)	-> check_unop tenv uop e, tenv
-	| A.Assign(e1, e2)	-> check_assign tenv e1 e2, tenv
-	| A.Noexpr		-> S.SNoexpr, tenv	
-(* add in fexpr as type fun *)
-(* for check_expr, add in check_call *)
-and get_sexpr_type = function 
-	  S.SIntLit(_)		-> A.Int
-	| S.SBoolLit(_)		-> A.Bool
-	| S.SFloatLit(_)	-> A.Float
-	| S.SCharLit(_)		-> A.Char
-	| S.SStringLit(_)	-> A.String
-	| S.SId(_, t)		-> t
-	| S.SBinop(_,_,_,t)	-> t
-	| S.SUnop(_,_,t)	-> t
-	| S.SAssign(_,_,t)	-> t
-	| S.SCallExpr(_,_,t)	-> t
-
-(***********************
- * Check Statements
- ***********************)
-
 (* helper for check_fdecl, checks for fdecl name dup *) 
 let rec find_fdecl_name (scope : symbol_table) name =  (* takes in a scope of type symbol_table *)
   if (scope.name <> name)
@@ -240,6 +162,81 @@ let rec check_block tenv sl = match sl with
 	  [] -> S.SBlock([S.SExprStmt(S.SNoexpr)]), tenv (* empty block *)
 	| _ -> let sl, _ = check_stmt_list tenv sl in 
 	  S.SBlock(sl), tenv 
+
+
+and check_fexpr tenv f =
+  let get_bind_string (_,s) = s in
+  let formals_map = List.fold_left (fun m formal ->  (* check formal dups within current function *)
+    if StringMap.mem (get_bind_string formal) m 
+    then raise(E.DuplicateFormal(get_bind_string formal))
+    else StringMap.add (get_bind_string formal) formal m) StringMap.empty f.A.feFormals in    
+  let scope' = (* create a new scope *)
+    	{ 
+	parent = Some(tenv.scope); (* parent may or may not exist *)
+	variables = []; 
+	name = "anon"; (* anonymous function *)
+	return_type = f.A.feReturnType;
+	formals = f.A.feFormals;
+	} in
+  let tenv' = 
+	{ tenv with scope = scope'; in_for = tenv.in_for; in_while = tenv.in_while } in
+ (* let sl = List.map (fun s->check_stmt tenv' s) f.A.feBody in (* check fbody with new scope *)
+  scope'.variables <- List.rev scope'.variables; *)
+  let get_ssl (sstmt_list, _) = sstmt_list in
+  let sslp = check_stmt_list tenv' f.A.feBody in scope'.variables <- List.rev scope'.variables;
+  let sfexpr = {
+	S.sfeReturnType = f.A.feReturnType;
+	S.sfeFormals = f.A.feFormals;
+	S.sfeBody = get_ssl sslp; 
+} in S.SFunExpr(sfexpr)
+
+
+and check_binop tenv e1 op e2 = 
+  (* TODO *)
+  S.SIntLit(0)
+
+and check_unop tenv uop e =
+  (* TODO *)
+  S.SIntLit(0)
+
+and check_assign tenv e1 e2 = 
+  (* TODO *)
+  S.SIntLit(0)
+
+(********************
+ * Check Expressions
+ ********************)
+and check_expr tenv = function
+	  A.IntLit i		-> S.SIntLit(i), tenv
+	| A.BoolLit b		-> S.SBoolLit(b), tenv
+	| A.FloatLit f		-> S.SFloatLit(f), tenv
+	| A.CharLit c 		-> S.SCharLit(c), tenv
+	| A.StringLit s		-> S.SStringLit(s), tenv
+	| A.FunExpr f		-> check_fexpr tenv f, tenv
+	| A.Id i		-> S.SId(i, get_id_type tenv i), tenv
+	| A.Binop(e1,op,e2)	-> check_binop tenv e1 op e2, tenv
+	| A.Unop(uop, e)	-> check_unop tenv uop e, tenv
+	| A.Assign(e1, e2)	-> check_assign tenv e1 e2, tenv
+	| A.Noexpr		-> S.SNoexpr, tenv	
+
+(* for check_expr, add in check_call *)
+and get_sexpr_type = function 
+	  S.SIntLit(_)		-> A.Int
+	| S.SBoolLit(_)		-> A.Bool
+	| S.SFloatLit(_)	-> A.Float
+	| S.SCharLit(_)		-> A.Char
+	| S.SStringLit(_)	-> A.String
+	| S.SFunExpr(_)		-> A.Fun
+	| S.SId(_, t)		-> t
+	| S.SBinop(_,_,_,t)	-> t
+	| S.SUnop(_,_,t)	-> t
+	| S.SAssign(_,_,t)	-> t
+	| S.SCallExpr(_,_,t)	-> t
+
+(***********************
+ * Check Statements
+ ***********************)
+
 
 (* check exprstmt by just checking expr *)
 and check_expr_stmt tenv e =
