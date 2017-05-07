@@ -33,10 +33,7 @@ and expr =
   | Binop of expr * op * expr
   | Unop of uop * expr
   | Assign of expr * expr
-  | ObjCreate of string * expr list
-  | ObjAccess of expr * expr
-  | CallExpr of expr * expr list (* callee * arguments *)
-  | MemberExpr of expr * [ `Id of string | `ExprStmt of expr ]
+  | CallExpr of expr * expr list 
   | Noexpr
 
 and stmt =
@@ -44,7 +41,6 @@ and stmt =
   | ExprStmt of expr
   | VarDecl of vdecl
   | FunDecl of fdecl
-  | ClassDecl of cdecl
   | Return of expr
   | If of expr * stmt * stmt
   | For of expr * expr * expr * stmt
@@ -61,24 +57,6 @@ and fdecl = {
   fdFname : string;
   fdFormals : bind list;
   fdBody : stmt list;
-}
-
-(* Classes *)
-and cbody = {
-  properties : vdecl list;
-  constructors : constr list;
-  methods : fdecl list;
-}
-
-and cdecl = { 
-  cname : string;
-  (* extends *)
-  cbody: cbody;
-}
-
-and constr = { 
-  formals : bind list;
-  body : stmt list;
 }
 
 (* type program = include_stmt list * constructs *)
@@ -129,8 +107,6 @@ let rec string_of_expr = function
       string_of_expr e1 ^ " " ^ string_of_op o ^ " " ^ string_of_expr e2
   | Unop(o, e) -> string_of_uop o ^ string_of_expr e
   | Assign(e1, e2) -> string_of_expr e1 ^ " = " ^ string_of_expr e2
-  | ObjCreate(classname, args) -> "new " ^ classname ^ "(" ^ String.concat ", " (List.map string_of_expr args) ^ ")"
-  | ObjAccess(e1, e2) -> string_of_expr e1 ^ "." ^ string_of_expr e2
   | CallExpr(call_expr, args) ->
       string_of_expr call_expr ^ "(" ^ String.concat ", " (List.map string_of_expr args) ^ ")"
   | Noexpr -> ""
@@ -141,7 +117,6 @@ and string_of_stmt = function
   | ExprStmt(expr) -> string_of_expr expr ^ ";\n"
   | VarDecl(v) -> string_of_vdecl v
   | FunDecl(fd) -> string_of_fdecl fd
-  | ClassDecl(cdecl) -> string_of_cdecl cdecl
   | Return(expr) -> "return " ^ string_of_expr expr ^ ";\n";
   | If(e, s, Block([])) -> "if (" ^ string_of_expr e ^ ")\n" ^ string_of_stmt s
   | If(e, s1, s2) ->  "if (" ^ string_of_expr e ^ ")\n" ^
@@ -164,23 +139,6 @@ and string_of_fdecl fdecl =
   "function " ^ string_of_typ fdecl.fdReturnType ^ " " ^
   fdecl.fdFname ^ "(" ^ String.concat ", " (List.map string_of_bind fdecl.fdFormals) ^
   ")\n{\n" ^ String.concat "" (List.map string_of_stmt fdecl.fdBody) ^ "}"
- 
-and string_of_method mth = 
-  string_of_typ mth.fdReturnType ^ " " ^
-  mth.fdFname ^ "(" ^ String.concat ", " (List.map string_of_bind mth.fdFormals) ^
-  ")\n{\n" ^ String.concat "" (List.map string_of_stmt mth.fdBody) ^ "}"
-
-and string_of_constr constr =
-  "constructor(" ^ String.concat ", " (List.map string_of_bind constr.formals) ^ ") {" 
-  ^ String.concat "" (List.map string_of_stmt constr.body) ^ "}\n" 
-
-and string_of_cbody cbody = 
-  String.concat "" (List.map string_of_vdecl cbody.properties) ^ 
-  String.concat "" (List.map string_of_constr cbody.constructors) ^ String.concat "" 
-  (List.map string_of_method cbody.methods)
-
-and string_of_cdecl cdecl =
-  "class " ^ cdecl.cname ^ "{\n" ^ string_of_cbody cdecl.cbody ^ "}\n"
 
 let string_of_program prog = match prog with 
   Program(stmts) -> String.concat "" (List.map string_of_stmt stmts) ^ "\n"

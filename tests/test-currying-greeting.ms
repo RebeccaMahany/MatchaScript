@@ -3,9 +3,6 @@ fun greetCurried = function fun (string greeting) {
     print(greeting);
     print(", ");
     print(name);
-    return function void (string punctuation) {
-    	print(punctuation);
-    }
   };
 };
 
@@ -14,3 +11,4 @@ fun greetHello = greetCurried("Hello");
 greetHello("Heidi"); // "Hello, Heidi"
 
 greetCurried("Hi there")("Howard"); // "Hi there, Howard"
+/* How to handle that in codegen? */

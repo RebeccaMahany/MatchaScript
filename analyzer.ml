@@ -7,9 +7,8 @@ module E = Exceptions
 (* Symbol table: *)
 type symbol_table = {
 	parent: symbol_table option; (* option means a parent scope is optional *)
-	mutable st_vdecls: A.vdecl list;
-	mutable st_fdecls: A.fdecl list;
-	mutable st_cdecls: A.cdecl list;
+	mutable st_vdecls: S.svdecl list;
+	mutable st_fdecls: S.sfdecl list;
 }
 
 (******************************************************
@@ -199,7 +198,6 @@ let root_symbol_table : symbol_table = {
   parent =  None;
   st_vdecls = [];
   st_fdecls = []; (* add builtins *)
-  st_cdecls = [];
 }
 
 let root_env : translation_env = {
