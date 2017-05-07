@@ -2,7 +2,7 @@ module S = Sast
 module A = Ast
 module E = Exceptions
 
-(* Data structures *)
+module StringMap = Map.Make(String)
 
 (* Symbol table: *)
 type symbol_table = {
@@ -159,13 +159,18 @@ and check_block env sl = (* 4/3 1:08:00 *)
 (**********************
 * Helper functions
 **********************)
+let rec find_variable (scope : symbol_table) name =  (* takes in a scope of type symbol_table *)
+  try List.find (fun (_,n,_) -> n = name) scope.variables
+  with Not_found ->
+    match scope.parent with 
+      Some(parent) -> find_variable parent name (* keep searching each parent's scope if not found until there's no more parent *)
+    | _ -> raise Not_found
+
 let get_id_type tenv i =
-  let get_vname (_,name,_) = name in
-    let vdecl = try List.find (fun x->(get_vname x)=i) tenv.scope.variables 
+  let vdecl = try find_variable tenv.scope i
     with | Not_found -> raise (E.UndeclaredIdentifier(i)) in
       let get_vdecl_typ (typ,_,_) = typ in
         get_vdecl_typ vdecl 
-        
 
 let convert_fexpr tenv f =
     (* TODO*)
@@ -222,6 +227,15 @@ and get_sexpr_type = function
 (***********************
  * Check Statements
  ***********************)
+
+(* helper for check_fdecl, checks for fdecl name dup *) 
+let rec find_fdecl_name (scope : symbol_table) name =  (* takes in a scope of type symbol_table *)
+  if (scope.name <> name)
+  then match scope.parent with 
+      Some(parent) -> find_fdecl_name parent name
+    | _ -> raise Not_found 
+  else raise(E.DuplicateFunction(name))
+
 let rec check_block tenv sl = match sl with
 	  [] -> S.SBlock([S.SExprStmt(S.SNoexpr)]), tenv (* empty block *)
 	| _ -> let sl, _ = check_stmt_list tenv sl in 
@@ -253,8 +267,14 @@ and check_vdecl_st tenv v =
       with | Not_found	-> v
            |  _ 	-> raise(E.DuplicateLocal(vname))
                
-
 and check_fdecl tenv f =
+  try find_fdecl_name tenv.scope f.A.fdFname  (* check name dups *)
+  with | Not_found -> 
+  let get_bind_string (_,s) = s in
+  let formals_map = List.fold_left (fun m formal ->  (* check formal dups within current function *)
+    if StringMap.mem (get_bind_string formal) m 
+    then raise(E.DuplicateFormal(get_bind_string formal))
+    else StringMap.add (get_bind_string formal) formal m) StringMap.empty f.A.fdFormals in    
   let scope' = (* create a new scope *)
     	{ 
 	parent = Some(tenv.scope); (* parent may or may not exist *)
@@ -275,7 +295,6 @@ and check_fdecl tenv f =
     } in sl;
       S.SFunDecl(sfdecl), tenv (* return the original tenv after checking the fdecl *)
   
- 
 and check_return tenv e =
   let sexpr, _ = check_expr tenv e in
     let t = get_sexpr_type sexpr in
