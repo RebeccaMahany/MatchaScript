@@ -243,12 +243,12 @@ let rec check_block tenv sl = match sl with
 	| _ -> let sl, _ = check_stmt_list tenv sl in 
 	  S.SBlock(sl), tenv 
 
-(* Check exprstmt by just checking expr *)
+(* check exprstmt by just checking expr *)
 and check_expr_stmt tenv e =
   let sexpr, tenv = check_expr tenv e in
     S.SExprStmt(sexpr), tenv
 
-(* TODO: add vdecl to symbol table *)
+(* check vdecl dup, vdecl type, and then add to symbol table *)
 and check_vdecl tenv v =
   let get_v_expr (_,_,e) = e in (* helper to get expr from vdecl tuple *)
     let vexpr = get_v_expr v in
@@ -258,8 +258,17 @@ and check_vdecl tenv v =
             let vtyp = get_v_typ v in
               let get_v_name (_,n,_) = n in
                 let vname = get_v_name v in
-                  if vtyp = vstyp then S.SVarDecl(v), tenv
+                  if vtyp = vstyp (* check declared type of vdecl with its actual type *)
+                    then (tenv.scope.variables <- v:: tenv.scope.variables
+; S.SVarDecl(v), tenv)  (* add the vdecl to symbol table *)
                     else raise(E.VariableDeclarationTypeMismatch(vname)) 
+and check_vdecl_st tenv v =  
+  let get_v_name (_,n,_) = n in
+    let vname = get_v_name v in
+      try List.find (fun x->(get_v_name x)=vname) tenv.scope.variables (* check to see if local variable already exists *)
+      with | Not_found	-> v
+           |  _ 	-> raise(E.DuplicateLocal(vname))
+               
 
 and check_fdecl tenv f =
   (* TODO *)
@@ -290,7 +299,7 @@ and check_while tenv e s =
 and check_stmt tenv = function
 	  A.Block sl		-> check_block tenv sl
 	| A.ExprStmt e		-> check_expr_stmt tenv e
-	| A.VarDecl v		-> check_vdecl tenv v  
+	| A.VarDecl v		-> ignore(check_vdecl_st tenv v); check_vdecl tenv v  
 	| A.FunDecl f		-> check_fdecl tenv f
 	| A.Return e		-> check_return tenv e
 	| A.If(e, s1, s2)	-> check_if tenv e s1 s2
