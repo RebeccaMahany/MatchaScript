@@ -288,11 +288,12 @@ and check_vdecl tenv v =
     let vexpr = get_v_expr v in
       let vsexpr, _ = check_expr tenv vexpr in
         let vstyp = get_sexpr_type vsexpr in
+(*	Printf.printf "%s " (A.string_of_typ vstyp); *)
           let get_v_typ (t,_,_) = t in  (* helper to get typ of vdecl *)
             let vtyp = get_v_typ v in
               let get_v_name (_,n,_) = n in
                 let vname = get_v_name v in
-                  if vtyp = vstyp (* check declared type of vdecl with its actual type *)
+                  if (vtyp = vstyp || vstyp = A.Void) (* check declared type of vdecl with its actual type, or if vdecl hasn't been initialized yet *) 
                     then (tenv.scope.variables <- v:: tenv.scope.variables
 ; S.SVarDecl(v), tenv)  (* add the vdecl to symbol table *)
                     else raise(E.VariableDeclarationTypeMismatch(vname)) 
