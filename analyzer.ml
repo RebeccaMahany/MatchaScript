@@ -242,8 +242,16 @@ and check_unop tenv uop e =
 	| _		-> raise(E.InvalidUnaryOperator)
   
 and check_assign tenv e1 e2 = 
-  (* TODO *)
-  S.SIntLit(0)
+  let se1, _ = check_expr tenv e1 in
+  let se2, _ = check_expr tenv e2 in
+  let t1 = get_sexpr_type se1 in
+  let t2 = get_sexpr_type se2 in
+  if t1 = t2 (* assignment types must be exactly the same *)
+     then S.SAssign(se1, se2, t1)
+     else raise(E.AssignmentTypeMismatch(A.string_of_typ t1, A.string_of_typ t2))
+
+and check_call tenv e1 args =
+S.SIntLit(0)
 
 (********************
  * Check Expressions
@@ -259,7 +267,8 @@ and check_expr tenv = function
 	| A.Binop(e1,op,e2)	-> check_binop tenv e1 op e2, tenv
 	| A.Unop(uop, e)	-> check_unop tenv uop e, tenv
 	| A.Assign(e1, e2)	-> check_assign tenv e1 e2, tenv
-	| A.Noexpr		-> S.SNoexpr, tenv	
+	| A.Noexpr		-> S.SNoexpr, tenv
+	| A.CallExpr(e1, args)	-> check_call tenv e1 args, tenv 	
 
 (* for check_expr, add in check_call *)
 and get_sexpr_type = function 
