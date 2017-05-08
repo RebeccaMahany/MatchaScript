@@ -52,15 +52,42 @@ let rec find_formal (scope : symbol_table) name =  (* takes in a scope of type s
       Some(parent) -> find_formal parent name (* keep searching each parent's scope if not found until there's no more parent *)
     | _ -> raise Not_found
 
-let get_id_type tenv i = 
+let rec find_fdecl (scope : symbol_table) name =
+  if scope.name <> name
+  then match scope.parent with
+     Some(parent) -> find_fdecl parent name
+   | _ -> A.Void
+  else let t = A.Fun in t
+
+let search_vdecls tenv i = 
    let vdecl = try find_variable tenv.scope i
     with | Not_found -> (A.Void, "Not Found", A.IntLit(0)) (*raise (E.UndeclaredIdentifier(i))*) in
       let get_vdecl_typ (typ,_,_) = typ in
-         get_vdecl_typ vdecl; 
+         get_vdecl_typ vdecl
+(*
+let search_fdecls tenv i =
+  let fname = try find_fdecl tenv.scope i
+  with | Not_found -> A.Void in
+    A.Fun 
+*)
+let search_formals tenv i =
    let formal = try find_formal tenv.scope i
-     with | Not_found -> raise (E.UndeclaredIdentifier(i)) in
+     with | Not_found -> (A.Void, "Void")(*raise (E.UndeclaredIdentifier(i))*) in
        let get_formal_typ (typ,_) = typ in
          get_formal_typ formal
+
+let get_id_type tenv i =
+  let typ = search_vdecls tenv i in
+  if typ = A.Void 
+  then begin
+   let ft = find_fdecl tenv.scope i in
+     if ft = A.Void 
+     then (let t = search_formals tenv i in
+           if t = A.Void then raise(E.UndeclaredIdentifier(i))
+           else t) 
+     else ft
+  end 
+  else typ
   
 
 (* helper for check_fdecl, checks for fdecl name dup *) 
