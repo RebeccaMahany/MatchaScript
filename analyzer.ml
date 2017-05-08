@@ -339,6 +339,10 @@ let check_ast ast = match ast with
 	    let sast = check_stmt_list root_env stmts in sast
 	| _ -> raise(E.InvalidCompilerArgument)
 
-(* Testing *)
-let test_ok sast = match sast with
-  _ -> "okay\n"
+(* Testing *) 
+let test_ok sast = match sast with 
+_ -> "okay\n"
+
+(*
+let ast_one = A.Program([A.ExprStmt(A.IntLit(1))]) in
+check_ast ast_one *)
