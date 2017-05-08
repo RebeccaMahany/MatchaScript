@@ -190,10 +190,41 @@ and check_fexpr tenv f =
 	S.sfeBody = get_ssl sslp; 
 } in S.SFunExpr(sfexpr)
 
+and check_math_binop se1 op se2 = function (* only numbers are supported *)
+	| (A.Int, A.Float) 
+	| (A.Float, A.Int)
+	| (A.Float, A.Float)	-> S.SBinop(se1, op, se2, A.Float)
+	| (A.Int, A.Int)	-> S.SBinop(se1, op, se2, A.Int)
+	| _ -> raise(E.InvalidBinopEvalType)
+
+and check_equal_binop se1 op se2 t1 t2 = (* no floats or functions *)
+  if (t1 = A.Float || t2 = A.Float || t1 = A.Fun || t2 = A.Fun) 
+  then raise(E.InvalidBinopEvalType)
+  else if t1 = t2 then S.SBinop(se1, op, se2, A.Bool)
+       else raise(E.InvalidBinopEvalType)
+
+and check_compare_binop se1 op se2 = function (* only numbers supported *)
+	| (A.Int, A.Float) 
+	| (A.Float, A.Int)
+	| (A.Float, A.Float)	
+	| (A.Int, A.Int)	-> S.SBinop(se1, op, se2, A.Bool)
+	| _ -> raise(E.InvalidBinopEvalType)
+
+and check_bool_binop se1 op se2 = function (* only boolean supported *)
+	| (A.Bool, A.Bool)	-> S.SBinop(se1, op, se2, A.Bool)
+	| _ -> raise(E.InvalidBinopEvalType) 
 
 and check_binop tenv e1 op e2 = 
-  (* TODO *)
-  S.SIntLit(0)
+  let se1, _ = check_expr tenv e1 in
+  let se2, _ = check_expr tenv e2 in
+  let t1 = get_sexpr_type se1 in
+  let t2 = get_sexpr_type se2 in
+  match op with
+	  A.Add | A.Sub | A.Mult | A.Div | A.Mod	-> check_math_binop se1 op se2 (t1, t2)
+	| A.Equal | A.Neq				-> check_equal_binop se1 op se2 t1 t2
+	| A.Less | A.Leq | A.Greater | A.Geq    	-> check_compare_binop se1 op se2 (t1, t2)
+	| A.And | A.Or					-> check_bool_binop se1 op se2 (t1, t2)
+	| _ -> raise(E.InvalidBinaryOperator)
 
 and check_unop tenv uop e =
   (* TODO *)

@@ -22,13 +22,13 @@ exception VariableDeclarationTypeMismatch of string
 exception InvalidIfStatementCondition
 exception InvalidForStatementCondition
 exception InvalidWhileStatementCondition
+exception InvalidBinopEvalType (* "a" / "b" *)
+exception InvalidBinaryOperator (* a @ b, where @ is not supported *)
 (*exception CallingBreakOutsideLoop
 exception CallingContinueOutsideLoop*)
 
 (* Codegen exceptions *)
 exception InvalidTypePassedToPrint
-exception InvalidBinaryOperator (* a @ b, where @ is not supported *)
-exception InvalidBinopEvalType (* "a" / "b" *)
 exception InvalidUnaryOperator (* ^a *)
 exception InvalidUnopEvalType (* !"not" *)
 
