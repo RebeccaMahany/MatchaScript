@@ -1,12 +1,12 @@
 function void main() {
-    i = 10;
-    j = i % 3;
+    int i = 10;
+    int j = i % 3;
     print(j);
 
-    k = i % 2;
+    int k = i % 2;
     print(k);
 
-    l = i % 5;
+    int l = i % 5;
     print(l);
 
 }

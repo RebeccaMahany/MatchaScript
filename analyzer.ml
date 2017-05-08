@@ -10,6 +10,7 @@ type symbol_table = {
 	mutable variables	: A.vdecl list;
 		return_type	: A.typ;
 	mutable formals		: A.bind list;
+	mutable	fun_names	: string list;
 	(*	reserved	: string list; *)
 	(*mutable st_fdecls: A.fdecl list;
 	mutable st_cdecls: A.cdecl list;*)
@@ -38,6 +39,18 @@ let update_env_context tenv in_for in_while = {
 (**********************
 * Helper functions
 **********************)
+let rec check_call_helper (scope : symbol_table) name =  
+    if (scope.name <> name)	(* search for function name in scope *)
+    then match scope.parent with 
+      Some(parent) -> check_call_helper parent name
+    | _ -> raise Not_found (*raise(E.UndefinedFunction(name))*)
+    else name
+
+let check_call_wrapper tenv i =
+  let res = try check_call_helper tenv.scope i 
+   with Not_found -> "A.Void" in 
+     res
+
 let rec find_variable (scope : symbol_table) name =  (* takes in a scope of type symbol_table *)
   try List.find (fun (_,n,_) -> n = name) scope.variables
   with Not_found ->
@@ -52,24 +65,26 @@ let rec find_formal (scope : symbol_table) name =  (* takes in a scope of type s
       Some(parent) -> find_formal parent name (* keep searching each parent's scope if not found until there's no more parent *)
     | _ -> raise Not_found
 
-let rec find_fdecl (scope : symbol_table) name =
-  if scope.name <> name
-  then match scope.parent with
-     Some(parent) -> find_fdecl parent name
-   | _ -> A.Void
-  else let t = A.Fun in t
+let find_fdecl (scope : symbol_table) name =
+  try List.find (fun x -> x = name) scope.fun_names
+  with Not_found -> raise Not_found
 
+let check_call_fun tenv i =
+  let res = try find_fdecl tenv.scope i 
+  with Not_found -> "A.Void" in
+    res
+    
 let search_vdecls tenv i = 
    let vdecl = try find_variable tenv.scope i
     with | Not_found -> (A.Void, "Not Found", A.IntLit(0)) (*raise (E.UndeclaredIdentifier(i))*) in
       let get_vdecl_typ (typ,_,_) = typ in
          get_vdecl_typ vdecl
-(*
+
 let search_fdecls tenv i =
   let fname = try find_fdecl tenv.scope i
-  with | Not_found -> A.Void in
-    A.Fun 
-*)
+  with | Not_found -> "Void" in
+  if fname = "Void" then A.Void else A.Fun
+
 let search_formals tenv i =
    let formal = try find_formal tenv.scope i
      with | Not_found -> (A.Void, "Void")(*raise (E.UndeclaredIdentifier(i))*) in
@@ -80,7 +95,7 @@ let get_id_type tenv i =
   let typ = search_vdecls tenv i in
   if typ = A.Void 
   then begin
-   let ft = find_fdecl tenv.scope i in
+   let ft = search_fdecls tenv i in
      if ft = A.Void 
      then (let t = search_formals tenv i in
            if t = A.Void then raise(E.UndeclaredIdentifier(i))
@@ -88,7 +103,7 @@ let get_id_type tenv i =
      else ft
   end 
   else typ
-  
+ 
 
 (* helper for check_fdecl, checks for fdecl name dup *) 
 let rec find_fdecl_name (scope : symbol_table) name =  (* takes in a scope of type symbol_table *)
@@ -117,6 +132,7 @@ and check_fexpr tenv f =
 	name = "anon"; (* anonymous function *)
 	return_type = f.A.feReturnType;
 	formals = f.A.feFormals;
+	fun_names = [];
 	} in
   let tenv' = 
 	{ tenv with scope = scope'; } in
@@ -189,7 +205,7 @@ and check_assign tenv e1 e2 =
   if t1 = t2 (* assignment types must be exactly the same *)
      then S.SAssign(se1, se2, t1)
      else raise(E.AssignmentTypeMismatch(A.string_of_typ t1, A.string_of_typ t2))
-
+(*
 and check_call tenv e args =
   let se, _ = check_expr tenv e in
     let name = A.string_of_expr e in
@@ -197,12 +213,33 @@ and check_call tenv e args =
     if (scope.name <> name)	(* search for function name in scope *)
     then match scope.parent with 
       Some(parent) -> check_call_helper parent name args
-    | _ -> raise(E.UndefinedFunction(name))
+    | _ -> (*raise(E.UndefinedFunction(name))*)
+      try find_fdecl tenv.scope name with 
+       | Not_found -> raise(E.UndefinedFunction(name))
     else			(* if found, convert to SCallExpr *)
     let get_s (s,_) = s in 
     let sargs = List.map (fun x -> get_s (check_expr tenv x)) args in
     S.SCallExpr(se, sargs, scope.return_type) in
     check_call_helper tenv.scope name args
+*)
+
+and check_call tenv e args =
+ let se, _ = check_expr tenv e in
+    let name = A.string_of_expr e in
+
+    let result = check_call_wrapper tenv name in
+    if result = "A.Void" 
+    then begin
+     let res = check_call_fun tenv name in
+     if res = "A.Void" then raise(E.UndefinedFunction(name))
+     else (let get_s (s,_) = s in 
+       let sargs = List.map (fun x -> get_s (check_expr tenv x)) args in
+       S.SCallExpr(se, sargs, tenv.scope.return_type))
+    end
+    else 
+    let get_s (s,_) = s in 
+    let sargs = List.map (fun x -> get_s (check_expr tenv x)) args in
+    S.SCallExpr(se, sargs, tenv.scope.return_type)
 
 (********************
  * Check Expressions
@@ -273,7 +310,9 @@ and check_fdecl tenv f =
   let formals_map = List.fold_left (fun m formal ->  (* check formal dups within current function *)
     if StringMap.mem (get_bind_string formal) m 
     then raise(E.DuplicateFormal(get_bind_string formal))
-    else StringMap.add (get_bind_string formal) formal m) StringMap.empty f.A.fdFormals in    
+    else StringMap.add (get_bind_string formal) formal m) StringMap.empty f.A.fdFormals in  
+  tenv.scope.fun_names <- tenv.scope.fun_names@[f.A.fdFname];
+ (* List.iter (Printf.printf "%s ") tenv.scope.fun_names; *) 
   let scope' = (* create a new scope *)
     	{ 
 	parent = Some(tenv.scope); (* parent may or may not exist *)
@@ -281,6 +320,7 @@ and check_fdecl tenv f =
 	name = f.A.fdFname;
 	return_type = f.A.fdReturnType;
 	formals = f.A.fdFormals;
+	fun_names = [f.A.fdFname];
 	} in
   let tenv' = 
 	{ tenv with scope = scope'; } in
@@ -368,6 +408,7 @@ let root_symbol_table : symbol_table = {
   variables	 = [(A.Fun, "print", A.Id("print"))];
   return_type	 = A.Void;
   formals	 = []; 
+  fun_names 	 = [];
 }
 
 let print_symbol_table : symbol_table = {
@@ -376,6 +417,7 @@ let print_symbol_table : symbol_table = {
   variables	 = [(A.Fun, "print", A.Id("print"))];
   return_type	 = A.Void;
   formals	 = [(A.String, "input")];
+  fun_names	 = [];
 }
 
 let root_env : translation_env = {
