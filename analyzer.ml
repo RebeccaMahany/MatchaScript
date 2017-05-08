@@ -179,7 +179,7 @@ and check_fexpr tenv f =
 	formals = f.A.feFormals;
 	} in
   let tenv' = 
-	{ tenv with scope = scope'; in_for = tenv.in_for; in_while = tenv.in_while } in
+	{ tenv with scope = scope'; } in
  (* let sl = List.map (fun s->check_stmt tenv' s) f.A.feBody in (* check fbody with new scope *)
   scope'.variables <- List.rev scope'.variables; *)
   let get_ssl (sstmt_list, _) = sstmt_list in
@@ -250,8 +250,20 @@ and check_assign tenv e1 e2 =
      then S.SAssign(se1, se2, t1)
      else raise(E.AssignmentTypeMismatch(A.string_of_typ t1, A.string_of_typ t2))
 
-and check_call tenv e1 args =
-S.SIntLit(0)
+and check_call tenv e args =
+  let se, _ = check_expr tenv e in
+    let name = A.string_of_expr e in
+  let rec check_call_helper (scope : symbol_table) name args =  
+    if (scope.name <> name)	(* search for function name in scope *)
+    then match scope.parent with 
+      Some(parent) -> check_call_helper parent name args
+    | _ -> raise(E.UndefinedFunction(name))
+    else			(* if found, convert to SCallExpr *)
+    let get_s (s,_) = s in 
+    let sargs = List.map (fun x -> get_s (check_expr tenv x)) args in
+    S.SCallExpr(se, sargs, scope.return_type) in
+    check_call_helper tenv.scope name args
+
 
 (********************
  * Check Expressions
@@ -268,7 +280,7 @@ and check_expr tenv = function
 	| A.Unop(uop, e)	-> check_unop tenv uop e, tenv
 	| A.Assign(e1, e2)	-> check_assign tenv e1 e2, tenv
 	| A.Noexpr		-> S.SNoexpr, tenv
-	| A.CallExpr(e1, args)	-> check_call tenv e1 args, tenv 	
+	| A.CallExpr(e, args)	-> check_call tenv e args, tenv 	
 
 (* for check_expr, add in check_call *)
 and get_sexpr_type = function 
@@ -283,6 +295,7 @@ and get_sexpr_type = function
 	| S.SUnop(_,_,t)	-> t
 	| S.SAssign(_,_,t)	-> t
 	| S.SCallExpr(_,_,t)	-> t
+	| S.SNoexpr		-> A.Void
 
 (***********************
  * Check Statements
@@ -332,7 +345,7 @@ and check_fdecl tenv f =
 	formals = f.A.fdFormals;
 	} in
   let tenv' = 
-	{ tenv with scope = scope'; in_for = tenv.in_for; in_while = tenv.in_while } in
+	{ tenv with scope = scope'; } in
   let sl = List.map (fun s->check_stmt tenv' s) f.A.fdBody in (* check fbody with new scope *)
   scope'.variables <- List.rev scope'.variables;
     let sfdecl = {
