@@ -9,7 +9,8 @@ type symbol_table = {
 		name		: string;
 	mutable variables	: A.vdecl list;
 		return_type	: A.typ;
-	mutable formals		: A.bind list; 
+	mutable formals		: A.bind list;
+	(*	reserved	: string list; *)
 	(*mutable st_fdecls: A.fdecl list;
 	mutable st_cdecls: A.cdecl list;*)
 }
@@ -44,11 +45,23 @@ let rec find_variable (scope : symbol_table) name =  (* takes in a scope of type
       Some(parent) -> find_variable parent name (* keep searching each parent's scope if not found until there's no more parent *)
     | _ -> raise Not_found
 
-let get_id_type tenv i =
-  let vdecl = try find_variable tenv.scope i
-    with | Not_found -> raise (E.UndeclaredIdentifier(i)) in
+let rec find_formal (scope : symbol_table) name =  (* takes in a scope of type symbol_table *)
+  try List.find (fun (_,n) -> n = name) scope.formals
+  with Not_found ->
+    match scope.parent with 
+      Some(parent) -> find_formal parent name (* keep searching each parent's scope if not found until there's no more parent *)
+    | _ -> raise Not_found
+
+let get_id_type tenv i = 
+   let vdecl = try find_variable tenv.scope i
+    with | Not_found -> (A.Void, "Not Found", A.IntLit(0)) (*raise (E.UndeclaredIdentifier(i))*) in
       let get_vdecl_typ (typ,_,_) = typ in
-        get_vdecl_typ vdecl 
+         get_vdecl_typ vdecl; 
+   let formal = try find_formal tenv.scope i
+     with | Not_found -> raise (E.UndeclaredIdentifier(i)) in
+       let get_formal_typ (typ,_) = typ in
+         get_formal_typ formal
+  
 
 (* helper for check_fdecl, checks for fdecl name dup *) 
 let rec find_fdecl_name (scope : symbol_table) name =  (* takes in a scope of type symbol_table *)
@@ -237,7 +250,7 @@ and check_fdecl tenv f =
   let scope' = (* create a new scope *)
     	{ 
 	parent = Some(tenv.scope); (* parent may or may not exist *)
-	variables = []; 
+	variables = [(A.Fun, "print", A.Id("print"))]; 
 	name = f.A.fdFname;
 	return_type = f.A.fdReturnType;
 	formals = f.A.fdFormals;
@@ -320,16 +333,26 @@ and check_stmt_list tenv stmt_list =
 (***********************
  * Program entry point
  ***********************)
+let builtin_functions = ["print"]
+
 let root_symbol_table : symbol_table = {
   parent	 = None;
   name		 = "anon"; 
-  variables	 = [];
+  variables	 = [(A.Fun, "print", A.Id("print"))];
   return_type	 = A.Void;
-  formals	 = [];
+  formals	 = []; 
+}
+
+let print_symbol_table : symbol_table = {
+  parent	 = Some(root_symbol_table);
+  name		 = "print"; 
+  variables	 = [(A.Fun, "print", A.Id("print"))];
+  return_type	 = A.Void;
+  formals	 = [(A.String, "input")];
 }
 
 let root_env : translation_env = {
-  scope = root_symbol_table;
+  scope = print_symbol_table;
   in_for = false;
   in_while = false;
 }
