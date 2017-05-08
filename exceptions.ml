@@ -34,5 +34,5 @@ exception InvalidTypePassedToPrint
 
 (* MatchaScript exceptions *)
 exception IncorrectNumberOfCompilerArguments of int
-exception InvalidCompilerArgument of string
+exception InvalidCompilerArgument
 exception NoFileArgument
