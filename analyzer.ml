@@ -227,9 +227,20 @@ and check_binop tenv e1 op e2 =
 	| _ -> raise(E.InvalidBinaryOperator)
 
 and check_unop tenv uop e =
-  (* TODO *)
-  S.SIntLit(0)
-
+  let se, _ = check_expr tenv e in
+  let t = get_sexpr_type se in
+  let check_num_unop uop se = function (* numbers only *)
+	| A.Int -> S.SUnop(uop, se, A.Int)
+	| A.Float -> S.SUnop(uop, se, A.Float)
+	| _ -> raise(E.InvalidUnopEvalType) in
+  let check_bool_unop uop se = function (* bool only *)
+	| A.Bool -> S.SUnop(uop, se, A.Bool)
+	| _ -> raise(E.InvalidUnopEvalType) in
+  match uop with
+	  A.Neg		-> check_num_unop uop se t
+	| A.Not		-> check_bool_unop uop se t
+	| _		-> raise(E.InvalidUnaryOperator)
+  
 and check_assign tenv e1 e2 = 
   (* TODO *)
   S.SIntLit(0)

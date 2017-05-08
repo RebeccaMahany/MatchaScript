@@ -24,13 +24,13 @@ exception InvalidForStatementCondition
 exception InvalidWhileStatementCondition
 exception InvalidBinopEvalType (* "a" / "b" *)
 exception InvalidBinaryOperator (* a @ b, where @ is not supported *)
+exception InvalidUnaryOperator (* ^a *)
+exception InvalidUnopEvalType (* !"not" *)
 (*exception CallingBreakOutsideLoop
 exception CallingContinueOutsideLoop*)
 
 (* Codegen exceptions *)
 exception InvalidTypePassedToPrint
-exception InvalidUnaryOperator (* ^a *)
-exception InvalidUnopEvalType (* !"not" *)
 
 (* MatchaScript exceptions *)
 exception IncorrectNumberOfCompilerArguments of int
