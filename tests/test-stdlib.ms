@@ -1,21 +1,3 @@
-/***************
-Error objects
-***************/
-class Error{
-
-    /** Class fields **/
-    string message; /** Error message **/
-    string name; /** Type of error **/
-
-    /** Constructor with error message **/
-    constructor(string msg) {
-        this.name = "Error";
-        this.message = msg;
-    }
-}
-
-
-
 /*************** 
 Functions for converting types 
 ***************/
@@ -124,12 +106,6 @@ function float float_abs(float i) {
 }
 
 
-/** Random function to return random float between 0 and 1 **/
-function float rand() {
-    return 0.0;
-}
-
-
 /** Get max of two ints **/
 function int int_max(int a, int b){
     if (a > b){
@@ -194,20 +170,34 @@ function float float_pow(float base, int pow){
 }
 
 
-/** Get ceiling of float, returns int **/
-function int ceil(float f) {
+/** Get ceiling of float **/
+function float ceil(float f) {
     remainder = f % 1;
     new_f = f + 1 - remainder;
-    return floatToInt(new_f);
+    return new_f;
 }
 
 
 /** Get floor of float, returns int **/
-function int floor(float f) {
+function float floor(float f) {
     remainder = f % 1;
     new_f = f - remainder;
-    return floatToInt(new_f);
+    return new_f;
 }
 
 
 /** Round a float to the decimal place specified **/
+function float round(float f) {
+    float absOfF = float_abs(f);
+    float floorOfF = floor(f);
+    float result;
+
+    /* Determine whether we are closer to the ceiling of f */
+    if (absOfF - floorOfF >= 0.5) {
+        result = floorOfF + 1.0;
+    /* Else we are closer to the floor of f */
+    } else {                
+        result = floorOfF;
+    }
+    return result;
+}
