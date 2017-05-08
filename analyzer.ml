@@ -340,9 +340,6 @@ let check_ast ast = match ast with
 	| _ -> raise(E.InvalidCompilerArgument)
 
 (* Testing *) 
-let test_ok sast = match sast with 
-_ -> "okay\n"
+let test_ok sast = match sast with  (* with MatchaScript.ml *)
+ _ -> "okay\n"
 
-(*
-let ast_one = A.Program([A.ExprStmt(A.IntLit(1))]) in
-check_ast ast_one *)
