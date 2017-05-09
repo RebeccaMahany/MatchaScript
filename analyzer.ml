@@ -61,6 +61,16 @@ let rec find_formal (scope : symbol_table) name =  (* takes in a scope of type s
       Some(parent) -> find_formal parent name (* keep searching each parent's scope if not found until there's no more parent *)
     | _ -> raise Not_found
 
+let find_fun_vdecl (scope : symbol_table) name =
+  try List.find (fun (_,n,_) -> n = name) scope.variables
+  with Not_found -> raise Not_found
+
+let check_call_fun_vdecls tenv i =  (* [identifying hello in] fun hello = function fun... *) 
+   let vdecl = try find_fun_vdecl tenv.scope i
+    with | Not_found -> (A.Void, "Not Found", A.IntLit(0)) in
+      let get_vdecl_typ (typ,_,_) = typ in
+         get_vdecl_typ vdecl
+
 let find_fdecl (scope : symbol_table) name =
   try List.find (fun x -> x = name) scope.fun_names
   with Not_found -> raise Not_found
@@ -218,28 +228,36 @@ and check_assign tenv e1 e2 =
 
 and check_call tenv e args =
  let se, _ = check_expr tenv e in
-    match e with 
+  (*  match e with 
    | A.FunExpr(e) -> (*Printf.printf "true! %s\n" (A.string_of_typ tenv.scope.return_type);*) ( let get_s (s,_) = s in 
     let sargs = List.map (fun x -> get_s (check_expr tenv x)) args in
     S.SCallExpr(se, sargs, tenv.scope.return_type))
-   | _ -> (*Printf.printf "false! %s\n" (A.string_of_typ tenv.scope.return_type);*)
-      let name = A.string_of_expr e in
+   | _ -> (*Printf.printf "false! %s\n" (A.string_of_typ tenv.scope.return_type);*)*)
+    let name = A.string_of_expr e in
     let result = check_call_wrapper tenv name in
     if result = "A.Void" 
     then begin
-     let res = check_call_fun tenv name in
-     if res = "A.Void" then ( 
-          let first_word = Str.first_chars (A.string_of_expr e) 8 in
-    (*Printf.printf "%s\n" first_word;*)
-    if first_word <> "function" then raise(E.UndefinedFunction(name))
-      else 
-     let get_s (s,_) = s in 
-    let sargs = List.map (fun x -> get_s (check_expr tenv x)) args in
-    S.SCallExpr(se, sargs, tenv.scope.return_type)
-      )
-     else (let get_s (s,_) = s in 
-       let sargs = List.map (fun x -> get_s (check_expr tenv x)) args in
-       S.SCallExpr(se, sargs, tenv.scope.return_type))
+      let res = check_call_fun tenv name in
+      if res = "A.Void" then ( 
+        let first_word = try Str.first_chars (A.string_of_expr e) 8 with 
+	| Invalid_argument(err) -> A.string_of_expr e in
+        (*Printf.printf "%s\n" first_word;*)
+         if first_word <> "function" then ( (* check for anonymous funs *)
+            let t = check_call_fun_vdecls tenv name in
+            if t = A.Void then raise(E.UndefinedFunction(name))
+            else (
+              let get_s (s,_) = s in 
+              let sargs = List.map (fun x -> get_s (check_expr tenv x)) args in
+              S.SCallExpr(se, sargs, tenv.scope.return_type)
+              ))
+         else 
+            let get_s (s,_) = s in 
+            let sargs = List.map (fun x -> get_s (check_expr tenv x)) args in
+            S.SCallExpr(se, sargs, tenv.scope.return_type)
+            )
+      else (let get_s (s,_) = s in 
+          let sargs = List.map (fun x -> get_s (check_expr tenv x)) args in
+          S.SCallExpr(se, sargs, tenv.scope.return_type))
     end
     else 
     let get_s (s,_) = s in 
