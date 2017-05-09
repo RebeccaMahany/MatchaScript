@@ -1,4 +1,4 @@
-function void scoop(flavor one, flavor two) {
+function void scoop(int one, int two) {
 	print(one);		
 }
 

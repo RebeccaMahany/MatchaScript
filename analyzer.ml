@@ -8,10 +8,9 @@ type symbol_table = {
 	parent: symbol_table option; (* option means a parent scope is optional *)
 	name: string;
 	mutable variables	: A.vdecl list;
-	return_type	: A.typ;
-	mutable formals		: A.bind list; 
-	(*mutable st_fdecls: A.fdecl list;
-	mutable st_cdecls: A.cdecl list;*)
+  return_type	: A.typ;
+	mutable formals		: A.bind list;
+	mutable	fun_names	: string list;
 }
 
 (******************************************************
@@ -37,6 +36,18 @@ let update_env_context tenv in_for in_while = {
 (**********************
 * Helper functions
 **********************)
+let rec check_call_helper (scope : symbol_table) name =  
+    if (scope.name <> name)	(* search for function name in scope *)
+    then match scope.parent with 
+      Some(parent) -> check_call_helper parent name
+    | _ -> raise Not_found (*raise(E.UndefinedFunction(name))*)
+    else name
+
+let check_call_wrapper tenv i =
+  let res = try check_call_helper tenv.scope i 
+   with Not_found -> "A.Void" in 
+     res
+
 let rec find_variable (scope : symbol_table) name =  (* takes in a scope of type symbol_table *)
   try List.find (fun (_,n,_) -> n = name) scope.variables
   with Not_found ->
@@ -44,11 +55,52 @@ let rec find_variable (scope : symbol_table) name =  (* takes in a scope of type
       Some(parent) -> find_variable parent name (* keep searching each parent's scope if not found until there's no more parent *)
     | _ -> raise Not_found
 
-let get_id_type tenv i =
-  let vdecl = try find_variable tenv.scope i
-    with | Not_found -> raise (E.UndeclaredIdentifier(i)) in
+let rec find_formal (scope : symbol_table) name =  (* takes in a scope of type symbol_table *)
+  try List.find (fun (_,n) -> n = name) scope.formals
+  with Not_found ->
+    match scope.parent with 
+      Some(parent) -> find_formal parent name (* keep searching each parent's scope if not found until there's no more parent *)
+    | _ -> raise Not_found
+
+let find_fdecl (scope : symbol_table) name =
+  try List.find (fun x -> x = name) scope.fun_names
+  with Not_found -> raise Not_found
+
+let check_call_fun tenv i =
+  let res = try find_fdecl tenv.scope i 
+  with Not_found -> "A.Void" in
+    res
+    
+let search_vdecls tenv i = 
+   let vdecl = try find_variable tenv.scope i
+    with | Not_found -> (A.Void, "Not Found", A.IntLit(0)) (*raise (E.UndeclaredIdentifier(i))*) in
       let get_vdecl_typ (typ,_,_) = typ in
-        get_vdecl_typ vdecl 
+         get_vdecl_typ vdecl
+
+let search_fdecls tenv i =
+  let fname = try find_fdecl tenv.scope i
+  with | Not_found -> "Void" in
+  if fname = "Void" then A.Void else A.Fun
+
+let search_formals tenv i =
+   let formal = try find_formal tenv.scope i
+     with | Not_found -> (A.Void, "Void")(*raise (E.UndeclaredIdentifier(i))*) in
+       let get_formal_typ (typ,_) = typ in
+         get_formal_typ formal
+
+let get_id_type tenv i =
+  let typ = search_vdecls tenv i in
+  if typ = A.Void 
+  then begin
+   let ft = search_fdecls tenv i in
+     if ft = A.Void 
+     then (let t = search_formals tenv i in
+           if t = A.Void then raise(E.UndeclaredIdentifier(i))
+           else t) 
+     else ft
+  end 
+  else typ
+ 
 
 (* helper for check_fdecl, checks for fdecl name dup *) 
 let rec find_fdecl_name (scope : symbol_table) name =  (* takes in a scope of type symbol_table *)
@@ -77,6 +129,7 @@ and check_fexpr tenv f =
 	name = "anon"; (* anonymous function *)
 	return_type = f.A.feReturnType;
 	formals = f.A.feFormals;
+	fun_names = [];
 	} in
   let tenv' = 
 	{ tenv with scope = scope'; } in
@@ -151,18 +204,22 @@ and check_assign tenv e1 e2 =
      else raise(E.AssignmentTypeMismatch(A.string_of_typ t1, A.string_of_typ t2))
 
 and check_call tenv e args =
-  let se, _ = check_expr tenv e in
+ let se, _ = check_expr tenv e in
     let name = A.string_of_expr e in
-  let rec check_call_helper (scope : symbol_table) name args =  
-    if (scope.name <> name)	(* search for function name in scope *)
-    then match scope.parent with 
-      Some(parent) -> check_call_helper parent name args
-    | _ -> raise(E.UndefinedFunction(name))
-    else			(* if found, convert to SCallExpr *)
+
+    let result = check_call_wrapper tenv name in
+    if result = "A.Void" 
+    then begin
+     let res = check_call_fun tenv name in
+     if res = "A.Void" then raise(E.UndefinedFunction(name))
+     else (let get_s (s,_) = s in 
+       let sargs = List.map (fun x -> get_s (check_expr tenv x)) args in
+       S.SCallExpr(se, sargs, tenv.scope.return_type))
+    end
+    else 
     let get_s (s,_) = s in 
     let sargs = List.map (fun x -> get_s (check_expr tenv x)) args in
-    S.SCallExpr(se, sargs, scope.return_type) in
-    check_call_helper tenv.scope name args
+    S.SCallExpr(se, sargs, tenv.scope.return_type)
 
 (********************
  * Check Expressions
@@ -211,11 +268,12 @@ and check_vdecl tenv v =
     let vexpr = get_v_expr v in
       let vsexpr, _ = check_expr tenv vexpr in
         let vstyp = get_sexpr_type vsexpr in
+(*	Printf.printf "%s " (A.string_of_typ vstyp); *)
           let get_v_typ (t,_,_) = t in  (* helper to get typ of vdecl *)
             let vtyp = get_v_typ v in
               let get_v_name (_,n,_) = n in
                 let vname = get_v_name v in
-                  if vtyp = vstyp (* check declared type of vdecl with its actual type *)
+                  if (vtyp = vstyp || vstyp = A.Void) (* check declared type of vdecl with its actual type, or if vdecl hasn't been initialized yet *) 
                     then (tenv.scope.variables <- v:: tenv.scope.variables
 ; S.SVarDecl(v), tenv)  (* add the vdecl to symbol table *)
                     else raise(E.VariableDeclarationTypeMismatch(vname)) 
@@ -233,25 +291,30 @@ and check_fdecl tenv f =
   let formals_map = List.fold_left (fun m formal ->  (* check formal dups within current function *)
     if StringMap.mem (get_bind_string formal) m 
     then raise(E.DuplicateFormal(get_bind_string formal))
-    else StringMap.add (get_bind_string formal) formal m) StringMap.empty f.A.fdFormals in    
+    else StringMap.add (get_bind_string formal) formal m) StringMap.empty f.A.fdFormals in  
+  tenv.scope.fun_names <- tenv.scope.fun_names@[f.A.fdFname];
+ (* List.iter (Printf.printf "%s ") tenv.scope.fun_names; *) 
   let scope' = (* create a new scope *)
     	{ 
 	parent = Some(tenv.scope); (* parent may or may not exist *)
-	variables = []; 
+	variables = [(A.Fun, "print", A.Id("print"))]; 
 	name = f.A.fdFname;
 	return_type = f.A.fdReturnType;
 	formals = f.A.fdFormals;
+	fun_names = [f.A.fdFname];
 	} in
   let tenv' = 
-	{ tenv with scope = scope'; } in
+	{ tenv with scope = scope'; } in(*
   let sl = List.map (fun s->check_stmt tenv' s) f.A.fdBody in (* check fbody with new scope *)
-  scope'.variables <- List.rev scope'.variables;
+  scope'.variables <- List.rev scope'.variables;*)
+  let get_ssl (sstmt_list, _) = sstmt_list in 
+    let sslp = check_stmt_list tenv' f.A.fdBody in scope'.variables <- List.rev scope'.variables;
     let sfdecl = {
       S.sfdReturnType = f.A.fdReturnType;
       S.sfdFname = f.A.fdFname;
       S.sfdFormals = f.A.fdFormals;
-      S.sfdBody = f.A.fdBody;
-    } in sl;
+      S.sfdBody = get_ssl sslp;
+    } in 
       S.SFunDecl(sfdecl), tenv (* return the original tenv after checking the fdecl *)
   
 and check_return tenv e =
@@ -320,16 +383,28 @@ and check_stmt_list tenv stmt_list =
 (***********************
  * Program entry point
  ***********************)
+let builtin_functions = ["print"]
+
 let root_symbol_table : symbol_table = {
   parent	 = None;
   name		 = "anon"; 
-  variables	 = [];
+  variables	 = [(A.Fun, "print", A.Id("print"))];
   return_type	 = A.Void;
-  formals	 = [];
+  formals	 = []; 
+  fun_names 	 = [];
+}
+
+let print_symbol_table : symbol_table = {
+  parent	 = Some(root_symbol_table);
+  name		 = "print"; 
+  variables	 = [(A.Fun, "print", A.Id("print"))];
+  return_type	 = A.Void;
+  formals	 = [(A.String, "input")];
+  fun_names	 = [];
 }
 
 let root_env : translation_env = {
-  scope = root_symbol_table;
+  scope = print_symbol_table;
   in_for = false;
   in_while = false;
 }
