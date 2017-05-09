@@ -340,6 +340,6 @@ let check_ast ast = match ast with
 	| _ -> raise(E.InvalidCompilerArgument)
 
 (* Testing *) 
-let test_ok sast = match sast with  (* with MatchaScript.ml *)
+let test_ok sast : sstmt list = match sast with  (* with MatchaScript.ml *)
  _ -> "okay\n"
 

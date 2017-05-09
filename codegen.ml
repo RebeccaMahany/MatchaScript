@@ -53,6 +53,7 @@ let i1_t   = L.i1_type        context
 let fl_t   = L.float_type     context
 let str_t  = L.pointer_type (L.i8_type context)
 let void_t = L.void_type      context
+
 let sym_table : symbol_table = {
   name = "main";
   parent =  None;
@@ -113,11 +114,15 @@ let wrap_sstmt_list (sl : sstmt list) =
 
 (* Forward-declare the program functions *)
 
+
 (* Generate LLVM IR to define the structs of the program functions and returned function pointers *)
+
 
 (* Generate LLVM IR for functions *)
 
 (* Generate LLVM IR for main function *)
+let codegen_main sstmt_list builder =
+
 
 let translate (sstmt_list : sstmt list) =
   (* wrap the incoming sstmt_list in a main sfdecl *)
@@ -130,9 +135,9 @@ let translate (sstmt_list : sstmt list) =
   (* Forward-declare the program functions (all sfdecls and sfexprs) *)
 
   (* Generate LLVM IR to define the structs of the program functions and returned function pointers *)
-  
+
   (* Generate LLVM IR for functions *)
 
   (* Generate LLVM IR for main function *)
-  (*let _ = codegen_main sstmt_list builder in*)
+  let _ = codegen_main sstmt_list builder in
   the_module
