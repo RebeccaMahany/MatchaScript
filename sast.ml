@@ -19,6 +19,8 @@ and sexpr =
     | STernary of sexpr * sexpr * sexpr
 	| SNoexpr
 
+and scaseType = SDefault | SCaseType of sexpr
+
 and sstmt = 
     SBlock of sstmt list
   | SExprStmt of sexpr
@@ -31,6 +33,12 @@ and sstmt =
   | SDoWhile of sstmt * sexpr
   | SBreak
   | SContinue
+  | SSwitch of sexpr * scase list
+
+and scase = {
+  scase : scaseType;
+  ssetStmt : sstmt list;
+}
 
 and sfexpr = {
   sfeReturnType : typ;
