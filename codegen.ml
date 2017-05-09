@@ -44,7 +44,7 @@ let gen_type = function
   | SFloatLit _ -> A.Float
   | SBoolLit _ -> A.Bool
   | SCharLit _ -> A.Char
-  | SStringLit _ -> A.String 
+  | SStringLit _ -> A.String
 
 (* Builtins *)
 (* printf *)
@@ -63,7 +63,8 @@ let gen_func_fwd_decl (f : sfdecl) =
 
 let codegen_func_fwd_decls (sast : sstmt list) =
   let get_fdecls_for_fwd_decl_generation sstmt = match sstmt with
-    SFunDecl(f) -> gen_func_fwd_decl f
+      SFunDecl(f) -> gen_func_fwd_decl f
+    | _ -> ()
   in List.iter get_fdecls_for_fwd_decl_generation sast
 
 (*************************
@@ -94,7 +95,8 @@ let build_function_body f_build =
     let f_locals = 
       let extract_locals_from_fbody fbody = 
         let handle_vdecl locals_list stmt = match stmt with
-          SVarDecl(typ, id, expr) -> (typ, id) :: locals_list
+            SVarDecl(typ, id, expr) -> (typ, id) :: locals_list
+          | _ -> locals_list
         in
         List.fold_left handle_vdecl [] fbody  (* fbody is a stmt list*)
       in extract_locals_from_fbody f_build.sfdBody 
@@ -220,7 +222,8 @@ let build_function_body f_build =
 
 let codegen_func_defs (sast : sstmt list) =
   let gen_func_def sstmt = match sstmt with
-    SFunDecl(f) -> build_function_body f
+      SFunDecl(f) -> build_function_body f
+    | _ -> ()
   in List.iter gen_func_def sast
 
 (*************************
