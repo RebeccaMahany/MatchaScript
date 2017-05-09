@@ -13,10 +13,10 @@ let _ =
   let lexbuf = Lexing.from_channel stdin in
   let ast_nomain = Parser.program Scanner.token lexbuf in
   let ast = Top_ast.top_ast ast_nomain in
-  let sast = (*Analyzer.check_ast ast*) Fake_sast.create_fake_sast in
+  let sast = Analyzer.check_ast ast (*Fake_sast.create_fake_sast*) in
   match action with
       Ast -> print_string (Ast.string_of_program ast)
-(*    | Sast -> print_string (Analyzer.test_ok sast) *)
+    | Sast -> print_string (Analyzer.test_ok sast)
     | LLVM_IR -> print_string (Llvm.string_of_llmodule (Codegen.translate sast))
     | Compile -> let m = Codegen.translate sast in
         Llvm_analysis.assert_valid_module m;

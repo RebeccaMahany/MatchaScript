@@ -122,6 +122,7 @@ let wrap_sstmt_list (sl : sstmt list) =
 
 (* Generate LLVM IR for main function *)
 let codegen_main sstmt_list builder =
+  1
 
 
 let translate (sstmt_list : sstmt list) =
