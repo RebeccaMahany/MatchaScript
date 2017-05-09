@@ -2,9 +2,9 @@ open Ast
 
 type sbind = typ * string
 
-type svdecl = typ * string * expr
+type svdecl = typ * string * sexpr
 
-type sexpr = 
+and sexpr = 
     SIntLit of int
 	| SFloatLit of float
 	| SBoolLit of bool
