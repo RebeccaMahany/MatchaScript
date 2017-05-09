@@ -6,11 +6,14 @@ module StringMap = Map.Make(String)
 
 type symbol_table = {
 	parent: symbol_table option; (* option means a parent scope is optional *)
-	name: string;
+		name		: string;
 	mutable variables	: A.vdecl list;
-  return_type	: A.typ;
+		return_type	: A.typ;
 	mutable formals		: A.bind list;
 	mutable	fun_names	: string list;
+	(*	reserved	: string list; *)
+	(*mutable st_fdecls: A.fdecl list;
+	mutable st_cdecls: A.cdecl list;*)
 }
 
 (******************************************************
@@ -410,11 +413,9 @@ let root_env : translation_env = {
 }
 
 let check_ast ast = match ast with
-	  A.Program(stmts) -> 
-	    let sast = check_stmt_list root_env stmts in sast
+	  A.Program(stmts) -> let sast = check_stmt_list root_env stmts in sast
 	| _ -> raise(E.InvalidCompilerArgument)
 
 (* Testing *) 
-let test_ok sast : sstmt list = match sast with  (* with MatchaScript.ml *)
+let test_ok sast = match sast with  (* with MatchaScript.ml *)
  _ -> "okay\n"
-

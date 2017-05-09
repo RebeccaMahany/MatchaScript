@@ -46,7 +46,7 @@ let rec find_sfdecl (scope : symbol_table) name =
 
 let context = L.global_context ()
 let the_module = L.create_module context "MatchaScript"
-let builder     = L.builder context
+let builder = L.builder context
 let i32_t  = L.i32_type       context
 let i8_t   = L.i8_type        context
 let i1_t   = L.i1_type        context
@@ -99,6 +99,7 @@ let codegen_call_printf e builder =
   let fun_llvalue 
   L.build_call 
 *)
+
 let wrap_sstmt_list (sl : sstmt list) =
   let sfdecl_main : sfdecl = {
     sfdReturnType = A.Int;
@@ -109,21 +110,19 @@ let wrap_sstmt_list (sl : sstmt list) =
   } in
   sfdecl_main
 
-(* Forward-declare structs for the program functions and any returned function pointers *)
+(* Forward-declare structs for the program functions and any returned function 
+pointers - implementation *)
 
+(* Forward-declare the program functions - implementation *)
 
-(* Forward-declare the program functions *)
+(* Generate LLVM IR to define the structs of the program functions and returned 
+function pointers - implementation *)
 
+(* Generate LLVM IR for functions - implementation *)
 
-(* Generate LLVM IR to define the structs of the program functions and returned function pointers *)
-
-
-(* Generate LLVM IR for functions *)
-
-(* Generate LLVM IR for main function *)
+(* Generate LLVM IR for main function - implementation *)
 let codegen_main sstmt_list builder =
   1
-
 
 let translate (sstmt_list : sstmt list) =
   (* wrap the incoming sstmt_list in a main sfdecl *)
@@ -131,7 +130,6 @@ let translate (sstmt_list : sstmt list) =
 
   (* Forward-declare the structs for the program functions and any returned functions
     (using the symbol tables) *)
-
 
   (* Forward-declare the program functions (all sfdecls and sfexprs) *)
 
