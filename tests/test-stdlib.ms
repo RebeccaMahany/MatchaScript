@@ -4,20 +4,6 @@ Functions for converting types
 
 
 /** String to bool **/
-function bool stringToBool(string s) {
-    if (s == "true"){
-        return true;
-    }
-    if (s == "True"){
-        return true;
-    }
-    if (s == "false"){
-        return false;
-    }
-    if (s == "False"){
-        return false;
-    }
-}
 
 
 /** String to int **/
@@ -27,13 +13,6 @@ function bool stringToBool(string s) {
 
 
 /** Bool to string **/
-function string boolToString(bool b) {
-    if (b){
-        return "true";
-    } else {
-        return "false";
-    }
-}
 
 
 /** Int to string **/
@@ -172,16 +151,16 @@ function float float_pow(float base, int pow){
 
 /** Get ceiling of float **/
 function float ceil(float f) {
-    remainder = f % 1;
-    new_f = f + 1 - remainder;
+    float remainder = f % 1;
+    float new_f = f + 1 - remainder;
     return new_f;
 }
 
 
 /** Get floor of float, returns int **/
 function float floor(float f) {
-    remainder = f % 1;
-    new_f = f - remainder;
+    float remainder = f % 1;
+    float new_f = f - remainder;
     return new_f;
 }
 
