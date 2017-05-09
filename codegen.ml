@@ -212,6 +212,7 @@ let build_function_body f_build =
         L.builder_at_end context merge_bb
     | SFor (e1, e2, e3, body) -> codegen_sstmt llbuilder
         ( SBlock [SExprStmt e1 ; SWhile (e2, SBlock [body ; SExprStmt e3]) ] )
+    | SFunDecl(_) -> llbuilder
   in
   
   (* Build the code for each statement in the function *)
