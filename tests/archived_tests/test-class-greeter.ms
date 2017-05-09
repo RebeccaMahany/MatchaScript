@@ -11,4 +11,4 @@ class Greeter {
 }
 
 class Greeter greeter = new Greeter("world");
-print(greeter.greet()); //returns Hello, world
+print(greeter.greet());
