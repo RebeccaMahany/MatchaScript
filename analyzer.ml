@@ -401,9 +401,10 @@ and check_while tenv e s =
     in result, tenv
 
 and check_case tenv c = 
-    let result = 
-        scase(c)
-    in result
+    let scase = {
+        S.scaseType = A.caseType;
+        S.ssetStmt = check_stmt_list tenv A.setStmt;
+    } in S.scase(scase)
 
 and check_switch tenv e c = 
     let se, _ = check_expr tenv e in
