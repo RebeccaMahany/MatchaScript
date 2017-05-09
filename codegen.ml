@@ -43,8 +43,11 @@ let gen_type = function
     SIntLit _ -> A.Int
   | SFloatLit _ -> A.Float
   | SBoolLit _ -> A.Bool
-  | SCharLit _ -> A.Char
+(*  | SCharLit _ -> A.Char *)
   | SStringLit _ -> A.String
+  | SId(_, typ) -> typ
+  | SBinop(_,_,_, typ) -> typ
+  | SCallExpr(_,_,typ) -> typ
 
 (* Builtins *)
 (* printf *)
