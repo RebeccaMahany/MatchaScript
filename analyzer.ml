@@ -413,7 +413,7 @@ let root_env : translation_env = {
 }
 
 let check_ast ast = match ast with
-	  A.Program(stmts) -> let sast = check_stmt_list root_env stmts in sast
+	  A.Program(stmts) -> let (sast, _) = check_stmt_list root_env stmts in sast
 	| _ -> raise(E.InvalidCompilerArgument)
 
 (* Testing *) 
