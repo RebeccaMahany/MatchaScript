@@ -10,7 +10,7 @@ type sexpr =
 	| SBoolLit of bool
 	| SCharLit of char
 	| SStringLit of string
-	| SFunExpr of sfexpr
+	| SFunExpr of sfexpr 
 	| SId of string * typ
 	| SBinop of sexpr * op * sexpr * typ
 	| SUnop of uop * sexpr * typ
@@ -40,7 +40,12 @@ and sfdecl = {
   sfdFormals : bind list;
   sfdBody : sstmt list;
 }
-
+(*
+and scdecl = {
+  scname : string;
+  scproperties : svdecl list;
+}
+*)
 and sprogram = sstmt list
 
 
