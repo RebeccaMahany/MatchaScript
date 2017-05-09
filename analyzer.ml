@@ -228,12 +228,11 @@ and check_assign tenv e1 e2 =
 
 and check_call tenv e args =
  let se, _ = check_expr tenv e in
-  (*  match e with 
-   | A.FunExpr(e) -> (*Printf.printf "true! %s\n" (A.string_of_typ tenv.scope.return_type);*) ( let get_s (s,_) = s in 
-    let sargs = List.map (fun x -> get_s (check_expr tenv x)) args in
-    S.SCallExpr(se, sargs, tenv.scope.return_type))
-   | _ -> (*Printf.printf "false! %s\n" (A.string_of_typ tenv.scope.return_type);*)*)
-    let name = A.string_of_expr e in
+    let str = A.string_of_expr e in
+    let r = Str.regexp "\\([A-Za-z_]+\\)" in    (* in currying examples, parser may think the called function name in pokemonMotto("Ash")("!") is pokemonMotto("Ash") --> parse to pokemonMotto and then check the function *)
+    let num = try Str.search_forward r str 0 with
+      | Not_found -> raise(E.UndefinedFunction(str)) in
+    let name = Str.matched_string str in
     let result = check_call_wrapper tenv name in
     if result = "A.Void" 
     then begin
