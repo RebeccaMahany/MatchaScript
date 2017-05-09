@@ -3,9 +3,6 @@ fun greetCurried = function fun (string greeting) {
     print(greeting);
     print(", ");
     print(name);
-    return function void (string punctuation) {
-    	print(punctuation);
-    };
   };
 };
 

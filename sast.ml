@@ -2,9 +2,9 @@ open Ast
 
 type sbind = typ * string
 
-type svdecl = typ * string * expr
+type svdecl = typ * string * sexpr
 
-type sexpr = 
+and sexpr = 
     SIntLit of int
 	| SFloatLit of float
 	| SBoolLit of bool
@@ -15,9 +15,6 @@ type sexpr =
 	| SBinop of sexpr * op * sexpr * typ
 	| SUnop of uop * sexpr * typ
 	| SAssign of sexpr * sexpr * typ
-(*	| SObjCreate of string * sexpr list * typ
-	| SObjAccess of sexpr * sexpr * typ *)
-	(* Array access *)
 	| SCallExpr of sexpr * sexpr list * typ 
 	| SNoexpr
 
@@ -26,7 +23,6 @@ and sstmt =
   | SExprStmt of sexpr
   | SVarDecl of svdecl
   | SFunDecl of sfdecl
- (* | SClassDecl of scdecl *)
   | SReturn of sexpr
   | SIf of sexpr * sstmt * sstmt
   | SFor of sexpr * sexpr * sexpr * sstmt

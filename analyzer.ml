@@ -307,21 +307,21 @@ and check_expr_stmt tenv e =
 
 (* check vdecl dup, vdecl type, and then add to symbol table *)
 and check_vdecl tenv v =
-  let get_v_expr (_,_,e) = e in (* helper to get expr from vdecl tuple *)
-    let vexpr = get_v_expr v in
-      let vsexpr, _ = check_expr tenv vexpr in
-        let vstyp = get_sexpr_type vsexpr in
+  let get_v_expr (_,_, e) = e in (* helper to get expr from vdecl tuple *)
+  let vexpr = get_v_expr v in
+  let vsexpr, _ = check_expr tenv vexpr in
+  let vstyp = get_sexpr_type vsexpr in
 (*	Printf.printf "%s " (A.string_of_typ vstyp); *)
-          let get_v_typ (t,_,_) = t in  (* helper to get typ of vdecl *)
-            let vtyp = get_v_typ v in
-              let get_v_name (_,n,_) = n in
-                let vname = get_v_name v in
-                  if (vtyp = vstyp || vstyp = A.Void) (* check declared type of vdecl with its actual type, or if vdecl hasn't been initialized yet *) 
-                    then (tenv.scope.variables <- v:: tenv.scope.variables
-; S.SVarDecl(v), tenv)  (* add the vdecl to symbol table *)
-                    else raise(E.VariableDeclarationTypeMismatch(vname)) 
-and check_vdecl_st tenv v =  
+  let get_v_typ (t,_,_) = t in  (* helper to get typ of vdecl *)
+  let vtyp = get_v_typ v in
   let get_v_name (_,n,_) = n in
+  let vname = get_v_name v in
+  if (vtyp = vstyp || vstyp = A.Void) (* check declared type of vdecl with its actual type, or if vdecl hasn't been initialized yet *) 
+  then (tenv.scope.variables <- v:: tenv.scope.variables; 
+    S.SVarDecl(vstyp, vname, vsexpr), tenv)  (* add the vdecl to symbol table *)
+  else raise(E.VariableDeclarationTypeMismatch(vname)) 
+  and check_vdecl_st tenv v =  
+    let get_v_name (_,n,_) = n in
     let vname = get_v_name v in
       try List.find (fun x->(get_v_name x)=vname) tenv.scope.variables (* check to see if local variable already exists *)
       with | Not_found	-> v
@@ -453,11 +453,9 @@ let root_env : translation_env = {
 }
 
 let check_ast ast = match ast with
-	  A.Program(stmts) -> 
-	    let sast = check_stmt_list root_env stmts in sast
+	  A.Program(stmts) -> let (sast, _) = check_stmt_list root_env stmts in sast
 	| _ -> raise(E.InvalidCompilerArgument)
 
 (* Testing *) 
 let test_ok sast = match sast with  (* with MatchaScript.ml *)
  _ -> "okay\n"
-

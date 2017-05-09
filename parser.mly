@@ -54,51 +54,6 @@ vdecl:
   | typ ID ASSIGN expr SEMI { ($1, $2, $4) }
 
 /*********
-Classes
-**********/
-mthfdecl:
-  typ ID LPAREN formals_opt RPAREN LBRACE stmt_list RBRACE
-  { { fdReturnType = $1;
-   fdFname = $2;
-   fdFormals = $4;
-   fdBody = $7 } }
-
-constr:
-    CONSTRUCTOR LPAREN formals_opt RPAREN LBRACE stmt_list RBRACE { {
-        formals = $3;
-        body = $6;
-    } }
-
-cbody:
-  /* nothing */ { {
-    properties = [];
-    constructors = [];
-    methods = [];
-  } }
-  | cbody vdecl { {
-      properties = $2 :: $1.properties;
-      constructors = $1.constructors;
-      methods = $1.methods;
-    } }
-  | cbody constr { { 
-      properties = $1.properties;
-      constructors = $2 :: $1.constructors;
-      methods = $1.methods;
-    } }
-  | cbody mthfdecl { { 
-      properties = $1.properties;
-      constructors = $1.constructors;
-      methods = $2 :: $1.methods;
-    } }
-
-
-cdecl:
-    CLASS ID LBRACE cbody RBRACE { {
-        cname = $2;
-        cbody = $4;
-    } }
-
-/*********
 Functions
 **********/
 fdecl:
@@ -134,7 +89,6 @@ stmt:
     expr SEMI { ExprStmt $1 }
   | vdecl { VarDecl($1) }
   | fdecl { FunDecl($1) }
-  | cdecl { ClassDecl($1) }
   | RETURN expr SEMI { Return $2 }
   | RETURN SEMI { Return Noexpr }
   | LBRACE stmt_list RBRACE { Block($2) }
@@ -155,18 +109,9 @@ primary_expr:
     THIS          { This }
   | ID            { Id($1) }
 
-member_expr:
-    primary_expr  { $1 }              /* e.g. functionName(4) */
-  | LPAREN fexpr RPAREN                { FunExpr($2) }     /* e.g. (function int (int a, int b) { return a + b; })(3, 4) */
-  | member_expr LBRACKET expr RBRACKET { MemberExpr($1, `ExprStmt $3) } /* e.g. arr_id[i+1], arr_id[i+1][j+1] */
-  | member_expr DOT ID                 { MemberExpr($1, `Id $3) } /* e.g. rectangle.height, rectArray[0].height */
-  | NEW ID LPAREN actuals_opt RPAREN   { ObjCreate($2, $4) } /* int a = new Rectangle(3,4).height */
-
 call_expr:
-    member_expr LPAREN actuals_opt RPAREN { CallExpr($1, $3) }
-  | call_expr LPAREN actuals_opt RPAREN   { CallExpr($1, $3) } /* e.g. */
-  | call_expr LBRACKET expr RBRACKET      { MemberExpr($1, `ExprStmt $3) } /* e.g. returnArray()[3] */
-  | call_expr DOT ID                      { MemberExpr($1, `Id $3) } /* e.g. objName.property, getNewRect(3, 5).height, objName.propertyObject.property */
+    ID            { Id($1) }
+  | call_expr LPAREN actuals_opt RPAREN  { CallExpr($1, $3) }
 
 expr:
     INTLIT           { IntLit($1)           }

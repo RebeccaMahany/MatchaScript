@@ -3,13 +3,12 @@ class Animal {
 		this.name = name;
 		this.weight = weight;
  	}
-
+}
 
 class BunnyRabbit extends Animal {
 	constructor(string name, int weight, string ears) {
 		super​(name, weight);
 		this​.ears = ears;
-		print("the bunny is born");
 	}
 	function​ int​ getWeight() {
 		return​ this​.weight;
