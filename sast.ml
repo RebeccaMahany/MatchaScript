@@ -42,7 +42,7 @@ and sfdecl = {
   sfdReturnType : typ;
   sfdFname : string;
   sfdFormals : bind list;
-  sfdBody : stmt list;
+  sfdBody : sstmt list;
 }
 (*
 and scdecl = {

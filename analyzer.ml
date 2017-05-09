@@ -205,23 +205,6 @@ and check_assign tenv e1 e2 =
   if t1 = t2 (* assignment types must be exactly the same *)
      then S.SAssign(se1, se2, t1)
      else raise(E.AssignmentTypeMismatch(A.string_of_typ t1, A.string_of_typ t2))
-(*
-and check_call tenv e args =
-  let se, _ = check_expr tenv e in
-    let name = A.string_of_expr e in
-  let rec check_call_helper (scope : symbol_table) name args =  
-    if (scope.name <> name)	(* search for function name in scope *)
-    then match scope.parent with 
-      Some(parent) -> check_call_helper parent name args
-    | _ -> (*raise(E.UndefinedFunction(name))*)
-      try find_fdecl tenv.scope name with 
-       | Not_found -> raise(E.UndefinedFunction(name))
-    else			(* if found, convert to SCallExpr *)
-    let get_s (s,_) = s in 
-    let sargs = List.map (fun x -> get_s (check_expr tenv x)) args in
-    S.SCallExpr(se, sargs, scope.return_type) in
-    check_call_helper tenv.scope name args
-*)
 
 and check_call tenv e args =
  let se, _ = check_expr tenv e in
@@ -324,15 +307,17 @@ and check_fdecl tenv f =
 	fun_names = [f.A.fdFname];
 	} in
   let tenv' = 
-	{ tenv with scope = scope'; } in
+	{ tenv with scope = scope'; } in(*
   let sl = List.map (fun s->check_stmt tenv' s) f.A.fdBody in (* check fbody with new scope *)
-  scope'.variables <- List.rev scope'.variables;
+  scope'.variables <- List.rev scope'.variables;*)
+  let get_ssl (sstmt_list, _) = sstmt_list in 
+    let sslp = check_stmt_list tenv' f.A.fdBody in scope'.variables <- List.rev scope'.variables;
     let sfdecl = {
       S.sfdReturnType = f.A.fdReturnType;
       S.sfdFname = f.A.fdFname;
       S.sfdFormals = f.A.fdFormals;
-      S.sfdBody = f.A.fdBody;
-    } in sl;
+      S.sfdBody = get_ssl sslp;
+    } in 
       S.SFunDecl(sfdecl), tenv (* return the original tenv after checking the fdecl *)
   
 and check_return tenv e =
