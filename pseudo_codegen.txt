@@ -1,0 +1,21 @@
+let check_expr_it1 e = match e with
+	vdecl ->
+		add vdecl to symbol table
+	fdecl ->
+		add fdecl to symbol table
+	fexpr ->
+
+
+
+
+let check_stmt_it1 s = match s with
+		expr -> check_expr s 
+	|	(* other stmts *)
+in 
+
+let codegen_stmt_it1 s =
+	check_stmt s;
+
+List.iter check_stmt_list_it1 prog
+
+keep track of struct_builder, 

@@ -1,6 +1,9 @@
-(* Semantic checking for the MicroC compiler *)
+(* Semantic checking for MatchaScript compiler *)
 
 open Ast
+open Sast
+
+
 
 module StringMap = Map.Make(String)
 

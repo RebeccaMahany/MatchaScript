@@ -1,4 +1,4 @@
-(* Ocamllex scanner for MicroC *)
+(* Ocamllex scanner for MatchaScript *)
 
 { open Printf }
 
@@ -17,6 +17,7 @@ let whitespace = [' ' '\t' '\r' '\n']
 rule token = parse
   whitespace { token lexbuf }
 | "/*"     { comment lexbuf }
+| "//"     { line_comment lexbuf }
 | '('      { print_string "LPAREN " }
 | ')'      { print_string "RPAREN " }
 | '{'      { print_string "LBRACE " }
@@ -85,6 +86,10 @@ rule token = parse
 and comment = parse
   "*/" { token lexbuf }
 | _    { comment lexbuf }
+
+and line_comment = parse
+  "\n" { token lexbuf }
+| _    { line_comment lexbuf }
 
 {
   let main () =
