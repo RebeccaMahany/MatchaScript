@@ -11,8 +11,8 @@ struct Fp_toplevel_anon0_anon0;
 
 /***************** Functions *****************/
 // Function forward declarations are made 
-struct Rec_toplevel_anon0_anon0 *toplevel_anon0(struct Rec_toplevel *parent, char *greeting);
-void toplevel_anon0_anon0(struct Rec_greetCurried *parent, char *name);
+struct Fp_toplevel_anon0_anon0 *toplevel_anon0(struct Rec_toplevel *parent, char *greeting);
+void toplevel_anon0_anon0(struct Rec_toplevel_anon0 *parent, char *name);
 
 /***************** Structs *****************/
 struct Rec_toplevel {
@@ -26,7 +26,7 @@ struct Rec_toplevel {
 };
 
 // Declare access link structs for each function
-struct greetCurried_anon0 {
+struct Rec_toplevel_anon0 {
 	// pointer to parent struct
 	struct Rec_toplevel *parent;
 	// all formals and locally declared variables, functions, and classes
@@ -34,13 +34,13 @@ struct greetCurried_anon0 {
 	char *greeting;
 	// locals
 	// functions
-	void (*greetCurried_anon0_anon0)(struct Rec_greetCurried *, char *);
+	void (*Rec_toplevel_anon0_anon0)(struct Rec_toplevel_anon0 *, char *);
 	// classes
 };
 
-struct Rec_greetCurried_anon0_anon0 {
+struct Rec_toplevel_anon0_anon0 {
 	// pointer to parent struct
-	struct Rec_greetCurried *parent;
+	struct Rec_toplevel_anon0 *parent;
 	// all formals and locally declared variables, functions, and classes
 	// formals
 	char *name;
@@ -52,26 +52,26 @@ struct Rec_greetCurried_anon0_anon0 {
 // 1. a function pointer to the returned function
 // 2. the environment of the parent of the returned function (static scope)
 struct Fp_toplevel_anon0_anon0 {
-	void (*fp)(struct Rec_greetCurried *parent, char *name);
-	struct Rec_greetCurried *env;
+	void (*fp)(struct Rec_toplevel_anon0 *parent, char *name);
+	struct Rec_toplevel_anon0 *env;
 };
 
 struct Fp_toplevel_anon0_anon0 *toplevel_anon0(struct Rec_toplevel *parent, char *greeting) {
-	struct Rec_greetCurried *mine = malloc(sizeof(struct Rec_greetCurried));
+	struct Rec_toplevel_anon0 *mine = malloc(sizeof(struct Rec_toplevel_anon0));
 	mine->parent = parent;
 	mine->greeting = greeting; 	// formals, assigns, and vdecls
 
 	// return a struct containing:
-	// 1. function pointer to 
-	// 2. 
+	// 1. function pointer to the returned function
+	// 2. returned function's environment
 	struct Fp_toplevel_anon0_anon0 *fp = malloc(sizeof(struct Fp_toplevel_anon0_anon0));
-	fp->fp = &greetCurried_anon0_anon0;
+	fp->fp = &toplevel_anon0_anon0;
 	fp->env = mine;
 	return fp;	// 
 }
 
-void greetCurried_anon0_anon0(struct Rec_greetCurried *parent, char *name) {
-	struct Rec_greetCurried_anon0_anon0 *mine = malloc(sizeof(struct Rec_greetCurried_anon0_anon0));
+void toplevel_anon0_anon0(struct Rec_toplevel_anon0 *parent, char *name) {
+	struct Rec_toplevel_anon0_anon0 *mine = malloc(sizeof(struct Rec_toplevel_anon0_anon0));
 	// fill in formals at the beginning of every scope
 	mine->parent = parent;
 	mine->name = name;
@@ -91,8 +91,11 @@ int main(int argc, char **argv) {
 	// is it in your symbol table? --> pass in "mine"
 	// is it in the symbol table above? --> pass in "parent"
 	mine->greetHello = (mine->greetCurried)(mine, "Hello");
-	// when you are calling a returned function, the returned function pointer also returns an env
+	// when you are calling a returned function, the returned function pointer also returns an env.
+	// use the env in the returned Fp_* struct
 	(mine->greetHello->fp)(mine->greetHello->env, "Heidi");
-	
-	Fp_toplevel_anon0_anon0 (mine->greetCurried)(mine, "Hi there");
+
+	struct Fp_toplevel_anon0_anon0 *tmp1 = (mine->greetCurried)(mine, "Hi there");
+	// on the second call
+	(tmp1->fp)(tmp1->env, "Howard");
 }
