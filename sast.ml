@@ -10,7 +10,7 @@ type sexpr =
 	| SBoolLit of bool
 	| SCharLit of char
 	| SStringLit of string
-(*	| SFunExpr of sfexpr *)
+	| SFunExpr of sfexpr 
 	| SId of string * typ
 	| SBinop of sexpr * op * sexpr * typ
 	| SUnop of uop * sexpr * typ
@@ -31,20 +31,18 @@ and sstmt =
   | SIf of sexpr * sstmt * sstmt
   | SFor of sexpr * sexpr * sexpr * sstmt
   | SWhile of sexpr * sstmt
-(*
+
 and sfexpr = {
   sfeReturnType : typ;
   sfeFormals : sbind list;
   sfeBody: sstmt list;
 }
-*)
+
 and sfdecl = {
   sfdReturnType : typ;
   sfdFname : string;
-  sfdParent : string;
   sfdFormals : bind list;
-  sfdLocals : expr list;
-  sfdBody : stmt list;
+  sfdBody : sstmt list;
 }
 (*
 and scdecl = {
@@ -52,6 +50,6 @@ and scdecl = {
   scproperties : svdecl list;
 }
 *)
-and sprogram = fdecl
+and sprogram = sstmt list
 
 
