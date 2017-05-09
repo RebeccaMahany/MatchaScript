@@ -162,12 +162,12 @@ let build_function_body f_build =
         and e_type = gen_type e in
         L.build_call printf_func [| format_str e_type llbuilder; e' |]
             "printf" llbuilder
-    | SCallExpr (SId(f, _), act, typ) ->
-        let (fdef, f_build) = Hashtbl.find fwd_decls_hashtbl f in
+    | SCallExpr (SId(fname, _), act, typ) ->
+        let (llvm_fdef, ocaml_sfdecl) = Hashtbl.find fwd_decls_hashtbl fname in
         let actuals = List.rev (List.map (codegen_sexpr llbuilder) (List.rev act)) in
-        let result = (match f_build.sfdReturnType with A.Void -> ""
-                                                      | _     -> f ^ "_result") in
-        L.build_call fdef (Array.of_list actuals) result llbuilder
+        let result = (match ocaml_sfdecl.sfdReturnType with A.Void -> ""
+                                                      | _     -> fname ^ "_result") in
+        L.build_call llvm_fdef (Array.of_list actuals) result llbuilder
       in
 
       let add_terminal llbuilder f =
