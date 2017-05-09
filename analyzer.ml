@@ -399,6 +399,18 @@ and check_while tenv e s =
       else raise(E.InvalidWhileStatementCondition) in
     let tenv = update_env_context tenv tenv.in_for restore
     in result, tenv
+
+and check_case tenv c = 
+    let result = 
+        scase(c)
+    in result
+
+and check_switch tenv e c = 
+    let se, _ = check_expr tenv e in
+    let sc = check_case tenv c in
+    let result = 
+        S.SSwitch(se, c)
+    in result, tenv
  
 and check_stmt tenv = function
 	  A.Block sl		-> check_block tenv sl
@@ -410,6 +422,7 @@ and check_stmt tenv = function
 	| A.For(e1, e2, e3, s)	-> check_for tenv e1 e2 e3 s
 	| A.While(e,s)		-> check_while tenv e s
     | A.DoWhile(s,e)    -> check_while tenv e s
+    | A.Switch(e, c)    -> check_switch tenv e c
 
 (* To be used as entrypoint for parsing ast, which is a stmt list *)
 and check_stmt_list tenv stmt_list =
