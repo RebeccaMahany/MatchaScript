@@ -7,7 +7,7 @@
 .PHONY : MatchaScript.native
 
 MatchaScript.native :
-	ocamlbuild -use-ocamlfind -pkgs llvm,llvm.analysis -cflags -w,+a-4 \
+	ocamlbuild -use-ocamlfind -pkgs llvm,llvm.analysis,str -cflags -w,+a-4 \
 		MatchaScript.native
 
 # "make clean" removes all generated files
@@ -25,7 +25,7 @@ clean :
 OBJS = ast.cmx codegen.cmx parser.cmx scanner.cmx analyzer.cmx MatchaScript.cmx top_ast.cmx sast.cmx
 
 MatchaScript : $(OBJS)
-	ocamlfind ocamlopt -linkpkg -package llvm -package llvm.analysis $(OBJS) -o MatchaScript
+	ocamlfind ocamlopt -linkpkg -package llvm -package llvm.analysis -package str $(OBJS) -o MatchaScript
 
 scanner.ml : scanner.mll
 	ocamllex scanner.mll
@@ -51,15 +51,16 @@ codegen.cmo : ast.cmo sast.cmo
 codegen.cmx : ast.cmx sast.cmx
 top_ast.cmo :
 top_ast.cmx :
-MatchaScript.cmo : analyzer.cmo scanner.cmo parser.cmi codegen.cmo ast.cmo top_ast.cmo sast.cmo
-MatchaScript.cmx : analyzer.cmx scanner.cmx parser.cmx codegen.cmx ast.cmx top_ast.cmx sast.cmx
+MatchaScript.cmo : analyzer.cmo scanner.cmo parser.cmi codegen.cmo ast.cmo top_ast.cmo sast.cmo str.cma
+MatchaScript.cmx : analyzer.cmx scanner.cmx parser.cmx codegen.cmx ast.cmx top_ast.cmx sast.cmx str.cmxa
 parser.cmo : ast.cmo parser.cmi
 parser.cmx : ast.cmx parser.cmi
 scanner.cmo : parser.cmi
 scanner.cmx : parser.cmx
-analyzer.cmo: ast.cmo sast.cmo
-analyzer.cmx: ast.cmx sast.cmx
+analyzer.cmo: ast.cmo sast.cmo str.cma
+analyzer.cmx: ast.cmx sast.cmx str.cmxa
 parser.cmi : ast.cmo
+
 
 # Building the tarball
 

@@ -18,7 +18,7 @@ fun a = function int(int x) {
 all of the above is commented out for now
 ****************************/
 
-print((function int (int x) { 
+print((function fun(int x) { 
 	return function int (int y) {
 		return x;
 	};
