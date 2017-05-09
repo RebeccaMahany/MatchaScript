@@ -255,6 +255,8 @@ let build_function_body f_build =
         let merge_bb = L.append_block context "merge" the_function in
         ignore (L.build_cond_br bool_val body_bb merge_bb pred_builder);
         L.builder_at_end context merge_bb
+    | SDoWhile(body, pred) -> codegen_sstmt llbuilder
+        ( SBlock [ SBlock [ body ] ; SWhile(pred, body) ] )
     | SFor (e1, e2, e3, body) -> codegen_sstmt llbuilder
         ( SBlock [SExprStmt e1 ; SWhile (e2, SBlock [body ; SExprStmt e3]) ] )
     | SFunDecl(_) -> llbuilder
