@@ -25,7 +25,7 @@ let llbuilder = L.builder       context
 let i32_t  = L.i32_type       context
 let i8_t   = L.i8_type        context
 let i1_t   = L.i1_type        context
-let fl_t   = L.float_type     context
+let fl_t   = L.double_type     context
 let str_t  = L.pointer_type (L.i8_type context)
 let void_t = L.void_type      context
 
