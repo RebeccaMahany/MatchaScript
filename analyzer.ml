@@ -32,8 +32,6 @@ let update_env_context tenv in_for in_while = {
 (**********************
 * Helper functions
 **********************)
-
-
 let rec find_variable (scope : symbol_table) name =  (* takes in a scope of type symbol_table *)
   try List.find (fun (_,n,_) -> n = name) scope.variables
   with Not_found ->
@@ -70,15 +68,6 @@ let find_parent_fdecl (scope : symbol_table) name =
       try List.find (fun x -> (get_name x) = name) parent.fun_names
       with Not_found -> raise Not_found
   | _ -> raise Not_found
-
-let check_call_fun tenv i =
-  let res = try find_fdecl tenv.scope i 
-  with Not_found -> try find_parent_fdecl tenv.scope i with
-   Not_found -> { A.fdReturnType = A.Void;
-		  A.fdFname = "A.Void";
-		  A.fdFormals = [];
-	          A.fdBody = []; } in
-    res
 
 let search_vdecls tenv i = 
    let vdecl = try find_variable tenv.scope i
@@ -140,29 +129,7 @@ let rec check_block tenv sl = match sl with
 	  [] -> S.SBlock([S.SExprStmt(S.SNoexpr)]), tenv (* empty block *)
 	| _ -> let sl, _ = check_stmt_list tenv sl in 
 	  S.SBlock(sl), tenv
-(*
-let find_fdecl (scope : symbol_table) name =
-  let get_name f = f.A.fdFname in
-  try List.find (fun x -> (get_name x) = name) scope.fun_names
-  with Not_found -> raise Not_found
 
-let find_parent_fdecl (scope : symbol_table) name =
-  match scope.parent with 
-  | Some(parent) -> 
-      let get_name f = f.A.fdFname in 
-      try List.find (fun x -> (get_name x) = name) parent.fun_names
-      with Not_found -> raise Not_found
-  | _ -> raise Not_found
-
-let check_call_fun tenv i =
-  let res = try find_fdecl tenv.scope i 
-  with Not_found -> try find_parent_fdecl tenv.scope i with
-   Not_found -> { A.fdReturnType = A.Void;
-		  A.fdFname = "A.Void";
-		  A.fdFormals = [];
-	          A.fdBody = []; } in
-    res
-*)
 and check_call_fun tenv name args = 
   let get_name f = f.A.fdFname in
   let fdecl = try List.find (fun x -> (get_name x) = name) tenv.scope.fun_names
@@ -178,17 +145,14 @@ and check_call_fun tenv name args =
 		  A.fdFname = "A.Void";
 		  A.fdFormals = [];
 	          A.fdBody = []; }
-
   | _ -> { A.fdReturnType = A.Void;
 		  A.fdFname = "A.Void";
 		  A.fdFormals = [];
 	          A.fdBody = []; } )
   in (* check if number and type of args are the same *) (
-    Printf.printf "fdecl is %d and args is %d" (List.length fdecl.A.fdFormals) (List.length args);Printf.printf "\n";
-        let exprs = List.map (fun x-> A.string_of_expr x) args in
-(*	List.iter (Printf.printf "%s ") exprs; Printf.printf "\n"; *)
+           let exprs = List.map (fun x-> A.string_of_expr x) args in
      if (List.length fdecl.A.fdFormals) = (List.length args) then
-       (Printf.printf "equal args\n"; let get_s (s,_) = s in 
+       (let get_s (s,_) = s in 
         let sargs = List.map (fun x -> get_s (check_expr tenv x)) args in (* get list of arguments *)
         let sarg_types = List.map (fun x -> get_sexpr_type x) sargs in (* get list of argument types *) 
         let formal_types = List.map (fun x -> get_s x) fdecl.A.fdFormals in (* get list of parameter types *)
@@ -200,21 +164,14 @@ and check_call_fun tenv name args =
  else raise(E.IncorrectNumberOfArguments) in result)
          else raise(E.IncorrectNumberOfArguments))  
         
-  
-
-
-       
-
-and check_call_wrapper tenv i args =
+ and check_call_wrapper tenv i args =
   let rec check_call_helper tenv (scope : symbol_table) name args =  
     if (scope.name <> name)	(* search for function name in scope *)
     then match scope.parent with 
-      Some(parent) -> Printf.printf "checking Some(parent)\n"; check_call_helper tenv parent name args
-    | _ -> Printf.printf "Didn't find %s\n" name; raise Not_found 
+      Some(parent) -> check_call_helper tenv parent name args
+    | _ -> raise Not_found 
     else (* check if number and type of args are the same *) (
-     Printf.printf "scope.formals is %d and args is %d" (List.length scope.formals) (List.length args); Printf.printf "\n";
         let exprs = List.map (fun x-> A.string_of_expr x) args in
-	List.iter (Printf.printf "%s ") exprs; Printf.printf "\n";
      if (List.length scope.formals) = (List.length args) then
        (let get_s (s,_) = s in 
         let sargs = List.map (fun x -> get_s (check_expr tenv x)) args in (* get list of arguments *)
@@ -317,8 +274,7 @@ and check_call tenv e args =
  let se, _ = check_expr tenv e in
  let str = A.string_of_expr e in
  if str <> "print" then
-    (Printf.printf "str is %s\n" str;
-    let r = Str.regexp "\\([A-Za-z_]+\\)" in    (* in currying examples, parser may think the called function name in pokemonMotto("Ash")("!") is pokemonMotto("Ash") --> parse to pokemonMotto and then check the function *)
+    (let r = Str.regexp "\\([A-Za-z_]+\\)" in    (* in currying examples, parser may think the called function name in pokemonMotto("Ash")("!") is pokemonMotto("Ash") --> parse to pokemonMotto and then check the function *)
     let num = try Str.search_forward r str 0 with
       | Not_found -> raise(E.UndefinedFunction(str)) in
     let name = Str.matched_string str in
