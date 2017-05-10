@@ -43,7 +43,7 @@ let ltype_of_typ = function
   | A.String -> str_t
 ;;
     
-let gen_type = function
+let gen_type exp = match exp with
     SIntLit(_) -> A.Int
   | SFloatLit(_) -> A.Float
   | SBoolLit(_) -> A.Bool
@@ -52,7 +52,7 @@ let gen_type = function
   | SId(_, typ) -> typ
   | SBinop(_,_,_, typ) -> typ
   | SCallExpr(_,_,typ) -> typ
-  | _ -> raise(Failure("llvm type not yet supported"))
+  | _ -> raise(Failure("llvm type of " ^ string_of_sexpr exp ^ " not yet supported"))
 ;;
 
 (* Builtins *)
