@@ -110,7 +110,7 @@ let build_function_body f_build =
             SVarDecl(typ, id, expr) -> (
               (* check if this vdecl is already in the locals_list *)
               if List.exists (fun (ltyp, lid) -> lid = id) locals_list
-              then raise(E.DuplicateLocal("duplicate local " ^ id ^ " in " ^ f_build.sfdFname))
+              then raise(E.DuplicateLocal("duplicate local " ^ id ^ " in function " ^ f_build.sfdFname))
               else (typ, id) :: locals_list 
               )
           | _ -> locals_list

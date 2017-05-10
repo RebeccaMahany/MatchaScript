@@ -1,1 +1,1 @@
-Fatal error: exception Exceptions.DuplicateLocal("newNice")
+Fatal error: exception Exceptions.DuplicateLocal("duplicate local newNice in function nice")
