@@ -16,6 +16,7 @@ and sexpr =
 	| SUnop of uop * sexpr * typ
 	| SAssign of sexpr * sexpr * typ
 	| SCallExpr of sexpr * sexpr list * typ 
+    | STernary of sexpr * sexpr * sexpr
 	| SNoexpr
 
 and sstmt = 
@@ -27,6 +28,7 @@ and sstmt =
   | SIf of sexpr * sstmt * sstmt
   | SFor of sexpr * sexpr * sexpr * sstmt
   | SWhile of sexpr * sstmt
+  | SDoWhile of sstmt * sexpr
 
 and sfexpr = {
   sfeReturnType : typ;
