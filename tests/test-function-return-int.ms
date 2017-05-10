@@ -3,3 +3,4 @@ function int returnFour() {
 }
 
 int four = returnFour();
+print(four);
