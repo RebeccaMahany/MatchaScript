@@ -106,9 +106,7 @@ let build_function_body f_build =
     let f_locals = 
       let extract_locals_from_fbody fbody = 
         let handle_vdecl locals_list stmt = match stmt with
-            SVarDecl(typ, id, expr) -> 
-              (* check if this vdecl is already in the locals_list *)
-              if List.find (_, id) locals_list (typ, id) :: locals_list
+            SVarDecl(typ, id, expr) -> (typ, id) :: locals_list
           | _ -> locals_list
         in
         List.fold_left handle_vdecl [] fbody  (* fbody is a stmt list *)
