@@ -16,5 +16,3 @@ function void stringAssign() {
     print(a);
 }
 
-
-

@@ -17,6 +17,7 @@ open Sast
 module L = Llvm
 module A = Ast
 module Ana = Analyzer
+module E = Exceptions
 
 module StringMap = Map.Make(String)
 
@@ -69,7 +70,9 @@ let gen_func_fwd_decl (f : sfdecl) =
   and formal_types = Array.of_list (List.map (fun (t,_) -> ltype_of_typ t) f.sfdFormals) in 
   let ftype = L.function_type (ltype_of_typ f.sfdReturnType) formal_types in
   (* Adds the pair (name, (LLVM fwd_declaration, ocaml_sfdecl)) to the StringMap m *)
-  Hashtbl.add fwd_decls_hashtbl name (L.define_function name ftype the_module, f)
+  if Hashtbl.mem fwd_decls_hashtbl name
+  then raise(E.DuplicateFunction("duplicate function " ^ name ))
+  else Hashtbl.add fwd_decls_hashtbl name (L.define_function name ftype the_module, f)
 
 let codegen_func_fwd_decls (sast : sstmt list) =
   let get_fdecls_for_fwd_decl_generation sstmt = match sstmt with
@@ -106,7 +109,12 @@ let build_function_body f_build =
     let f_locals = 
       let extract_locals_from_fbody fbody = 
         let handle_vdecl locals_list stmt = match stmt with
-            SVarDecl(typ, id, expr) -> (typ, id) :: locals_list
+            SVarDecl(typ, id, expr) -> (
+              (* check if this vdecl is already in the locals_list *)
+              if List.exists (fun (ltyp, lid) -> lid = id) locals_list
+              then raise(E.DuplicateLocal("duplicate local " ^ id ^ " in function " ^ f_build.sfdFname))
+              else (typ, id) :: locals_list 
+              )
           | _ -> locals_list
         in
         List.fold_left handle_vdecl [] fbody  (* fbody is a stmt list *)
@@ -115,12 +123,10 @@ let build_function_body f_build =
     (* extract locals from the stmt list of the function *)
     List.fold_left add_local f_formals f_locals 
   in
-
   (* Return the value for a variable or formal argument *)
   let var_lookup n = try StringMap.find n local_vars
                     with Not_found -> raise (Failure "Variable not found")
   in
-
   (* Expressions *)
   let rec codegen_sexpr llbuilder = function
       SIntLit i -> L.const_int i32_t i
@@ -220,19 +226,7 @@ let build_function_body f_build =
                                 A.Void -> L.build_ret_void llbuilder
                               | _      -> L.build_ret (codegen_sexpr llbuilder e) llbuilder); llbuilder
     | SVarDecl (typ, id, se) -> (* Assign the sexpr to id *)
-        let sexpr = (match se with
-            (* If Noexpr, assign a default value *)
-            SNoexpr -> (match typ with
-                A.Int -> SIntLit(0)
-              | A.Float -> SFloatLit(0.0)
-              | A.Bool -> SBoolLit(false)
-              (* | A.Char -> i8_t *)
-              | A.String -> SStringLit("")
-              | _ -> raise(Failure("Invalid type " ^ A.string_of_typ typ ^ " for variable " ^ id))
-            )
-          | _ -> se
-        ) in
-        let e' = codegen_sexpr llbuilder sexpr in
+        let e' = codegen_sexpr llbuilder se in
         ignore (L.build_store e' (var_lookup id) llbuilder); llbuilder
     | SIf (predicate, then_stmt, else_stmt) ->
         let bool_val = codegen_sexpr llbuilder predicate in
