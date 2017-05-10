@@ -81,4 +81,5 @@ and comment = parse
 
 and line_comment = parse
   "\n" { token lexbuf }
+| eof  { EOF }
 | _    { line_comment lexbuf }
