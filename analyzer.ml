@@ -312,7 +312,7 @@ and check_vdecl tenv v =
   let vname = get_v_name v in
   if (vtyp = vstyp || vstyp = A.Void) (* check declared type of vdecl with its actual type, or if vdecl hasn't been initialized yet *) 
   then (tenv.scope.variables <- v:: tenv.scope.variables; 
-    S.SVarDecl(vstyp, vname, vsexpr), tenv)  (* add the vdecl to symbol table *)
+    S.SVarDecl(vtyp, vname, vsexpr), tenv)  (* add the vdecl to symbol table *)
   else raise(E.VariableDeclarationTypeMismatch(vname)) 
   and check_vdecl_st tenv v =  
     let get_v_name (_,n,_) = n in
