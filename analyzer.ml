@@ -10,7 +10,7 @@ type symbol_table = {
 	mutable variables	: A.vdecl list;
 		return_type	: A.typ;
 	mutable formals		: A.bind list;
-	mutable	fun_names	: string list;
+	mutable	fun_names	: A.fdecl list;
 }
 
 (******************************************************
@@ -32,17 +32,7 @@ let update_env_context tenv in_for in_while = {
 (**********************
 * Helper functions
 **********************)
-let rec check_call_helper (scope : symbol_table) name =  
-    if (scope.name <> name)	(* search for function name in scope *)
-    then match scope.parent with 
-      Some(parent) -> check_call_helper parent name
-    | _ -> raise Not_found 
-    else name
 
-let check_call_wrapper tenv i =
-  let res = try check_call_helper tenv.scope i 
-   with Not_found -> "A.Void" in 
-     res
 
 let rec find_variable (scope : symbol_table) name =  (* takes in a scope of type symbol_table *)
   try List.find (fun (_,n,_) -> n = name) scope.variables
@@ -69,20 +59,25 @@ let check_call_fun_vdecls tenv i =  (* [identifying hello in] fun hello = functi
          get_vdecl_typ vdecl
 
 let find_fdecl (scope : symbol_table) name =
-  try List.find (fun x -> x = name) scope.fun_names
+  let get_name f = f.A.fdFname in
+  try List.find (fun x -> (get_name x) = name) scope.fun_names
   with Not_found -> raise Not_found
 
 let find_parent_fdecl (scope : symbol_table) name =
   match scope.parent with 
   | Some(parent) -> 
-      try List.find (fun x -> x = name) parent.fun_names
+      let get_name f = f.A.fdFname in 
+      try List.find (fun x -> (get_name x) = name) parent.fun_names
       with Not_found -> raise Not_found
   | _ -> raise Not_found
 
 let check_call_fun tenv i =
   let res = try find_fdecl tenv.scope i 
   with Not_found -> try find_parent_fdecl tenv.scope i with
-   Not_found -> "A.Void" in
+   Not_found -> { A.fdReturnType = A.Void;
+		  A.fdFname = "A.Void";
+		  A.fdFormals = [];
+	          A.fdBody = []; } in
     res
 
 let search_vdecls tenv i = 
@@ -92,14 +87,24 @@ let search_vdecls tenv i =
          get_vdecl_typ vdecl
 
 let search_fdecls tenv i =
-  let fname = try find_fdecl tenv.scope i
-  with | Not_found -> "Void" in
-  if fname = "Void" then A.Void else A.Fun
+  let f = try find_fdecl tenv.scope i
+  with | Not_found -> { A.fdReturnType = A.Void;
+		  A.fdFname = "A.Void";
+		  A.fdFormals = [];
+	          A.fdBody = []; } in
+  let get_fname fdecl = fdecl.A.fdFname in
+  let fname = get_fname f in
+  if fname = "A.Void" then A.Void else A.Fun
 
 let search_parent_fdecls tenv i =
-  let fname = try find_parent_fdecl tenv.scope i
-  with | Not_found -> "Void" in
-  if fname = "Void" then A.Void else A.Fun
+  let f = try find_parent_fdecl tenv.scope i
+  with | Not_found -> { A.fdReturnType = A.Void;
+		  A.fdFname = "A.Void";
+		  A.fdFormals = [];
+	          A.fdBody = []; } in
+  let get_fname fdecl = fdecl.A.fdFname in
+  let fname = get_fname f in
+  if fname = "A.Void" then A.Void else A.Fun
 
 let search_formals tenv i =
    let formal = try find_formal tenv.scope i
@@ -134,7 +139,93 @@ let rec find_fdecl_name (scope : symbol_table) name =  (* takes in a scope of ty
 let rec check_block tenv sl = match sl with
 	  [] -> S.SBlock([S.SExprStmt(S.SNoexpr)]), tenv (* empty block *)
 	| _ -> let sl, _ = check_stmt_list tenv sl in 
-	  S.SBlock(sl), tenv 
+	  S.SBlock(sl), tenv
+(*
+let find_fdecl (scope : symbol_table) name =
+  let get_name f = f.A.fdFname in
+  try List.find (fun x -> (get_name x) = name) scope.fun_names
+  with Not_found -> raise Not_found
+
+let find_parent_fdecl (scope : symbol_table) name =
+  match scope.parent with 
+  | Some(parent) -> 
+      let get_name f = f.A.fdFname in 
+      try List.find (fun x -> (get_name x) = name) parent.fun_names
+      with Not_found -> raise Not_found
+  | _ -> raise Not_found
+
+let check_call_fun tenv i =
+  let res = try find_fdecl tenv.scope i 
+  with Not_found -> try find_parent_fdecl tenv.scope i with
+   Not_found -> { A.fdReturnType = A.Void;
+		  A.fdFname = "A.Void";
+		  A.fdFormals = [];
+	          A.fdBody = []; } in
+    res
+*)
+and check_call_fun tenv name args = 
+  let get_name f = f.A.fdFname in
+  let fdecl = try List.find (fun x -> (get_name x) = name) tenv.scope.fun_names
+  with Not_found -> (match tenv.scope.parent with 
+  | Some(parent) -> 
+      let get_name f = f.A.fdFname in 
+      try List.find (fun x -> (get_name x) = name) parent.fun_names
+      with Not_found -> { A.fdReturnType = A.Void;
+		  A.fdFname = "A.Void";
+		  A.fdFormals = [];
+	          A.fdBody = []; }
+       | _ -> Printf.printf "Found!\n"; { A.fdReturnType = A.Void;
+		  A.fdFname = "A.Void";
+		  A.fdFormals = [];
+	          A.fdBody = []; }
+
+  | _ -> { A.fdReturnType = A.Void;
+		  A.fdFname = "A.Void";
+		  A.fdFormals = [];
+	          A.fdBody = []; } )
+  in (* check if number and type of args are the same *) (
+    Printf.printf "fdecl is %d and args is %d" (List.length fdecl.A.fdFormals) (List.length args);Printf.printf "\n";
+        let exprs = List.map (fun x-> A.string_of_expr x) args in
+(*	List.iter (Printf.printf "%s ") exprs; Printf.printf "\n"; *)
+     if (List.length fdecl.A.fdFormals) = (List.length args) then
+       (Printf.printf "equal args\n"; let get_s (s,_) = s in 
+        let sargs = List.map (fun x -> get_s (check_expr tenv x)) args in (* get list of arguments *)
+        let sarg_types = List.map (fun x -> get_sexpr_type x) sargs in (* get list of argument types *) 
+        let formal_types = List.map (fun x -> get_s x) fdecl.A.fdFormals in (* get list of parameter types *)
+        let compare = List.map2(fun x y -> if x <> y then raise(E.IncorrectTypeOfArgument(A.string_of_typ x, A.string_of_typ y)) else x) sarg_types formal_types in 
+        let result = if (compare=sarg_types) then  { A.fdReturnType = A.Void;
+		  A.fdFname = name;
+		  A.fdFormals = [];
+	          A.fdBody = []; } 
+ else raise(E.IncorrectNumberOfArguments) in result)
+         else raise(E.IncorrectNumberOfArguments))  
+        
+  
+
+
+       
+
+and check_call_wrapper tenv i args =
+  let rec check_call_helper tenv (scope : symbol_table) name args =  
+    if (scope.name <> name)	(* search for function name in scope *)
+    then match scope.parent with 
+      Some(parent) -> Printf.printf "checking Some(parent)\n"; check_call_helper tenv parent name args
+    | _ -> Printf.printf "Didn't find %s\n" name; raise Not_found 
+    else (* check if number and type of args are the same *) (
+     Printf.printf "scope.formals is %d and args is %d" (List.length scope.formals) (List.length args); Printf.printf "\n";
+        let exprs = List.map (fun x-> A.string_of_expr x) args in
+	List.iter (Printf.printf "%s ") exprs; Printf.printf "\n";
+     if (List.length scope.formals) = (List.length args) then
+       (let get_s (s,_) = s in 
+        let sargs = List.map (fun x -> get_s (check_expr tenv x)) args in (* get list of arguments *)
+        let sarg_types = List.map (fun x -> get_sexpr_type x) sargs in (* get list of argument types *) 
+        let formal_types = List.map (fun x -> get_s x) scope.formals in (* get list of parameter types *)
+        let compare = List.map2(fun x y -> if x <> y then raise(E.IncorrectTypeOfArgument(A.string_of_typ x, A.string_of_typ y)) else []) sarg_types formal_types in 
+        let result = if (compare = []) then name else raise Not_found in result)
+         else raise(E.IncorrectNumberOfArguments)) in
+  let res = try check_call_helper tenv tenv.scope i args
+   with Not_found -> "A.Void" in 
+     res 
 
 and check_fexpr tenv f =
   let get_bind_string (_,s) = s in
@@ -224,15 +315,19 @@ and check_assign tenv e1 e2 =
 
 and check_call tenv e args =
  let se, _ = check_expr tenv e in
-    let str = A.string_of_expr e in
+ let str = A.string_of_expr e in
+ if str <> "print" then
+    (Printf.printf "str is %s\n" str;
     let r = Str.regexp "\\([A-Za-z_]+\\)" in    (* in currying examples, parser may think the called function name in pokemonMotto("Ash")("!") is pokemonMotto("Ash") --> parse to pokemonMotto and then check the function *)
     let num = try Str.search_forward r str 0 with
       | Not_found -> raise(E.UndefinedFunction(str)) in
     let name = Str.matched_string str in
-    let result = check_call_wrapper tenv name in
+    let result = check_call_wrapper tenv name args in
     if result = "A.Void" 
     then begin
-      let res = check_call_fun tenv name in
+      let resf = check_call_fun tenv name args in
+      let get_fname fdecl = fdecl.A.fdFname in
+      let res = get_fname resf in
       if res = "A.Void" then ( 
         let first_word = try Str.first_chars (A.string_of_expr e) 8 with 
 	| Invalid_argument(err) -> A.string_of_expr e in
@@ -257,7 +352,11 @@ and check_call tenv e args =
     let get_s (s,_) = s in 
     let sargs = List.map (fun x -> get_s (check_expr tenv x)) args in
     S.SCallExpr(se, sargs, tenv.scope.return_type)
-   
+   ) else 
+    let get_s (s,_) = s in 
+    let sargs = List.map (fun x -> get_s (check_expr tenv x)) args in
+    S.SCallExpr(se, sargs, tenv.scope.return_type)
+
 
 (********************
  * Check Expressions
@@ -328,10 +427,28 @@ and check_fdecl tenv f =
   let formals_map = List.fold_left (fun m formal ->  (* check formal dups within current function *)
     if StringMap.mem (get_bind_string formal) m 
     then raise(E.DuplicateFormal(get_bind_string formal))
-    else StringMap.add (get_bind_string formal) formal m) StringMap.empty f.A.fdFormals in  
-  tenv.scope.fun_names <- tenv.scope.fun_names@[f.A.fdFname];
+    else StringMap.add (get_bind_string formal) formal m) StringMap.empty f.A.fdFormals in
+  let new_fun = { 
+	A.fdReturnType = f.A.fdReturnType;
+	A.fdFname = f.A.fdFname;
+	A.fdFormals = f.A.fdFormals;
+	A.fdBody = f.A.fdBody; 
+  } in  
+  tenv.scope.fun_names <- tenv.scope.fun_names@[new_fun];
   match tenv.scope.parent with 
-    | Some(parent) -> (parent.fun_names <- parent.fun_names@[f.A.fdFname]); 
+    | Some(parent) -> (let new_fun = { 
+	A.fdReturnType = f.A.fdReturnType;
+	A.fdFname = f.A.fdFname;
+	A.fdFormals = f.A.fdFormals;
+	A.fdBody = f.A.fdBody; 
+        } in  
+       parent.fun_names <- parent.fun_names@[new_fun]);
+  let new_fun = { 
+	A.fdReturnType = f.A.fdReturnType;
+	A.fdFname = f.A.fdFname;
+	A.fdFormals = f.A.fdFormals;
+	A.fdBody = f.A.fdBody; 
+  } in   
   let scope' = (* create a new scope *)
     	{ 
 	parent = Some(tenv.scope); (* parent may or may not exist *)
@@ -339,7 +456,7 @@ and check_fdecl tenv f =
 	name = f.A.fdFname;
 	return_type = f.A.fdReturnType;
 	formals = f.A.fdFormals;
-	fun_names = [f.A.fdFname];
+	fun_names = [new_fun];
 	} in
   let tenv' = 
 	{ tenv with scope = scope'; } in
