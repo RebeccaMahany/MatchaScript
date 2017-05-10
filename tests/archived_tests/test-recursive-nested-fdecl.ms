@@ -3,5 +3,9 @@ function void outer() {
     function void inner() {
     	print("defining inner");
     }
-    outer();
+ 
+    inner();
 }
+
+outer();
+

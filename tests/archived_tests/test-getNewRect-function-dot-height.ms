@@ -12,7 +12,7 @@ class Rectangle {
   }
 }
 
-int getNewRect = function int (int h, int w) {
+Rectangle function getNewRect(int h, int w) {
   return new Rectangle(h, w);
 };
 
