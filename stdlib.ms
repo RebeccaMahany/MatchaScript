@@ -15,7 +15,7 @@ function int int_abs(int i) {
 
 /** Absolute value for floats **/
 function float float_abs(float i) {
-    if (i > 0) {
+    if (i > 0.0) {
         return i;
     }
     return -1.0 * i;
