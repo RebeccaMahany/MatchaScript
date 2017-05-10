@@ -49,14 +49,6 @@ and stmt =
   | For of expr * expr * expr * stmt
   | While of expr * stmt
   | DoWhile of stmt * expr
-  | Break
-  | Continue
-  | Switch of expr * case list
-
-and case = {
-  case : caseType;
-  setStmt : stmt list;
-}
 
 and fexpr = {
   feReturnType : typ;

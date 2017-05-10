@@ -6,8 +6,7 @@ open Ast
 %token SEMI LPAREN RPAREN LBRACE RBRACE COMMA LBRACKET RBRACKET DOT
 %token PLUS MINUS TIMES DIVIDE MOD ASSIGN NOT
 %token EQ NEQ LT LEQ GT GEQ TRUE FALSE AND OR
-%token RETURN IF ELSE FOR WHILE DO COLON QMARK BREAK CONTINUE 
-%token SWITCH CASE DEFAULT
+%token RETURN IF ELSE FOR WHILE DO COLON QMARK
 %token INT FLOAT BOOL CHAR STRING VOID FUN
 %token <int> INTLIT
 %token <float> FLOATLIT
@@ -100,23 +99,6 @@ stmt:
      { For($3, $5, $7, $9) }
   | WHILE LPAREN expr RPAREN stmt { While($3, $5) }
   | DO stmt WHILE LPAREN expr RPAREN SEMI { DoWhile ($2, $5) }
-  | BREAK SEMI { Break }
-  | CONTINUE SEMI { Continue }
-  | SWITCH LPAREN expr RPAREN LBRACE case_list RBRACE { Switch ($3, $6) }
-
-case_list:
-    case  { [$1] }
-  | case_list case { $1@[$2] }
-
-case:
-    CASE expr COLON stmt_list { {
-        case = CaseType($2);
-        setStmt = $4;
-    } }
-  | DEFAULT COLON stmt_list { { 
-        case = Default;
-        setStmt = $3; 
-    } }
 
 /*********
 Expressions
