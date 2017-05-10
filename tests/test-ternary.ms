@@ -1,3 +1,2 @@
-
-    String voteable = (age < 18) ? "Too young" : "Old enough";
+String voteable = (age < 18) ? "Too young" : "Old enough";
 
