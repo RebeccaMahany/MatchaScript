@@ -1,1 +1,1 @@
-Fatal error: exception Exceptions.DuplicateFunction()
+Fatal error: exception Exceptions.DuplicateFunction("duplicate function stringAssign")

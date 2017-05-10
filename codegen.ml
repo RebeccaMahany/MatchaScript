@@ -70,7 +70,9 @@ let gen_func_fwd_decl (f : sfdecl) =
   and formal_types = Array.of_list (List.map (fun (t,_) -> ltype_of_typ t) f.sfdFormals) in 
   let ftype = L.function_type (ltype_of_typ f.sfdReturnType) formal_types in
   (* Adds the pair (name, (LLVM fwd_declaration, ocaml_sfdecl)) to the StringMap m *)
-  Hashtbl.add fwd_decls_hashtbl name (L.define_function name ftype the_module, f)
+  if Hashtbl.mem fwd_decls_hashtbl name
+  then raise(E.DuplicateFunction("duplicate function " ^ name ))
+  else Hashtbl.add fwd_decls_hashtbl name (L.define_function name ftype the_module, f)
 
 let codegen_func_fwd_decls (sast : sstmt list) =
   let get_fdecls_for_fwd_decl_generation sstmt = match sstmt with
