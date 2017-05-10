@@ -101,7 +101,8 @@ let search_formals tenv i =
        let get_formal_typ (typ,_) = typ in
          get_formal_typ formal
 
-let get_id_type tenv i =
+let get_id_type tenv name =
+  let i = if name = "main" then "mainuserentryfunctionformatchascriptlanguage" else name in
   let typ = search_vdecls tenv i in
   if typ = A.Void 
   then begin
@@ -116,7 +117,14 @@ let get_id_type tenv i =
      else ft
   end 
   else typ
- 
+
+let check_id tenv i =
+  if i = "main" then 
+  let n = "mainuserentryfunctionformatchascriptlanguage" in
+  S.SId(n, get_id_type tenv i) 
+  else
+  S.SId(i, get_id_type tenv i) 
+
 (* helper for check_fdecl, checks for fdecl name dup *) 
 let rec find_fdecl_name (scope : symbol_table) name =  (* takes in a scope of type symbol_table *)
   if (scope.name <> name)
@@ -277,7 +285,8 @@ and check_call tenv e args =
     (let r = Str.regexp "\\([A-Za-z_]+\\)" in    (* in currying examples, parser may think the called function name in pokemonMotto("Ash")("!") is pokemonMotto("Ash") --> parse to pokemonMotto and then check the function *)
     let num = try Str.search_forward r str 0 with
       | Not_found -> raise(E.UndefinedFunction(str)) in
-    let name = Str.matched_string str in
+    let rname = Str.matched_string str in
+    let name = if rname = "main" then "mainuserentryfunctionformatchascriptlanguage" else rname in 
     let result = check_call_wrapper tenv name args in
     if result = "A.Void" 
     then begin
@@ -324,7 +333,7 @@ and check_expr tenv = function
 	| A.CharLit c 		-> S.SCharLit(c), tenv
 	| A.StringLit s		-> S.SStringLit(s), tenv
 	| A.FunExpr f		-> check_fexpr tenv f, tenv
-	| A.Id i		-> S.SId(i, get_id_type tenv i), tenv
+	| A.Id i		-> check_id tenv i, tenv
 	| A.Binop(e1,op,e2)	-> check_binop tenv e1 op e2, tenv
 	| A.Unop(uop, e)	-> check_unop tenv uop e, tenv
 	| A.Assign(e1, e2)	-> check_assign tenv e1 e2, tenv
@@ -384,24 +393,27 @@ and check_fdecl tenv f =
     if StringMap.mem (get_bind_string formal) m 
     then raise(E.DuplicateFormal(get_bind_string formal))
     else StringMap.add (get_bind_string formal) formal m) StringMap.empty f.A.fdFormals in
+  let nfname = if f.A.fdFname = "main" then "mainuserentryfunctionformatchascriptlanguage" else f.A.fdFname in  (* in codegen, the entire program is wrapped in a "main" function, which means technically no other function the user writes can be called "main" without a duplicate function error. Thus, we rename any user-defined function as this name. No other user program may define this particular function; this is so a function called "main" can be defined by user *)
   let new_fun = { 
 	A.fdReturnType = f.A.fdReturnType;
-	A.fdFname = f.A.fdFname;
+	A.fdFname = nfname;
 	A.fdFormals = f.A.fdFormals;
 	A.fdBody = f.A.fdBody; 
   } in  
   tenv.scope.fun_names <- tenv.scope.fun_names@[new_fun];
   match tenv.scope.parent with 
-    | Some(parent) -> (let new_fun = { 
+    | Some(parent) -> ( let nfname = if f.A.fdFname = "main" then "mainuserentryfunctionformatchascriptlanguage" else f.A.fdFname in  
+     let new_fun = { 
 	A.fdReturnType = f.A.fdReturnType;
-	A.fdFname = f.A.fdFname;
+	A.fdFname = nfname;
 	A.fdFormals = f.A.fdFormals;
 	A.fdBody = f.A.fdBody; 
         } in  
        parent.fun_names <- parent.fun_names@[new_fun]);
+   let nfname = if f.A.fdFname = "main" then "mainuserentryfunctionformatchascriptlanguage" else f.A.fdFname in  
   let new_fun = { 
 	A.fdReturnType = f.A.fdReturnType;
-	A.fdFname = f.A.fdFname;
+	A.fdFname = nfname;
 	A.fdFormals = f.A.fdFormals;
 	A.fdBody = f.A.fdBody; 
   } in   
@@ -409,7 +421,7 @@ and check_fdecl tenv f =
     	{ 
 	parent = Some(tenv.scope); (* parent may or may not exist *)
 	variables = [(A.Fun, "print", A.Id("print"))]; 
-	name = f.A.fdFname;
+	name = nfname;
 	return_type = f.A.fdReturnType;
 	formals = f.A.fdFormals;
 	fun_names = [new_fun];
@@ -420,7 +432,7 @@ and check_fdecl tenv f =
     let sslp = check_stmt_list tenv' f.A.fdBody in scope'.variables <- List.rev scope'.variables;
     let sfdecl = {
       S.sfdReturnType = f.A.fdReturnType;
-      S.sfdFname = f.A.fdFname;
+      S.sfdFname = nfname;
       S.sfdFormals = f.A.fdFormals;
       S.sfdBody = get_ssl sslp;
     } in 
