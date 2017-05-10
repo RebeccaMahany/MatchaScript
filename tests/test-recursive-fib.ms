@@ -9,4 +9,4 @@ function int fib_rec (int n) {
 }
 
 int result = fib_rec(6);
-//print(result);
+print(result);
