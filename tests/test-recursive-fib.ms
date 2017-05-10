@@ -8,5 +8,5 @@ function int fib_rec (int n) {
 	return fib_rec(n-1) + fib_rec(n-2);
 }
 
-int result = fib_rec(6);
-print(result);
+//int result = fib_rec(6);
+//print(result);
