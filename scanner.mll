@@ -48,14 +48,6 @@ rule token = parse
 (* Function *)
 | "function" { FUNCTION }
 
-(* Classes *)
-| "class"       { CLASS }
-| "constructor" { CONSTRUCTOR }
-| "this"        { THIS }
-| "new"         { NEW }
-(* | "extends"      { EXTENDS } *)
-(* | "super"        { SUPER } *)
-
 (* Branch control *)
 | "if"     { IF }
 | "else"   { ELSE }

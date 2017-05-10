@@ -26,10 +26,8 @@ and expr =
   | BoolLit of bool
   | CharLit of char
   | StringLit of string
-  | Array of expr list
-  | FunExpr of fexpr 
+  | FunExpr of fexpr
   | Id of string
-  | This
   | Binop of expr * op * expr
   | Unop of uop * expr
   | Assign of expr * expr
@@ -102,7 +100,6 @@ let rec string_of_expr = function
   | StringLit(s) -> "\"" ^ s ^ "\""
   | FunExpr(f) -> string_of_fexpr f
   | Id(s) -> s
-  | This -> "this"
   | Binop(e1, o, e2) ->
       string_of_expr e1 ^ " " ^ string_of_op o ^ " " ^ string_of_expr e2
   | Unop(o, e) -> string_of_uop o ^ string_of_expr e

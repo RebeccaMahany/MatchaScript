@@ -78,8 +78,9 @@ let find_fdecl (scope : symbol_table) name =
 let find_parent_fdecl (scope : symbol_table) name =
   match scope.parent with 
   | Some(parent) -> 
-  try List.find (fun x -> x = name) parent.fun_names
-  with Not_found -> raise Not_found
+      try List.find (fun x -> x = name) parent.fun_names
+      with Not_found -> raise Not_found
+  | _ -> raise Not_found
 
 let check_call_fun tenv i =
   let res = try find_fdecl tenv.scope i 
@@ -125,7 +126,6 @@ let get_id_type tenv i =
   end 
   else typ
  
-
 (* helper for check_fdecl, checks for fdecl name dup *) 
 let rec find_fdecl_name (scope : symbol_table) name =  (* takes in a scope of type symbol_table *)
   if (scope.name <> name)
@@ -166,11 +166,12 @@ and check_fexpr tenv f =
 	S.sfeBody = get_ssl sslp; 
 } in S.SFunExpr(sfexpr)
 
-and check_math_binop se1 op se2 = function (* only numbers are supported *)
-	| (A.Int, A.Float) 
+(* numbers and string concatenation are supported *)
+and check_math_binop se1 op se2 = function 
+	| (A.Int, A.Float)
 	| (A.Float, A.Int)
-	| (A.Float, A.Float)	-> S.SBinop(se1, op, se2, A.Float)
-	| (A.Int, A.Int)	-> S.SBinop(se1, op, se2, A.Int)
+	| (A.Float, A.Float) -> S.SBinop(se1, op, se2, A.Float)
+	| (A.Int, A.Int) -> S.SBinop(se1, op, se2, A.Int)
 	| _ -> raise(E.InvalidBinopEvalType)
 
 and check_equal_binop se1 op se2 t1 t2 = (* no floats or functions *)
@@ -457,5 +458,5 @@ let check_ast ast = match ast with
 	| _ -> raise(E.InvalidCompilerArgument)
 
 (* Testing *) 
-let test_ok sast = match sast with  (* with MatchaScript.ml *)
- _ -> "okay\n"
+let test_ok (sast : S.sstmt list) = match sast with  (* with MatchaScript.ml *)
+  _ -> "okay\n"
