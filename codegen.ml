@@ -17,6 +17,7 @@ open Sast
 module L = Llvm
 module A = Ast
 module Ana = Analyzer
+module E = Exceptions
 
 module StringMap = Map.Make(String)
 
@@ -69,7 +70,9 @@ let gen_func_fwd_decl (f : sfdecl) =
   and formal_types = Array.of_list (List.map (fun (t,_) -> ltype_of_typ t) f.sfdFormals) in 
   let ftype = L.function_type (ltype_of_typ f.sfdReturnType) formal_types in
   (* Adds the pair (name, (LLVM fwd_declaration, ocaml_sfdecl)) to the StringMap m *)
-  Hashtbl.add fwd_decls_hashtbl name (L.define_function name ftype the_module, f)
+  if Hashtbl.mem fwd_decls_hashtbl name
+  then raise(E.DuplicateFunction("duplicate function " ^ name ))
+  else Hashtbl.add fwd_decls_hashtbl name (L.define_function name ftype the_module, f)
 
 let codegen_func_fwd_decls (sast : sstmt list) =
   let get_fdecls_for_fwd_decl_generation sstmt = match sstmt with
@@ -84,7 +87,6 @@ Function Definitions
 let build_function_body f_build =
   let (the_function, _) = Hashtbl.find fwd_decls_hashtbl f_build.sfdFname in
   let llbuilder = L.builder_at_end context (L.entry_block the_function) in
-
   (* Construct the function's "locals": formal arguments and locally declared variables. 
     Allocate each on the stack, initialize their value, if appropriate, and remember their
     values in the "locals" map *)
@@ -93,34 +95,36 @@ let build_function_body f_build =
       let local = L.build_alloca (ltype_of_typ t) n llbuilder in
       ignore (L.build_store p local llbuilder);
       StringMap.add n local m 
-    in
+   in
 
     let add_local m (t, n) =
       let local_var = L.build_alloca (ltype_of_typ t) n llbuilder in 
       StringMap.add n local_var m
     in
-
     let f_formals = List.fold_left2 add_formal StringMap.empty f_build.sfdFormals
       (Array.to_list (L.params the_function)) in
 
     let f_locals = 
       let extract_locals_from_fbody fbody = 
         let handle_vdecl locals_list stmt = match stmt with
-            SVarDecl(typ, id, expr) -> (typ, id) :: locals_list
+            SVarDecl(typ, id, expr) -> (
+              (* check if this vdecl is already in the locals_list *)
+              if List.exists (fun (ltyp, lid) -> lid = id) locals_list
+              then raise(E.DuplicateLocal("duplicate local " ^ id ^ " in function " ^ f_build.sfdFname))
+              else (typ, id) :: locals_list 
+              )
           | _ -> locals_list
         in
         List.fold_left handle_vdecl [] fbody  (* fbody is a stmt list *)
       in extract_locals_from_fbody f_build.sfdBody 
-    in
+   in
     (* extract locals from the stmt list of the function *)
     List.fold_left add_local f_formals f_locals 
   in
-
   (* Return the value for a variable or formal argument *)
   let var_lookup n = try StringMap.find n local_vars
                     with Not_found -> raise (Failure "Variable not found")
   in
-
   (* Expressions *)
   let rec codegen_sexpr llbuilder = function
       SIntLit i -> L.const_int i32_t i
@@ -220,19 +224,7 @@ let build_function_body f_build =
                                 A.Void -> L.build_ret_void llbuilder
                               | _      -> L.build_ret (codegen_sexpr llbuilder e) llbuilder); llbuilder
     | SVarDecl (typ, id, se) -> (* Assign the sexpr to id *)
-        let sexpr = (match se with
-            (* If Noexpr, assign a default value *)
-            SNoexpr -> (match typ with
-                A.Int -> SIntLit(0)
-              | A.Float -> SFloatLit(0.0)
-              | A.Bool -> SBoolLit(false)
-              (* | A.Char -> i8_t *)
-              | A.String -> SStringLit("")
-              | _ -> raise(Failure("Invalid type " ^ A.string_of_typ typ ^ " for variable " ^ id))
-            )
-          | _ -> se
-        ) in
-        let e' = codegen_sexpr llbuilder sexpr in
+        let e' = codegen_sexpr llbuilder se in
         ignore (L.build_store e' (var_lookup id) llbuilder); llbuilder
     | SIf (predicate, then_stmt, else_stmt) ->
         let bool_val = codegen_sexpr llbuilder predicate in
@@ -256,6 +248,8 @@ let build_function_body f_build =
         let merge_bb = L.append_block context "merge" the_function in
         ignore (L.build_cond_br bool_val body_bb merge_bb pred_builder);
         L.builder_at_end context merge_bb
+    | SDoWhile(body, pred) -> codegen_sstmt llbuilder
+        ( SBlock [ SBlock [ body ] ; SWhile(pred, body) ] )
     | SFor (e1, e2, e3, body) -> codegen_sstmt llbuilder
         ( SBlock [SExprStmt e1 ; SWhile (e2, SBlock [body ; SExprStmt e3]) ] )
     | SFunDecl(_) -> llbuilder
@@ -269,7 +263,6 @@ let build_function_body f_build =
       A.Void -> L.build_ret_void
     | t -> L.build_ret (L.const_int (ltype_of_typ t) 0))
 ;;
-
 let codegen_func_defs (sast : sstmt list) =
   let gen_func_def sstmt = match sstmt with
       SFunDecl(f) -> build_function_body f

@@ -331,7 +331,7 @@ and check_call tenv e args =
       if res = "A.Void" then ( 
         let first_word = try Str.first_chars (A.string_of_expr e) 8 with 
 	| Invalid_argument(err) -> A.string_of_expr e in
-            if first_word <> "function" then ( (* check for anonymous funs *)
+          if first_word <> "function" then ( (* check for anonymous funs *)
             let t = check_call_fun_vdecls tenv name in
             if t = A.Void then raise(E.UndefinedFunction(name))
             else (
@@ -339,7 +339,7 @@ and check_call tenv e args =
               let sargs = List.map (fun x -> get_s (check_expr tenv x)) args in
               S.SCallExpr(se, sargs, tenv.scope.return_type)
               ))
-         else 
+          else 
             let get_s (s,_) = s in 
             let sargs = List.map (fun x -> get_s (check_expr tenv x)) args in
             S.SCallExpr(se, sargs, tenv.scope.return_type)
@@ -509,7 +509,7 @@ and check_while tenv e s =
       else raise(E.InvalidWhileStatementCondition) in
     let tenv = update_env_context tenv tenv.in_for restore
     in result, tenv
- 
+
 and check_stmt tenv = function
 	  A.Block sl		-> check_block tenv sl
 	| A.ExprStmt e		-> check_expr_stmt tenv e
@@ -519,6 +519,7 @@ and check_stmt tenv = function
 	| A.If(e, s1, s2)	-> check_if tenv e s1 s2
 	| A.For(e1, e2, e3, s)	-> check_for tenv e1 e2 e3 s
 	| A.While(e,s)		-> check_while tenv e s
+    | A.DoWhile(s,e)    -> check_while tenv e s
 
 (* To be used as entrypoint for parsing ast, which is a stmt list *)
 and check_stmt_list tenv stmt_list =
