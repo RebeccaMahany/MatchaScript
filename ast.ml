@@ -14,7 +14,7 @@ type op = Add | Sub | Mult | Div | Mod | Equal | Neq | Less | Leq | Greater | Ge
 
 type uop = Neg | Not
 
-type typ = Int | Float | Bool | Char | Void | ObjectType of string | Fun | String
+type typ = Int | Float | Bool | Char | Void | Fun | String
 
 type bind = typ * string
 
@@ -88,7 +88,6 @@ let string_of_typ = function
   | String -> "string"
   | Void -> "void"
   | Fun -> "fun"
-  | ObjectType(o) -> "class " ^ o 
 
 let string_of_bind (t, id) = string_of_typ t ^ " " ^ id
 

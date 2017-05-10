@@ -109,7 +109,7 @@ let build_function_body f_build =
             SVarDecl(typ, id, expr) -> (typ, id) :: locals_list
           | _ -> locals_list
         in
-        List.fold_left handle_vdecl [] fbody  (* fbody is a stmt list*)
+        List.fold_left handle_vdecl [] fbody  (* fbody is a stmt list *)
       in extract_locals_from_fbody f_build.sfdBody 
     in
     (* extract locals from the stmt list of the function *)
@@ -218,7 +218,19 @@ let build_function_body f_build =
     | SReturn e -> ignore (match f_build.sfdReturnType with
                                 A.Void -> L.build_ret_void llbuilder
                               | _      -> L.build_ret (codegen_sexpr llbuilder e) llbuilder); llbuilder
-    | SVarDecl (typ, id, sexpr) -> (* Assign the declared variable *)
+    | SVarDecl (typ, id, se) -> (* Assign the sexpr to id *)
+        let sexpr = (match se with
+            (* If Noexpr, assign a default value *)
+            SNoexpr -> (match typ with
+                A.Int -> SIntLit(0)
+              | A.Float -> SFloatLit(0.0)
+              | A.Bool -> SBoolLit(false)
+              (* | A.Char -> i8_t *)
+              | A.String -> SStringLit("")
+              | _ -> raise(Failure("Invalid type " ^ A.string_of_typ typ ^ " for variable " ^ id))
+            )
+          | _ -> se
+        ) in
         let e' = codegen_sexpr llbuilder sexpr in
         ignore (L.build_store e' (var_lookup id) llbuilder); llbuilder
     | SIf (predicate, then_stmt, else_stmt) ->
