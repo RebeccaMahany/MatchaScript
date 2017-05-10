@@ -48,4 +48,20 @@ and scdecl = {
 *)
 and sprogram = sstmt list
 
+(* Pretty-printing functions *)
+let string_of_sbind (t, id) = string_of_typ t ^ " " ^ id
 
+let rec string_of_sexpr = function
+    SIntLit(l) -> string_of_int l
+  | SFloatLit(f) -> string_of_float f
+  | SBoolLit(b) -> if b then "true" else "false"
+  | SCharLit(c) -> "\'" ^ String.make 1 c ^ "\'"
+  | SStringLit(s) -> "\"" ^ s ^ "\""
+  | SId(s,t) -> s
+  | SBinop(e1, o, e2, t) ->
+      string_of_sexpr e1 ^ " " ^ string_of_op o ^ " " ^ string_of_sexpr e2
+  | SUnop(o, e, t) -> string_of_uop o ^ string_of_sexpr e
+  | SAssign(e1, e2, t) -> string_of_sexpr e1 ^ " = " ^ string_of_sexpr e2
+  | SCallExpr(call_expr, args, t) ->
+      string_of_sexpr call_expr ^ "(" ^ String.concat ", " (List.map string_of_sexpr args) ^ ")"
+  | SNoexpr -> ""
