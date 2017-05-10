@@ -16,6 +16,7 @@ open Sast
 
 module L = Llvm
 module A = Ast
+module Ana = Analyzer
 
 module StringMap = Map.Make(String)
 
@@ -29,6 +30,7 @@ let fl_t   = L.double_type     context
 let str_t  = L.pointer_type (L.i8_type context)
 let void_t = L.void_type      context
 
+(* Table for function forward declarations *)
 let fwd_decls_hashtbl : (string, (L.llvalue * sfdecl)) Hashtbl.t = Hashtbl.create 10
 
 let ltype_of_typ = function
@@ -38,21 +40,26 @@ let ltype_of_typ = function
   | A.Char -> i8_t
   | A.Void -> void_t
   | A.String -> str_t
+;;
     
 let gen_type = function
-    SIntLit _ -> A.Int
-  | SFloatLit _ -> A.Float
-  | SBoolLit _ -> A.Bool
+    SIntLit(_) -> A.Int
+  | SFloatLit(_) -> A.Float
+  | SBoolLit(_) -> A.Bool
 (*  | SCharLit _ -> A.Char *)
-  | SStringLit _ -> A.String
+  | SStringLit(_) -> A.String
   | SId(_, typ) -> typ
   | SBinop(_,_,_, typ) -> typ
   | SCallExpr(_,_,typ) -> typ
+  | _ -> raise(Failure("llvm type not yet supported"))
+;;
 
 (* Builtins *)
 (* printf *)
-let printf_t = L.var_arg_function_type i32_t [| L.pointer_type i8_t |]
-let printf_func = L.declare_function "printf" printf_t the_module
+let printf_func = 
+  let printf_t = L.var_arg_function_type i32_t [| L.pointer_type i8_t |] in
+  L.declare_function "printf" printf_t the_module
+;;
 
 (*************************
 Forward Declarations
@@ -69,6 +76,7 @@ let codegen_func_fwd_decls (sast : sstmt list) =
       SFunDecl(f) -> gen_func_fwd_decl f
     | _ -> ()
   in List.iter get_fdecls_for_fwd_decl_generation sast
+;;
 
 (*************************
 Function Definitions
@@ -101,7 +109,7 @@ let build_function_body f_build =
             SVarDecl(typ, id, expr) -> (typ, id) :: locals_list
           | _ -> locals_list
         in
-        List.fold_left handle_vdecl [] fbody  (* fbody is a stmt list*)
+        List.fold_left handle_vdecl [] fbody  (* fbody is a stmt list *)
       in extract_locals_from_fbody f_build.sfdBody 
     in
     (* extract locals from the stmt list of the function *)
@@ -124,28 +132,53 @@ let build_function_body f_build =
     | SId(s, typ) -> L.build_load (var_lookup s) s llbuilder
     | SBinop (e1, op, e2, typ) ->
         let e1' = codegen_sexpr llbuilder e1
-        and e2' = codegen_sexpr llbuilder e2 in
-        (match op with
-          A.Add     -> L.build_add
-        | A.Sub     -> L.build_sub
-        | A.Mult    -> L.build_mul
-        | A.Div     -> L.build_sdiv
-        | A.Mod     -> L.build_srem
-        | A.And     -> L.build_and
-        | A.Or      -> L.build_or
-        | A.Equal   -> L.build_icmp L.Icmp.Eq
-        | A.Neq     -> L.build_icmp L.Icmp.Ne
-        | A.Less    -> L.build_icmp L.Icmp.Slt
-        | A.Leq     -> L.build_icmp L.Icmp.Sle
-        | A.Greater -> L.build_icmp L.Icmp.Sgt
-        | A.Geq     -> L.build_icmp L.Icmp.Sge
-        ) e1' e2' "tmp" llbuilder
+        and e2' = codegen_sexpr llbuilder e2
+        and typ = typ in 
+
+        let int_ops e1 op e2 = match op with
+            A.Add     -> L.build_add e1 e2 "addtmp" llbuilder
+          | A.Sub     -> L.build_sub e1 e2 "subtmp" llbuilder
+          | A.Mult    -> L.build_mul e1 e2 "multtmp" llbuilder
+          | A.Div     -> L.build_sdiv e1 e2 "divtmp" llbuilder
+          | A.Mod     -> L.build_srem e1 e2 "sremtmp" llbuilder
+          | A.And     -> L.build_and e1 e2 "andtmp" llbuilder
+          | A.Or      -> L.build_or e1 e2 "ortmp" llbuilder
+          | A.Equal   -> L.build_icmp L.Icmp.Eq e1 e2 "eqtmp" llbuilder
+          | A.Neq     -> L.build_icmp L.Icmp.Ne e1 e2 "neqtmp" llbuilder
+          | A.Less    -> L.build_icmp L.Icmp.Slt e1 e2 "lesstmp" llbuilder
+          | A.Leq     -> L.build_icmp L.Icmp.Sle e1 e2 "leqtmp" llbuilder
+          | A.Greater -> L.build_icmp L.Icmp.Sgt e1 e2 "sgttmp" llbuilder
+          | A.Geq     -> L.build_icmp L.Icmp.Sge e1 e2 "sgetmp" llbuilder
+          | _         -> raise (Failure("unsupported operator for integer arguments"))
+
+        and float_ops e1 op e2 = match op with
+            A.Add     -> L.build_fadd e1 e2 "flt_addtmp" llbuilder
+          | A.Sub     -> L.build_fsub e1 e2 "flt_subtmp" llbuilder
+          | A.Mult    -> L.build_fmul e1 e2 "flt_multmp" llbuilder
+          | A.Div     -> L.build_fdiv e1 e2 "flt_divtmp" llbuilder
+          | A.Mod     -> L.build_frem e1 e2 "flt_sremtmp" llbuilder
+          | A.Equal   -> L.build_fcmp L.Fcmp.Oeq e1 e2 "flt_eqtmp" llbuilder
+          | A.Neq     -> L.build_fcmp L.Fcmp.One e1 e2 "flt_neqtmp" llbuilder
+          | A.Less    -> L.build_fcmp L.Fcmp.Ult e1 e2 "flt_lesstmp" llbuilder
+          | A.Leq     -> L.build_fcmp L.Fcmp.Ole e1 e2 "flt_leqtmp" llbuilder
+          | A.Greater -> L.build_fcmp L.Fcmp.Ogt e1 e2 "flt_sgttmp" llbuilder
+          | A.Geq     -> L.build_fcmp L.Fcmp.Oge e1 e2 "flt_sgetmp" llbuilder
+          | _         -> raise (Failure("unsupported operation for floating point arguments"))
+        in 
+
+        let match_types t = match t with
+            A.Int   -> int_ops e1' op e2'
+          | A.Float -> float_ops e1' op e2'
+        in
+        match_types typ
+
     | SUnop(op, e, typ) ->
         let e' = codegen_sexpr llbuilder e in
         (match op with
           A.Neg     -> L.build_neg
         | A.Not     -> L.build_not) e' "tmp" llbuilder
-    | SAssign (SId(s,_), e, t) -> let e' = codegen_sexpr llbuilder e in
+    | SAssign (SId(s,_), e, t) -> 
+        let e' = codegen_sexpr llbuilder e in
         ignore (L.build_store e' (var_lookup s) llbuilder); e'
     | SCallExpr (SId("print", _), [e], typ) -> 
         let int_format_str llbuilder = L.build_global_stringptr "%d\n" "fmt" llbuilder;
@@ -185,7 +218,19 @@ let build_function_body f_build =
     | SReturn e -> ignore (match f_build.sfdReturnType with
                                 A.Void -> L.build_ret_void llbuilder
                               | _      -> L.build_ret (codegen_sexpr llbuilder e) llbuilder); llbuilder
-    | SVarDecl (typ, id, sexpr) -> (* Assign the declared variable *)
+    | SVarDecl (typ, id, se) -> (* Assign the sexpr to id *)
+        let sexpr = (match se with
+            (* If Noexpr, assign a default value *)
+            SNoexpr -> (match typ with
+                A.Int -> SIntLit(0)
+              | A.Float -> SFloatLit(0.0)
+              | A.Bool -> SBoolLit(false)
+              (* | A.Char -> i8_t *)
+              | A.String -> SStringLit("")
+              | _ -> raise(Failure("Invalid type " ^ A.string_of_typ typ ^ " for variable " ^ id))
+            )
+          | _ -> se
+        ) in
         let e' = codegen_sexpr llbuilder sexpr in
         ignore (L.build_store e' (var_lookup id) llbuilder); llbuilder
     | SIf (predicate, then_stmt, else_stmt) ->
@@ -229,6 +274,7 @@ let codegen_func_defs (sast : sstmt list) =
       SFunDecl(f) -> build_function_body f
     | _ -> ()
   in List.iter gen_func_def sast
+;;
 
 (*************************
 Main
@@ -253,6 +299,7 @@ let codegen_build_main (sast : sstmt list) =
   (* build_function_body main function *)
   let _ = build_function_body prog_main in
   ()
+;;
 
 (*************************
 Program entry point

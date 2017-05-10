@@ -2,7 +2,7 @@
 open Ast
 %}
 
-%token FUNCTION CLASS CONSTRUCTOR THIS NEW
+%token FUNCTION
 %token SEMI LPAREN RPAREN LBRACE RBRACE COMMA LBRACKET RBRACKET DOT
 %token PLUS MINUS TIMES DIVIDE MOD ASSIGN NOT
 %token EQ NEQ LT LEQ GT GEQ TRUE FALSE AND OR
@@ -44,7 +44,6 @@ typ:
   | STRING { String }
   | VOID   { Void }
   | FUN    { Fun }
-  | CLASS ID { ObjectType($2) }
 
 /*********
 Variables
@@ -105,13 +104,9 @@ expr_opt:
     /* nothing */ { Noexpr }
   | expr          { $1 }
 
-primary_expr:
-    THIS          { This }
+callee:
+    callee LPAREN actuals_opt RPAREN  { CallExpr($1, $3) }
   | ID            { Id($1) }
-
-call_expr:
-    ID            { Id($1) }
-  | call_expr LPAREN actuals_opt RPAREN  { CallExpr($1, $3) }
 
 expr:
     INTLIT           { IntLit($1)           }
@@ -138,7 +133,7 @@ expr:
   | MINUS expr %prec NEG { Unop(Neg, $2) }
   | NOT expr         { Unop(Not, $2) }
   | expr ASSIGN expr   { Assign($1, $3) }
-  | call_expr { $1 }
+  | callee LPAREN actuals_opt RPAREN { CallExpr($1, $3) }
   | LPAREN expr RPAREN { $2 }
 
 actuals_opt:
