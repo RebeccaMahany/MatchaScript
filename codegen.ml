@@ -87,7 +87,6 @@ Function Definitions
 let build_function_body f_build =
   let (the_function, _) = Hashtbl.find fwd_decls_hashtbl f_build.sfdFname in
   let llbuilder = L.builder_at_end context (L.entry_block the_function) in
-
   (* Construct the function's "locals": formal arguments and locally declared variables. 
     Allocate each on the stack, initialize their value, if appropriate, and remember their
     values in the "locals" map *)
@@ -96,13 +95,12 @@ let build_function_body f_build =
       let local = L.build_alloca (ltype_of_typ t) n llbuilder in
       ignore (L.build_store p local llbuilder);
       StringMap.add n local m 
-    in
+   in
 
     let add_local m (t, n) =
       let local_var = L.build_alloca (ltype_of_typ t) n llbuilder in 
       StringMap.add n local_var m
     in
-
     let f_formals = List.fold_left2 add_formal StringMap.empty f_build.sfdFormals
       (Array.to_list (L.params the_function)) in
 
@@ -119,7 +117,7 @@ let build_function_body f_build =
         in
         List.fold_left handle_vdecl [] fbody  (* fbody is a stmt list *)
       in extract_locals_from_fbody f_build.sfdBody 
-    in
+   in
     (* extract locals from the stmt list of the function *)
     List.fold_left add_local f_formals f_locals 
   in
@@ -250,6 +248,8 @@ let build_function_body f_build =
         let merge_bb = L.append_block context "merge" the_function in
         ignore (L.build_cond_br bool_val body_bb merge_bb pred_builder);
         L.builder_at_end context merge_bb
+    | SDoWhile(body, pred) -> codegen_sstmt llbuilder
+        ( SBlock [ SBlock [ body ] ; SWhile(pred, body) ] )
     | SFor (e1, e2, e3, body) -> codegen_sstmt llbuilder
         ( SBlock [SExprStmt e1 ; SWhile (e2, SBlock [body ; SExprStmt e3]) ] )
     | SFunDecl(_) -> llbuilder
@@ -263,7 +263,6 @@ let build_function_body f_build =
       A.Void -> L.build_ret_void
     | t -> L.build_ret (L.const_int (ltype_of_typ t) 0))
 ;;
-
 let codegen_func_defs (sast : sstmt list) =
   let gen_func_def sstmt = match sstmt with
       SFunDecl(f) -> build_function_body f
