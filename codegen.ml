@@ -173,7 +173,6 @@ let build_function_body f_build =
                   e2 ^ ": Can only do Binop on Int, Bool, or Float"))
         in
         match_types e1
-
     | SUnop(op, e, typ) ->
         let e' = codegen_sexpr llbuilder e in
         (match op with

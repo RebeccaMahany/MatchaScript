@@ -4,3 +4,4 @@ function void main() {
     a = b;
     print(a);
 }
+
