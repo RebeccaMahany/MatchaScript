@@ -162,7 +162,8 @@ if [ $# -ge 1 ]
 then
     files=$@
 else
-    files="tests/test-*.ms tests/fail-*.ms"
+    files="tests/test-*.ms fail_tests/fail-*.ms"
+
 fi
 
 for file in $files
@@ -180,5 +181,7 @@ do
 	    ;;
     esac
 done
+
+
 
 exit $globalerror

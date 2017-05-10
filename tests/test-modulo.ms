@@ -1,4 +1,4 @@
-function void main() {
+function void myfunc() {
     int i = 10;
     int j = i % 3;
     print(j);
@@ -8,5 +8,6 @@ function void main() {
 
     int l = i % 5;
     print(l);
-
 }
+
+myfunc();

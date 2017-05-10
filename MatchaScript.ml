@@ -15,7 +15,7 @@ let _ =
   let sast = Analyzer.check_ast ast (*Fake_sast.create_fake_sast*) in
   match action with
     Ast -> print_string (Ast.string_of_program ast)
-  | Sast -> print_string (Analyzer.test_ok sast)
+  | Sast -> print_string (Sast.string_of_sprogram sast)
   | LLVM_IR -> print_string (Llvm.string_of_llmodule (Codegen.translate sast))
   | Compile -> let m = Codegen.translate sast in
     Llvm_analysis.assert_valid_module m;
