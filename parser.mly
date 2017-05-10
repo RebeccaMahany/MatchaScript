@@ -49,7 +49,12 @@ typ:
 Variables
 **********/
 vdecl:
-    typ ID SEMI { ($1, $2, Noexpr)}
+    typ ID SEMI { match $1 with
+                    Int -> ($1, $2, IntLit(0))
+                  | Float -> ($1, $2, FloatLit(0.0))
+                  | Bool -> ($1, $2, BoolLit(false))
+                  | String -> ($1, $2, StringLit(""))
+                }
   | typ ID ASSIGN expr SEMI { ($1, $2, $4) }
 
 /*********
