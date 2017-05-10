@@ -92,7 +92,7 @@ let string_of_typ = function
 let string_of_bind (t, id) = string_of_typ t ^ " " ^ id
 
 let rec string_of_expr = function
-    IntLit(l) -> string_of_int l
+    IntLit(i) -> string_of_int i
   | FloatLit(f) -> string_of_float f
   | BoolLit(b) -> if b then "true" else "false"
   | CharLit(c) -> "\'" ^ String.make 1 c ^ "\'"

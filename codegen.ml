@@ -165,12 +165,14 @@ let build_function_body f_build =
           | A.Geq     -> L.build_fcmp L.Fcmp.Oge e1 e2 "flt_sgetmp" llbuilder
           | _         -> raise (Failure("unsupported operation for floating point arguments"))
         in 
-
-        let match_types t = match t with
+        let match_types e1 = match gen_type e1 with
             A.Int   -> int_ops e1' op e2'
           | A.Float -> float_ops e1' op e2'
+          | _ -> raise(Failure("Invalid Binop types at " ^
+                  string_of_sexpr e1 ^ " " ^ A.string_of_op op ^ " " ^ string_of_sexpr 
+                  e2 ^ ": Can only do Binop on Int or Float"))
         in
-        match_types typ
+        match_types e1
 
     | SUnop(op, e, typ) ->
         let e' = codegen_sexpr llbuilder e in
