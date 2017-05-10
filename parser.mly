@@ -6,7 +6,7 @@ open Ast
 %token SEMI LPAREN RPAREN LBRACE RBRACE COMMA LBRACKET RBRACKET DOT
 %token PLUS MINUS TIMES DIVIDE MOD ASSIGN NOT
 %token EQ NEQ LT LEQ GT GEQ TRUE FALSE AND OR
-%token RETURN IF ELSE FOR WHILE DO COLON QMARK 
+%token RETURN IF ELSE FOR WHILE DO 
 %token INT FLOAT BOOL CHAR STRING FUN VOID
 %token <int> INTLIT
 %token <float> FLOATLIT
@@ -141,7 +141,6 @@ expr:
   | NOT expr         { Unop(Not, $2) }
   | expr ASSIGN expr   { Assign($1, $3) }
   | callee LPAREN actuals_opt RPAREN { CallExpr($1, $3) }
-/*  | expr QMARK expr COLON expr { Ternary($1, $3, $5) } */
   | LPAREN expr RPAREN { $2 }
 
 actuals_opt:

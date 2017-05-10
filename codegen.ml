@@ -78,7 +78,6 @@ let codegen_func_fwd_decls (sast : sstmt list) =
   in List.iter get_fdecls_for_fwd_decl_generation sast
 ;;
 
-<<<<<<< 30da5b1497d40a5cf5ebfb3ec17b69be467a0b2b
 (*************************
 Function Definitions
 *************************)

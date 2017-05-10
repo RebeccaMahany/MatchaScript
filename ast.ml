@@ -32,7 +32,6 @@ and expr =
   | Unop of uop * expr
   | Assign of expr * expr
   | CallExpr of expr * expr list 
-(*  | Ternary of expr * expr * expr (* Ternary operator ?: *) *)
   | Noexpr
 
 and caseType = Default | CaseType of expr
@@ -106,8 +105,6 @@ let rec string_of_expr = function
   | Binop(e1, o, e2) ->
       string_of_expr e1 ^ " " ^ string_of_op o ^ " " ^ string_of_expr e2
   | Unop(o, e) -> string_of_uop o ^ string_of_expr e
-(*  | Ternary(p, e1, e2) -> "if " ^ string_of_expr p ^ " then " 
-        ^ string_of_expr e1 ^ " else " ^ string_of_expr e2 *)
   | Assign(e1, e2) -> string_of_expr e1 ^ " = " ^ string_of_expr e2
   | CallExpr(call_expr, args) ->
       string_of_expr call_expr ^ "(" ^ String.concat ", " (List.map string_of_expr args) ^ ")"
