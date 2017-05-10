@@ -47,3 +47,4 @@ function void primeNumberChecker(int a) {
 primeNumberChecker(5);
 primeNumberChecker(27);
 primeNumberChecker(43);
+
