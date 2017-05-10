@@ -11,9 +11,6 @@ type symbol_table = {
 		return_type	: A.typ;
 	mutable formals		: A.bind list;
 	mutable	fun_names	: string list;
-	(*	reserved	: string list; *)
-	(*mutable st_fdecls: A.fdecl list;
-	mutable st_cdecls: A.cdecl list;*)
 }
 
 (******************************************************
@@ -39,7 +36,7 @@ let rec check_call_helper (scope : symbol_table) name =
     if (scope.name <> name)	(* search for function name in scope *)
     then match scope.parent with 
       Some(parent) -> check_call_helper parent name
-    | _ -> raise Not_found (*raise(E.UndefinedFunction(name))*)
+    | _ -> raise Not_found 
     else name
 
 let check_call_wrapper tenv i =
@@ -139,14 +136,12 @@ let rec check_block tenv sl = match sl with
 	| _ -> let sl, _ = check_stmt_list tenv sl in 
 	  S.SBlock(sl), tenv 
 
-
 and check_fexpr tenv f =
   let get_bind_string (_,s) = s in
   let formals_map = List.fold_left (fun m formal ->  (* check formal dups within current function *)
     if StringMap.mem (get_bind_string formal) m 
     then raise(E.DuplicateFormal(get_bind_string formal))
     else StringMap.add (get_bind_string formal) formal m) StringMap.empty f.A.feFormals in    
- (* tenv.scope.fun_names <- tenv.scope.fun_names@[f.A.fdFname];*)
   let scope' = (* create a new scope *)
     	{ 
 	parent = Some(tenv.scope); (* parent may or may not exist *)
@@ -241,8 +236,7 @@ and check_call tenv e args =
       if res = "A.Void" then ( 
         let first_word = try Str.first_chars (A.string_of_expr e) 8 with 
 	| Invalid_argument(err) -> A.string_of_expr e in
-        (*Printf.printf "%s\n" first_word;*)
-         if first_word <> "function" then ( (* check for anonymous funs *)
+            if first_word <> "function" then ( (* check for anonymous funs *)
             let t = check_call_fun_vdecls tenv name in
             if t = A.Void then raise(E.UndefinedFunction(name))
             else (
@@ -312,7 +306,6 @@ and check_vdecl tenv v =
   let vexpr = get_v_expr v in
   let vsexpr, _ = check_expr tenv vexpr in
   let vstyp = get_sexpr_type vsexpr in
-(*	Printf.printf "%s " (A.string_of_typ vstyp); *)
   let get_v_typ (t,_,_) = t in  (* helper to get typ of vdecl *)
   let vtyp = get_v_typ v in
   let get_v_name (_,n,_) = n in
@@ -338,8 +331,7 @@ and check_fdecl tenv f =
     else StringMap.add (get_bind_string formal) formal m) StringMap.empty f.A.fdFormals in  
   tenv.scope.fun_names <- tenv.scope.fun_names@[f.A.fdFname];
   match tenv.scope.parent with 
-    | Some(parent) -> (parent.fun_names <- parent.fun_names@[f.A.fdFname]);
- (* List.iter (Printf.printf "%s ") tenv.scope.fun_names; Printf.printf"\n";*)  
+    | Some(parent) -> (parent.fun_names <- parent.fun_names@[f.A.fdFname]); 
   let scope' = (* create a new scope *)
     	{ 
 	parent = Some(tenv.scope); (* parent may or may not exist *)
@@ -427,12 +419,10 @@ and check_stmt_list tenv stmt_list =
 (***********************
  * Program entry point
  ***********************)
-let builtin_functions = ["print"]
-
 let root_symbol_table : symbol_table = {
   parent	 = None;
   name		 = "anon"; 
-  variables	 = [(A.Fun, "print", A.Id("print"))];
+  variables	 = [(A.Fun, "print", A.Id("print"))]; (* built-in function print *)
   return_type	 = A.Void;
   formals	 = []; 
   fun_names 	 = [];
