@@ -26,6 +26,7 @@ exception InvalidBinopEvalType (* "a" / "b" *)
 exception InvalidBinaryOperator (* a @ b, where @ is not supported *)
 exception InvalidUnaryOperator (* ^a *)
 exception InvalidUnopEvalType (* !"not" *)
+exception SwitchStatementTypeMismatch of string * string
 (*exception CallingBreakOutsideLoop
 exception CallingContinueOutsideLoop*)
 

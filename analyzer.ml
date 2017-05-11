@@ -478,6 +478,28 @@ and check_while tenv e s =
     let tenv = update_env_context tenv tenv.in_for restore
     in result, tenv
 
+and check_switch tenv e cl =
+  (* check that the type of each case is the same as expr type *)
+   let se, _ = check_expr tenv e in
+   let typ = get_sexpr_type se in
+   let get_case c = c.A.case in  (* is either Default or expr *)
+   let scases = List.map (fun x -> 
+     let scaseInner = match (get_case x) with
+      | A.Default -> S.SDefault
+      | A.CaseType(ex) -> 
+         (let se2, _ = check_expr tenv ex in 
+         let se2typ = get_sexpr_type se2 in
+         if typ <> se2typ then raise(E.SwitchStatementTypeMismatch(A.string_of_typ typ, A.string_of_typ se2typ)) else S.SCaseType(se2)) in
+    
+     let get_ssl (sstmt_list, _) = sstmt_list in
+     let sslp = check_stmt_list tenv x.A.setStmt in
+     let scase = 
+     { S.scase = scaseInner;
+       S.ssetStmt = get_ssl sslp; } in scase 
+) cl in 
+     S.SSwitch(se, scases), tenv 
+  
+
 and check_stmt tenv = function
 	  A.Block sl		-> check_block tenv sl
 	| A.ExprStmt e		-> check_expr_stmt tenv e
@@ -487,7 +509,8 @@ and check_stmt tenv = function
 	| A.If(e, s1, s2)	-> check_if tenv e s1 s2
 	| A.For(e1, e2, e3, s)	-> check_for tenv e1 e2 e3 s
 	| A.While(e,s)		-> check_while tenv e s
-    | A.DoWhile(s,e)    -> check_while tenv e s
+    	| A.DoWhile(s,e)    	-> check_while tenv e s
+	| A.Switch(e,cl)	-> check_switch tenv e cl
 
 (* To be used as entrypoint for parsing ast, which is a stmt list *)
 and check_stmt_list tenv stmt_list =
