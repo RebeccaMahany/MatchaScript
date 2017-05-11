@@ -4,10 +4,8 @@ function void main() {
     switch (0) {
         case 1:
             hello = "No hello for you";
-            break;
         case 2:
             hello = "No hello for you either";
-            break;
         default:
             hello = "Hello there!";
     }
@@ -21,11 +19,9 @@ function void main() {
     switch ( returnsOne() ) {
         case 1:
             i = 1;
-            break;
 
         case 2:
             i = 2;
-            break;
 
         default:
             i = 0;
@@ -37,7 +33,6 @@ function void main() {
     switch ( day ) {
         default:
             today = "I don't know what day today is!";
-            break;
         case "Sunday":
             today = "Can't believe the weekend is almost over :(";
     }

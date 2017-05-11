@@ -135,10 +135,15 @@ and string_of_stmt = function
       string_of_expr e3  ^ ") " ^ string_of_stmt s
   | While(e, s) -> "while (" ^ string_of_expr e ^ ") " ^ string_of_stmt s  
   | DoWhile(s, e) -> "do " ^ string_of_stmt s ^ " while (" ^ string_of_expr e ^ ");"
+  | Switch(e, c) -> "switch ( " ^ string_of_expr e ^ ") {\n" ^ String.concat "" (List.map string_of_case c) ^ "}\n"
 
 and string_of_vdecl (typ, str, expr) = 
   if expr = Noexpr then string_of_typ typ ^ " " ^ str ^ ";\n"
   else string_of_typ typ ^ " " ^ str ^ " = " ^ string_of_expr expr ^ ";\n"
+
+and string_of_case c = 
+  string_of_caseType c.case ^ ": " ^ String.concat "" 
+  (List.map string_of_stmt c.setStmt)
 
 and string_of_fexpr fexpr =
   "function " ^ string_of_typ fexpr.feReturnType ^ " " 
