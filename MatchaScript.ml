@@ -12,7 +12,7 @@ let _ =
   else Compile in
   let lexbuf = Lexing.from_channel stdin in
   let ast = Parser.program Scanner.token lexbuf in
-  let sast = Analyzer.check_ast ast (*Fake_sast.create_fake_sast*) in
+  let sast = Analyzer.check_ast ast in
   match action with
     Ast -> print_string (Ast.string_of_program ast)
   | Sast -> print_string (Sast.string_of_sprogram sast)

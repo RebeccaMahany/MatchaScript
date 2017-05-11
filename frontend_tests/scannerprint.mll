@@ -81,6 +81,11 @@ rule token = parse
 | "false"  { print_string "FALSE " }
 | "fun"    { print_string "FUN " }
 
+(* Include *)
+| "#"   { print_string "POUND " }
+| "include"     { print_string "INCLUDE " }
+| "ms"    { print_string "MS " }
+
 (* Literals *)
 | int as lxm 	{ print_string "INTLIT " }
 | float as lxm { print_string "FLOATLIT " }

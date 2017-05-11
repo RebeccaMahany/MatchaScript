@@ -11,4 +11,3 @@ while (k < 5) {
     print(k);
     k = k + 1;
 }
-

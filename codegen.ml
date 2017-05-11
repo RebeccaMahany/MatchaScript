@@ -43,7 +43,7 @@ let ltype_of_typ = function
   | A.String -> str_t
 ;;
     
-let gen_type = function
+let gen_type exp = match exp with
     SIntLit(_) -> A.Int
   | SFloatLit(_) -> A.Float
   | SBoolLit(_) -> A.Bool
@@ -51,8 +51,9 @@ let gen_type = function
   | SStringLit(_) -> A.String
   | SId(_, typ) -> typ
   | SBinop(_,_,_, typ) -> typ
+  | SUnop(_, _, typ) -> typ
   | SCallExpr(_,_,typ) -> typ
-  | _ -> raise(Failure("llvm type not yet supported"))
+  | _ -> raise(Failure("llvm type of " ^ string_of_sexpr exp ^ " not yet supported"))
 ;;
 
 (* Builtins *)
@@ -61,6 +62,10 @@ let printf_func =
   let printf_t = L.var_arg_function_type i32_t [| L.pointer_type i8_t |] in
   L.declare_function "printf" printf_t the_module
 ;;
+
+(*************************
+Standard Library
+*************************)
 
 (*************************
 Forward Declarations
@@ -179,9 +184,19 @@ let build_function_body f_build =
         match_types e1
     | SUnop(op, e, typ) ->
         let e' = codegen_sexpr llbuilder e in
-        (match op with
-          A.Neg     -> L.build_neg
-        | A.Not     -> L.build_not) e' "tmp" llbuilder
+        let int_unops op e' = match op with
+            A.Neg     -> L.build_neg e' "tmp" llbuilder
+          | A.Not     -> L.build_not e' "tmp" llbuilder
+        and float_unops op e' = match op with
+            A.Neg     -> L.build_fneg e' "tmp" llbuilder
+          | _         -> raise(Failure("Invalid " ^ A.string_of_uop op ^ " at " ^ string_of_sexpr e))
+        in
+        let match_types e = match gen_type e with
+            A.Int -> int_unops op e'
+          | A.Float -> float_unops op e'
+          | _ -> raise(Failure("Invalid Unop type at " ^ string_of_sexpr e))
+        in
+        match_types e
     | SAssign (SId(s,_), e, t) -> 
         let e' = codegen_sexpr llbuilder e in
         ignore (L.build_store e' (var_lookup s) llbuilder); e'
