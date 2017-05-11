@@ -1,5 +1,6 @@
-function float float_abs(float f) {
+function float return_float(float f) {
     return f;
 }
 
-float_abs(3.0);
+float f = return_float(3.0);
+print(f);
