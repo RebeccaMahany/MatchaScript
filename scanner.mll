@@ -67,6 +67,11 @@ rule token = parse
 | "false"  { FALSE }
 | "fun"	   { FUN }
 
+(* Include *)
+| "#"		{ POUND }
+| "include"     { INCLUDE }
+| "ms"		{ MS }
+
 (* Literals *)
 | int as lxm 	{ INTLIT(int_of_string lxm) }
 | float as lxm  { FLOATLIT(float_of_string lxm) }

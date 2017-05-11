@@ -60,8 +60,10 @@ and fdecl = {
   fdBody : stmt list;
 }
 
+type include_stmt = Include of string
+
 (* type program = include_stmt list * constructs *)
-type program = Program of stmt list
+type program = Program of include_stmt list * stmt list
 
 (* Pretty-printing functions *)
 let string_of_op = function
@@ -144,6 +146,11 @@ and string_of_fdecl fdecl =
   fdecl.fdFname ^ "(" ^ String.concat ", " (List.map string_of_bind fdecl.fdFormals) ^
   ")\n{\n" ^ String.concat "" (List.map string_of_stmt fdecl.fdBody) ^ "}"
 
+let string_of_include = function 
+  Include(s) -> "#include<" ^ s ^ ">;\n"
+
 let string_of_program prog = match prog with 
-  Program(stmts) -> String.concat "" (List.map string_of_stmt stmts) ^ "\n"
+  Program(includes, stmts) -> 
+    String.concat "" (List.map string_of_include includes) ^ "\n";
+    String.concat "" (List.map string_of_stmt stmts) ^ "\n";
 

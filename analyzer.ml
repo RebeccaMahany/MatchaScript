@@ -28,7 +28,6 @@ let update_env_context tenv in_for in_while = {
 	in_while	= in_while;
 }
 
-
 (**********************
 * Helper functions
 **********************)
@@ -503,7 +502,7 @@ and check_stmt_list tenv stmt_list =
 
 
 (***********************
- * Program entry point
+ * Root environment setup
  ***********************)
 let root_symbol_table : symbol_table = {
   parent	 = None;
@@ -529,9 +528,30 @@ let root_env : translation_env = {
   in_while = false;
 }
 
+(**********************
+* Includes
+**********************)
+(* for each file in the include_stmt list, recursively append the contents of the file
+to a stmt list, and then append that stmt list to the program stmt list *)
+let rec process_all_includes_in_level (includes_list : A.include_stmt list) (stmt_list : A.stmt list)=
+  (* returns the includes appended to the program stmts *)
+  let rec process_include_single (stmts: A.stmt list) (A.Include(incl) : A.include_stmt) =
+    let file_in = open_in incl in
+    let lexbuf = Lexing.from_channel file_in in
+    let A.Program(inner_incstmts, inner_stmts) = Parser.program Scanner.token lexbuf in
+    let (include_and_stmts : A.stmt list) = process_all_includes_in_level inner_incstmts inner_stmts in
+    ignore(close_in file_in);
+    (include_and_stmts@stmts)
+  in List.fold_left process_include_single stmt_list includes_list
+
+(***********************
+ * Program entry point
+ ***********************)
 let check_ast ast = match ast with
-	  A.Program(stmts) -> let (sast, _) = check_stmt_list root_env stmts in sast
-	| _ -> raise(E.InvalidCompilerArgument)
+    A.Program(includes, stmts) -> 
+        let prog_and_includes = process_all_includes_in_level includes stmts in
+        let (sast, _) = check_stmt_list root_env prog_and_includes in sast
+	 | _ -> raise(E.InvalidCompilerArgument)
 
 (* Testing *) 
 let test_ok (sast : S.sstmt list) = match sast with  (* with MatchaScript.ml *)

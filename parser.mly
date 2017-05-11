@@ -2,8 +2,8 @@
 open Ast
 %}
 
-%token FUNCTION
-%token SEMI LPAREN RPAREN LBRACE RBRACE COMMA LBRACKET RBRACKET DOT
+%token FUNCTION INCLUDE MS
+%token SEMI LPAREN RPAREN LBRACE RBRACE COMMA LBRACKET RBRACKET DOT POUND
 %token PLUS MINUS TIMES DIVIDE MOD ASSIGN NOT
 %token EQ NEQ LT LEQ GT GEQ TRUE FALSE AND OR
 %token RETURN IF ELSE FOR WHILE DO 
@@ -24,7 +24,7 @@ open Ast
 %left LT GT LEQ GEQ
 %left PLUS MINUS
 %left TIMES DIVIDE MOD
-%right NOT NEG DOT
+%right NOT NEG
 
 %start program
 %type <Ast.program> program
@@ -32,7 +32,21 @@ open Ast
 %%
 
 program:
-  stmt_list EOF { Program($1) }
+  includes stmt_list EOF { Program($1, $2) }
+
+/******************
+  INCLUDE
+******************/
+includes:
+    /* nothing */     { [] }
+    |   include_list  { $1 }
+
+include_list:
+      include_decl              { [$1] }
+    |   include_list include_decl { $1@[$2] }
+
+include_decl:
+  POUND INCLUDE STRINGLIT SEMI { Include($3) }
 
 /*********
 typs
