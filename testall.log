@@ -46,6 +46,12 @@ lli test-floats.ll > test-floats.out
 diff -b test-floats.out tests/test-floats.out > test-floats.diff
 ###### SUCCESS
 
+###### Testing test-for-all-mankind
+./MatchaScript.native < tests/test-for-all-mankind.ms > test-for-all-mankind.ll
+lli test-for-all-mankind.ll > test-for-all-mankind.out
+diff -b test-for-all-mankind.out tests/test-for-all-mankind.out > test-for-all-mankind.diff
+###### SUCCESS
+
 ###### Testing test-func-args-multiple
 ./MatchaScript.native < tests/test-func-args-multiple.ms > test-func-args-multiple.ll
 lli test-func-args-multiple.ll > test-func-args-multiple.out
