@@ -1,0 +1,275 @@
+/usr/bin/lli
+
+###### Testing test-assign-expr
+./MatchaScript.native < tests/test-assign-expr.ms > test-assign-expr.ll
+lli test-assign-expr.ll > test-assign-expr.out
+diff -b test-assign-expr.out tests/test-assign-expr.out > test-assign-expr.diff
+###### SUCCESS
+
+###### Testing test-boolean
+./MatchaScript.native < tests/test-boolean.ms > test-boolean.ll
+lli test-boolean.ll > test-boolean.out
+diff -b test-boolean.out tests/test-boolean.out > test-boolean.diff
+###### SUCCESS
+
+###### Testing test-break-continue
+./MatchaScript.native < tests/test-break-continue.ms > test-break-continue.ll
+Fatal error: exception Parsing.Parse_error
+###### FAILED
+
+###### Testing test-chars
+./MatchaScript.native < tests/test-chars.ms > test-chars.ll
+Fatal error: exception Match_failure("codegen.ml", 129, 36)
+###### FAILED
+
+###### Testing test-comments
+./MatchaScript.native < tests/test-comments.ms > test-comments.ll
+lli test-comments.ll > test-comments.out
+diff -b test-comments.out tests/test-comments.out > test-comments.diff
+###### SUCCESS
+
+###### Testing test-declstmt-assign
+./MatchaScript.native < tests/test-declstmt-assign.ms > test-declstmt-assign.ll
+lli test-declstmt-assign.ll > test-declstmt-assign.out
+diff -b test-declstmt-assign.out tests/test-declstmt-assign.out > test-declstmt-assign.diff
+###### SUCCESS
+
+###### Testing test-float-plus-float
+./MatchaScript.native < tests/test-float-plus-float.ms > test-float-plus-float.ll
+lli test-float-plus-float.ll > test-float-plus-float.out
+diff -b test-float-plus-float.out tests/test-float-plus-float.out > test-float-plus-float.diff
+###### SUCCESS
+
+###### Testing test-floats
+./MatchaScript.native < tests/test-floats.ms > test-floats.ll
+lli test-floats.ll > test-floats.out
+diff -b test-floats.out tests/test-floats.out > test-floats.diff
+###### SUCCESS
+
+###### Testing test-func-args-multiple
+./MatchaScript.native < tests/test-func-args-multiple.ms > test-func-args-multiple.ll
+lli test-func-args-multiple.ll > test-func-args-multiple.out
+diff -b test-func-args-multiple.out tests/test-func-args-multiple.out > test-func-args-multiple.diff
+###### SUCCESS
+
+###### Testing test-function-return-int
+./MatchaScript.native < tests/test-function-return-int.ms > test-function-return-int.ll
+lli test-function-return-int.ll > test-function-return-int.out
+diff -b test-function-return-int.out tests/test-function-return-int.out > test-function-return-int.diff
+###### SUCCESS
+
+###### Testing test-int-plus-float
+./MatchaScript.native < tests/test-int-plus-float.ms > test-int-plus-float.ll
+lli test-int-plus-float.ll > test-int-plus-float.out
+lli: test-int-plus-float.ll:9:108: error: operands of constexpr must have same type
+  %printf = call i32 (i8*, ...)* @printf(i8* getelementptr inbounds ([4 x i8]* @fmt, i32 0, i32 0), double add (double 3.050000e+00, i32 1))
+                                                                                                           ^
+###### FAILED
+
+###### Testing test-int
+./MatchaScript.native < tests/test-int.ms > test-int.ll
+lli test-int.ll > test-int.out
+diff -b test-int.out tests/test-int.out > test-int.diff
+###### SUCCESS
+
+###### Testing test-main-function
+./MatchaScript.native < tests/test-main-function.ms > test-main-function.ll
+lli test-main-function.ll > test-main-function.out
+diff -b test-main-function.out tests/test-main-function.out > test-main-function.diff
+###### SUCCESS
+
+###### Testing test-modulo
+./MatchaScript.native < tests/test-modulo.ms > test-modulo.ll
+lli test-modulo.ll > test-modulo.out
+diff -b test-modulo.out tests/test-modulo.out > test-modulo.diff
+###### SUCCESS
+
+###### Testing test-multiple-assignment
+./MatchaScript.native < tests/test-multiple-assignment.ms > test-multiple-assignment.ll
+lli test-multiple-assignment.ll > test-multiple-assignment.out
+diff -b test-multiple-assignment.out tests/test-multiple-assignment.out > test-multiple-assignment.diff
+###### SUCCESS
+
+###### Testing test-multiple-binop
+./MatchaScript.native < tests/test-multiple-binop.ms > test-multiple-binop.ll
+lli test-multiple-binop.ll > test-multiple-binop.out
+diff -b test-multiple-binop.out tests/test-multiple-binop.out > test-multiple-binop.diff
+###### SUCCESS
+
+###### Testing test-one-plus-one
+./MatchaScript.native < tests/test-one-plus-one.ms > test-one-plus-one.ll
+lli test-one-plus-one.ll > test-one-plus-one.out
+diff -b test-one-plus-one.out tests/test-one-plus-one.out > test-one-plus-one.diff
+###### SUCCESS
+
+###### Testing test-prime-fact
+./MatchaScript.native < tests/test-prime-fact.ms > test-prime-fact.ll
+lli test-prime-fact.ll > test-prime-fact.out
+diff -b test-prime-fact.out tests/test-prime-fact.out > test-prime-fact.diff
+###### SUCCESS
+
+###### Testing test-prime-number-checker
+./MatchaScript.native < tests/test-prime-number-checker.ms > test-prime-number-checker.ll
+lli test-prime-number-checker.ll > test-prime-number-checker.out
+diff -b test-prime-number-checker.out tests/test-prime-number-checker.out > test-prime-number-checker.diff
+###### SUCCESS
+
+###### Testing test-print-1point1
+./MatchaScript.native < tests/test-print-1point1.ms > test-print-1point1.ll
+lli test-print-1point1.ll > test-print-1point1.out
+diff -b test-print-1point1.out tests/test-print-1point1.out > test-print-1point1.diff
+###### SUCCESS
+
+###### Testing test-print-hello-world
+./MatchaScript.native < tests/test-print-hello-world.ms > test-print-hello-world.ll
+lli test-print-hello-world.ll > test-print-hello-world.out
+diff -b test-print-hello-world.out tests/test-print-hello-world.out > test-print-hello-world.diff
+###### SUCCESS
+
+###### Testing test-recursive-fib
+./MatchaScript.native < tests/test-recursive-fib.ms > test-recursive-fib.ll
+lli test-recursive-fib.ll > test-recursive-fib.out
+diff -b test-recursive-fib.out tests/test-recursive-fib.out > test-recursive-fib.diff
+###### SUCCESS
+
+###### Testing test-same-locals-in-different-functions
+./MatchaScript.native < tests/test-same-locals-in-different-functions.ms > test-same-locals-in-different-functions.ll
+lli test-same-locals-in-different-functions.ll > test-same-locals-in-different-functions.out
+diff -b test-same-locals-in-different-functions.out tests/test-same-locals-in-different-functions.out > test-same-locals-in-different-functions.diff
+###### SUCCESS
+
+###### Testing test-separate-declaration-and-assignment
+./MatchaScript.native < tests/test-separate-declaration-and-assignment.ms > test-separate-declaration-and-assignment.ll
+lli test-separate-declaration-and-assignment.ll > test-separate-declaration-and-assignment.out
+diff -b test-separate-declaration-and-assignment.out tests/test-separate-declaration-and-assignment.out > test-separate-declaration-and-assignment.diff
+###### SUCCESS
+
+###### Testing test-single-int
+./MatchaScript.native < tests/test-single-int.ms > test-single-int.ll
+lli test-single-int.ll > test-single-int.out
+diff -b test-single-int.out tests/test-single-int.out > test-single-int.diff
+###### SUCCESS
+
+###### Testing test-strings
+./MatchaScript.native < tests/test-strings.ms > test-strings.ll
+lli test-strings.ll > test-strings.out
+diff -b test-strings.out tests/test-strings.out > test-strings.diff
+###### SUCCESS
+
+###### Testing test-switch-basic
+./MatchaScript.native < tests/test-switch-basic.ms > test-switch-basic.ll
+Fatal error: exception Parsing.Parse_error
+###### FAILED
+
+###### Testing test-switch-demo
+./MatchaScript.native < tests/test-switch-demo.ms > test-switch-demo.ll
+Fatal error: exception Parsing.Parse_error
+###### FAILED
+
+###### Testing test-switch
+./MatchaScript.native < tests/test-switch.ms > test-switch.ll
+Fatal error: exception Parsing.Parse_error
+###### FAILED
+
+###### Testing test-vdecl-bind
+./MatchaScript.native < tests/test-vdecl-bind.ms > test-vdecl-bind.ll
+lli test-vdecl-bind.ll > test-vdecl-bind.out
+diff -b test-vdecl-bind.out tests/test-vdecl-bind.out > test-vdecl-bind.diff
+###### SUCCESS
+
+###### Testing test-while-do-while
+./MatchaScript.native < tests/test-while-do-while.ms > test-while-do-while.ll
+lli test-while-do-while.ll > test-while-do-while.out
+diff -b test-while-do-while.out tests/test-while-do-while.out > test-while-do-while.diff
+###### SUCCESS
+
+###### Testing test-while-loop
+./MatchaScript.native < tests/test-while-loop.ms > test-while-loop.ll
+lli test-while-loop.ll > test-while-loop.out
+diff -b test-while-loop.out tests/test-while-loop.out > test-while-loop.diff
+###### SUCCESS
+
+###### Testing fail-assignment-type-mismatch-char
+./MatchaScript.native < fail_tests/fail-assignment-type-mismatch-char.ms 2> fail-assignment-type-mismatch-char.err >> testall.log
+diff -b fail-assignment-type-mismatch-char.err fail_tests/fail-assignment-type-mismatch-char.err > fail-assignment-type-mismatch-char.diff
+###### SUCCESS
+
+###### Testing fail-assignment-type-mismatch-int
+./MatchaScript.native < fail_tests/fail-assignment-type-mismatch-int.ms 2> fail-assignment-type-mismatch-int.err >> testall.log
+diff -b fail-assignment-type-mismatch-int.err fail_tests/fail-assignment-type-mismatch-int.err > fail-assignment-type-mismatch-int.diff
+###### SUCCESS
+
+###### Testing fail-duplicate-functions-same-args
+./MatchaScript.native < fail_tests/fail-duplicate-functions-same-args.ms 2> fail-duplicate-functions-same-args.err >> testall.log
+diff -b fail-duplicate-functions-same-args.err fail_tests/fail-duplicate-functions-same-args.err > fail-duplicate-functions-same-args.diff
+###### SUCCESS
+
+###### Testing fail-duplicate-global
+./MatchaScript.native < fail_tests/fail-duplicate-global.ms 2> fail-duplicate-global.err >> testall.log
+diff -b fail-duplicate-global.err fail_tests/fail-duplicate-global.err > fail-duplicate-global.diff
+###### SUCCESS
+
+###### Testing fail-duplicate-local
+./MatchaScript.native < fail_tests/fail-duplicate-local.ms 2> fail-duplicate-local.err >> testall.log
+diff -b fail-duplicate-local.err fail_tests/fail-duplicate-local.err > fail-duplicate-local.diff
+###### SUCCESS
+
+###### Testing fail-incorrect-num-args
+./MatchaScript.native < fail_tests/fail-incorrect-num-args.ms 2> fail-incorrect-num-args.err >> testall.log
+diff -b fail-incorrect-num-args.err fail_tests/fail-incorrect-num-args.err > fail-incorrect-num-args.diff
+###### SUCCESS
+
+###### Testing fail-incorrect-type-args
+./MatchaScript.native < fail_tests/fail-incorrect-type-args.ms 2> fail-incorrect-type-args.err >> testall.log
+diff -b fail-incorrect-type-args.err fail_tests/fail-incorrect-type-args.err > fail-incorrect-type-args.diff
+###### SUCCESS
+
+###### Testing fail-invalid-binary-op
+./MatchaScript.native < fail_tests/fail-invalid-binary-op.ms 2> fail-invalid-binary-op.err >> testall.log
+diff -b fail-invalid-binary-op.err fail_tests/fail-invalid-binary-op.err > fail-invalid-binary-op.diff
+###### SUCCESS
+
+###### Testing fail-invalid-binop-eval
+./MatchaScript.native < fail_tests/fail-invalid-binop-eval.ms 2> fail-invalid-binop-eval.err >> testall.log
+diff -b fail-invalid-binop-eval.err fail_tests/fail-invalid-binop-eval.err > fail-invalid-binop-eval.diff
+###### SUCCESS
+
+###### Testing fail-invalid-binop-string-int
+./MatchaScript.native < fail_tests/fail-invalid-binop-string-int.ms 2> fail-invalid-binop-string-int.err >> testall.log
+diff -b fail-invalid-binop-string-int.err fail_tests/fail-invalid-binop-string-int.err > fail-invalid-binop-string-int.diff
+###### SUCCESS
+
+###### Testing fail-invalid-unary-op
+./MatchaScript.native < fail_tests/fail-invalid-unary-op.ms 2> fail-invalid-unary-op.err >> testall.log
+diff -b fail-invalid-unary-op.err fail_tests/fail-invalid-unary-op.err > fail-invalid-unary-op.diff
+###### SUCCESS
+
+###### Testing fail-invalid-unop-eval
+./MatchaScript.native < fail_tests/fail-invalid-unop-eval.ms 2> fail-invalid-unop-eval.err >> testall.log
+diff -b fail-invalid-unop-eval.err fail_tests/fail-invalid-unop-eval.err > fail-invalid-unop-eval.diff
+###### SUCCESS
+
+###### Testing fail-return-type-mismatch
+./MatchaScript.native < fail_tests/fail-return-type-mismatch.ms 2> fail-return-type-mismatch.err >> testall.log
+diff -b fail-return-type-mismatch.err fail_tests/fail-return-type-mismatch.err > fail-return-type-mismatch.diff
+###### SUCCESS
+
+###### Testing fail-undefined-function
+./MatchaScript.native < fail_tests/fail-undefined-function.ms 2> fail-undefined-function.err >> testall.log
+diff -b fail-undefined-function.err fail_tests/fail-undefined-function.err > fail-undefined-function.diff
+###### SUCCESS
+
+###### Testing fail-undefined-printed-function
+./MatchaScript.native < fail_tests/fail-undefined-printed-function.ms 2> fail-undefined-printed-function.err >> testall.log
+diff -b fail-undefined-printed-function.err fail_tests/fail-undefined-printed-function.err > fail-undefined-printed-function.diff
+###### SUCCESS
+
+###### Testing fail-unknown-id
+./MatchaScript.native < fail_tests/fail-unknown-id.ms 2> fail-unknown-id.err >> testall.log
+diff -b fail-unknown-id.err fail_tests/fail-unknown-id.err > fail-unknown-id.diff
+###### SUCCESS
+
+###### Testing fail-var-not-in-scope
+./MatchaScript.native < fail_tests/fail-var-not-in-scope.ms 2> fail-var-not-in-scope.err >> testall.log
+diff -b fail-var-not-in-scope.err fail_tests/fail-var-not-in-scope.err > fail-var-not-in-scope.diff
+###### SUCCESS
