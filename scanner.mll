@@ -44,6 +44,7 @@ rule token = parse
 | '.'      { DOT }
 | '['      { LBRACKET }
 | ']'      { RBRACKET }
+| ':'      { COLON }
 
 (* Function *)
 | "function" { FUNCTION }
@@ -55,6 +56,9 @@ rule token = parse
 | "while"       { WHILE }
 | "do"          { DO }
 | "return"      { RETURN }
+| "switch"      { SWITCH }
+| "case"        { CASE }
+| "default"     { DEFAULT }
 
 (* Data types *)
 | "int"    { INT }

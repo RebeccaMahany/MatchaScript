@@ -16,8 +16,9 @@ and sexpr =
 	| SUnop of uop * sexpr * typ
 	| SAssign of sexpr * sexpr * typ
 	| SCallExpr of sexpr * sexpr list * typ 
-    | STernary of sexpr * sexpr * sexpr
 	| SNoexpr
+
+and scaseType = SDefault | SCaseType of sexpr
 
 and sstmt = 
     SBlock of sstmt list
@@ -29,6 +30,12 @@ and sstmt =
   | SFor of sexpr * sexpr * sexpr * sstmt
   | SWhile of sexpr * sstmt
   | SDoWhile of sstmt * sexpr
+  | SSwitch of sexpr * scase list
+
+and scase = {
+    scase : scaseType;
+    ssetStmt : sstmt list;
+}
 
 and sfexpr = {
   sfeReturnType : typ;
